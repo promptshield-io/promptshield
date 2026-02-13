@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "outputs": ["coverage/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "dev": {
+      "cache": false,
+      "dependsOn": ["^build"],
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    },
+    "docs:build": {
+      "dependsOn": ["//#docs:api", "^build"],
+      "outputs": ["apps/web/.next/**"],
+      "inputs": [
+        "apps/web/content/**",
+        "apps/web/src/**",
+        "apps/web/package.json"
+      ]
+    },
+    "//#docs:api": {
+      "inputs": [
+        "packages/*/src/**",
+        "tooling/scripts/generate-api-docs.ts",
+        "typedoc.base.config.ts",
+        "tsconfig.docs.json"
+      ],
+      "outputs": ["apps/web/content/docs/api/**"]
+    }
+  }
+}

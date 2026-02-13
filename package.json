@@ -1,0 +1,58 @@
+{
+  "name": "turbo-forge",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "build:diff": "turbo run build --filter=[...origin/main]",
+    "clean": "turbo clean",
+    "dev": "turbo dev",
+    "debug:info": "tsx ./tooling/scripts/debug-info.ts",
+    "format": "biome check . --write",
+    "gen": "tsx ./node_modules/plop/bin/plop.js --plopfile tooling/generators/src/index.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "postinstall": "tsx ./tooling/scripts/postinstall.ts",
+    "prepare": "husky",
+    "rebrand": "echo coming soon...",
+    "release": "pnpm build && changeset publish --provenance --access public",
+    "release:aliases": "tsx ./tooling/scripts/publish-aliases.ts",
+    "release:github": "tsx ./tooling/scripts/create-github-releases.ts",
+    "sync": "forge-sync",
+    "test": "vitest run --coverage && tsx ./tooling/scripts/split-lcov.ts",
+    "typecheck": "turbo typecheck",
+    "docs:api": "tsx ./tooling/scripts/generate-api-docs.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.13",
+    "@changesets/changelog-github": "^0.5.2",
+    "@changesets/cli": "^2.29.8",
+    "@commitlint/cli": "^20.4.0",
+    "@commitlint/config-conventional": "^20.4.0",
+    "@tool/tsconfig": "workspace:*",
+    "@types/envinfo": "^7.8.4",
+    "@types/node": "^25.1.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "enquirer": "^2.4.1",
+    "envinfo": "^7.21.0",
+    "happy-dom": "^20.4.0",
+    "husky": "^9.1.7",
+    "p-limit": "^7.2.0",
+    "plop": "^4.0.5",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.0",
+    "typedoc": "^0.28.16",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "vite-tsconfig-paths": "^6.0.5",
+    "vitest": "^4.0.18"
+  },
+  "packageManager": "pnpm@10.27.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

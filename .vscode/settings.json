@@ -1,0 +1,35 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "terminal.integrated.scrollback": 10000,
+  "typescript.surveys.enabled": false,
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSaveMode": "file",
+  "mayank1513.trello-kanban.Workspace.filePath": ".tkb",
+  "cSpell.words": ["noscss"],
+  "conventionalCommits.scopes": [
+    "root",
+    "tooling",
+    "docs",
+    "deps",
+    "changeset",
+    "cli-kit",
+    "forge-sync",
+    "remark-typedoc-mdx",
+    "@app/web"
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
+}

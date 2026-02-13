@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Bypass check for GitHub Actions or automated commits
+if [ "$GITHUB_ACTIONS" = "true" ] || git log -1 --pretty=%B | grep -q "\[skip ci\]"; then
+  exit 0
+fi
+
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|mts|tsx|js|mjs|json|css|scss|sass)$' || true)
+[ -z "$FILES" ] && exit 0
+
+# Block manual version bumps in package.json files
+# Allow only "0.0.0" (repo bootstrap / placeholder version)
+if git diff --cached -S '"version":' -- "**/package.json" \
+  | grep '^+.*"version":' \
+  | grep -vq '"version": *"0\.0\.0"'; then
+  echo "❌ Error: Manual version bumps are forbidden in Turbo-Forge."
+  echo "Allowed exception: \"version\": \"0.0.0\" only."
+  echo "Please use 'pnpm changeset' to document your changes."
+  echo "The CI/CD pipeline will handle versioning automatically."
+  exit 1
+fi
+
+# Run Biome (Lint/Format)
+pnpm biome check --write --no-errors-on-unmatched $FILES
+
+git add $FILES
+
+# Update .forge-meta.json to keep track of last synced commit (behind by one commit)
+REMOTE_URL=$(git remote get-url --push origin)
+
+if [ "$REMOTE_URL" = "https://github.com/react18-tools/turbo-forge.git" ]; then
+  TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  COMMIT_HASH=$(git rev-parse HEAD)
+  echo "{
+    \"lastSyncedCommit\": \"$COMMIT_HASH\",
+    \"generatedAt\": \"$TIMESTAMP\"
+  }" > .forge-meta.json
+fi
+
+git add .forge-meta.json

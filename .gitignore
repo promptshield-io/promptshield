@@ -1,0 +1,19 @@
+.DS_Store
+node_modules
+.turbo
+*.log
+.next
+dist
+dist-ssr
+*.local
+.env
+.cache
+.obsidian
+
+# test coverage
+coverage
+
+# temporary files
+tsup.config.bundled*
+*.patch
+.merge-backups

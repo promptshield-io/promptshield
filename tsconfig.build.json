@@ -2,6 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "../../",
-    "paths": { "@promptshield/cli": ["./packages/promptshied/src"] }
+    "paths": { "@promptshield/cli": ["./packages/promptshield-cli/src"] }
   }
 }

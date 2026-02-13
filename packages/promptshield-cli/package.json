@@ -1,0 +1,79 @@
+{
+  "name": "@promptshield/cli",
+  "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
+  "private": false,
+  "version": "0.0.0",
+  "description": "Production-grade CLI for auditing AI prompts. Detects invisible characters, homoglyph attacks, and adversarial Unicode poisoning in your development workflow.",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/promptshield-cli"
+  },
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/promptshield-cli/README.md",
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "bin": {
+    "promptshield-cli": "./dist/cli.mjs"
+  },
+  "scripts": {
+    "build": "tsup && gzip -c dist/index.js | wc -c",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsup": "latest",
+    "typescript": "latest",
+    "@turbo-forge/cli-kit": "latest"
+  },
+  "forge": {
+    "aliases": [
+      "@ghostbuster/cli"
+    ],
+    "icon": "Shield"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/promptshield-io"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/mayank1513"
+    }
+  ],
+  "keywords": [
+    "prompt-security",
+    "ai-safety",
+    "red-teaming",
+    "llm-guardrails",
+    "unicode-scanner",
+    "prompt-injection-prevention",
+    "ci-cd-security",
+    "adversarial-ai",
+    "ghostbuster",
+    "promptshield-cli",
+    "turbo-forge"
+  ]
+}

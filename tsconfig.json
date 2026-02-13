@@ -25,7 +25,7 @@
 
     /* Path Mapping */
     "baseUrl": ".",
-    "paths": { "@promptshield/cli": ["./packages/promptshied/src"] }
+    "paths": { "@promptshield/cli": ["./packages/promptshield-cli/src"] }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "vitest.config.ts"],
   "exclude": [

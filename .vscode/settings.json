@@ -15,9 +15,7 @@
     "docs",
     "deps",
     "changeset",
-    "cli-kit",
-    "forge-sync",
-    "remark-typedoc-mdx",
+    "@promptshield/cli",
     "@app/web"
   ],
   "[typescript]": {

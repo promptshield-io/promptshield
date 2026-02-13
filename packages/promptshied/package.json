@@ -1,9 +1,9 @@
 {
-  "name": "remark-typedoc-mdx",
+  "name": "@promptshield/cli",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": false,
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.0.0",
+  "description": "Production-grade CLI for auditing AI prompts. Detects invisible characters, homoglyph attacks, and adversarial Unicode poisoning in your development workflow.",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -23,15 +23,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/react18-tools/turbo-forge",
-    "directory": "packages/remark-typedoc-mdx"
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/promptshied"
   },
-  "bugs": "https://github.com/react18-tools/turbo-forge/issues",
-  "homepage": "https://github.com/react18-tools/turbo-forge/blob/main/packages/remark-typedoc-mdx/README.md",
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/promptshied/README.md",
   "sideEffects": false,
   "files": [
     "dist/**"
   ],
+  "bin": {
+    "promptshied": "./dist/cli.mjs"
+  },
   "scripts": {
     "build": "tsup && gzip -c dist/index.js | wc -c",
     "clean": "rm -rf dist",
@@ -39,16 +42,21 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/mdast": "^4.0.4",
     "@types/node": "latest",
     "tsup": "latest",
     "typescript": "latest",
-    "unified": "^11.0.5"
+    "@turbo-forge/cli-kit": "latest"
+  },
+  "forge": {
+    "aliases": [
+      "@ghostbuster/cli"
+    ],
+    "icon": "FileTerminal"
   },
   "funding": [
     {
       "type": "github",
-      "url": "https://github.com/sponsors/react18-tools"
+      "url": "https://github.com/sponsors/promptshield-io"
     },
     {
       "type": "github",
@@ -56,10 +64,16 @@
     }
   ],
   "keywords": [
-    "remark-typedoc-mdx",
-    "turbo-forge"
-  ],
-  "dependencies": {
-    "unist-util-visit": "^5.1.0"
-  }
+    "promptshied",
+    "turbo-forge",
+    "prompt-security",
+    "ai-safety",
+    "red-teaming",
+    "llm-guardrails",
+    "unicode-scanner",
+    "prompt-injection-prevention",
+    "ci-cd-security",
+    "adversarial-ai",
+    "ghostbuster"
+  ]
 }

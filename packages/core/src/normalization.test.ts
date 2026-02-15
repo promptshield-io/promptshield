@@ -9,7 +9,7 @@ describe("scanNormalization", () => {
     expect(threats.length).toBe(1);
     expect(threats[0].category).toBe("NORMALIZATION");
     expect(threats[0].severity).toBe("HIGH");
-    expect(threats[0].message).toContain("decomposes");
+    expect(threats[0].message).toContain("normalizes to");
   });
 
   it("should ignore text that is already normalized", () => {

@@ -14,15 +14,15 @@ describe("PromptShield Core Engine", () => {
       expect(result.threats[0].loc.index).toBe(5);
     });
 
-    it("should detect BIDI overrides", () => {
+    it("should detect BIDI overrides as Trojan Source", () => {
       const input = "User: \u202Eadmin"; // RLO
       const result = scan(input);
-      const invisibleThreats = result.threats.filter(
-        (t) => t.category === ThreatCategory.Invisible,
+      const trojanThreats = result.threats.filter(
+        (t) => t.category === ThreatCategory.Trojan,
       );
 
-      expect(invisibleThreats.length).toBeGreaterThan(0);
-      expect(invisibleThreats[0].readableLabel).toBe("[RLO]");
+      expect(trojanThreats.length).toBeGreaterThan(0);
+      expect(trojanThreats[0].readableLabel).toBe("[U+202E]");
     });
 
     it("should identify correct line and column", () => {
@@ -97,7 +97,9 @@ describe("PromptShield Core Engine", () => {
         (t) => t.category === ThreatCategory.Smuggling,
       );
       expect(smuggling).toHaveLength(1);
-      expect(smuggling[0].readableLabel).toBe("[Base64]");
+      expect(smuggling[0].readableLabel).toBe(
+        "[Base64]: This is a secret instruction that is hidden...",
+      );
     });
 
     it("should detect Markdown comments", () => {
@@ -173,6 +175,33 @@ describe("PromptShield Core Engine", () => {
         minSeverity: "LOW",
       });
       expect(result.threats).toHaveLength(1);
+    });
+
+    it("should detect invisible-character steganography", () => {
+      // Create a payload: "ABC" -> 01000001 01000010 01000011
+      // 0 = \u200B (ZWSP), 1 = \u200C (ZWNJ)
+      const zero = "\u200B";
+      const one = "\u200C";
+
+      const payload = "ABC"
+        .split("")
+        .map((c) => c.charCodeAt(0).toString(2).padStart(8, "0"))
+        .join("")
+        .split("")
+        .map((b) => (b === "0" ? zero : one))
+        .join("");
+
+      const input = `Hidden message: ${payload}`;
+      const result = scan(input);
+
+      const stegThreats = result.threats.filter(
+        (t) =>
+          t.category === ThreatCategory.Smuggling &&
+          t.message.includes("steganography"),
+      );
+      expect(stegThreats).toHaveLength(1);
+      expect(stegThreats[0].readableLabel).toContain("ABC");
+      expect(stegThreats[0].severity).toBe("HIGH");
     });
   });
 

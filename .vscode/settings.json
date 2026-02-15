@@ -18,6 +18,7 @@
     "@promptshield/cli",
     "@promptshield/core",
     "@promptshield/mcp",
+    "@promptshield/sanitizer",
     "promptshield",
     "@app/web"
   ],
@@ -31,6 +32,6 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

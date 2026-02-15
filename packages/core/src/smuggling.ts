@@ -68,79 +68,7 @@ export const scanSmuggling = (
   context.lineOffsets = context.lineOffsets ?? getLineOffsets(text);
 
   /**
-   * 1. Base64 payload detection
-   */
-  const b64Regex = new RegExp(BASE64_REGEX);
-
-  while ((match = b64Regex.exec(text)) !== null) {
-    const candidate = match[0];
-    if (candidate.length <= 50) continue;
-
-    const decoded = decodeBase64IfLikely(candidate);
-    if (!decoded) continue;
-
-    const index = match.index;
-
-    threats.push({
-      category: ThreatCategory.Smuggling,
-      severity: "MEDIUM",
-      message: `Detected Base64 payload containing readable text`,
-      loc: getLocForIndex(index, context),
-      offendingText: candidate,
-      readableLabel: `[Base64]: ${decoded.slice(0, 50)}...`,
-      suggestion: "Decoded Base64 contains readable text. Inspect payload.",
-    });
-
-    if (options.stopOnFirstThreat) return threats;
-  }
-
-  if (options.minSeverity === "MEDIUM") return threats;
-
-  /**
-   * 2. Hidden Markdown comments
-   */
-  const commentRegex = new RegExp(MARKDOWN_COMMENT_REGEX);
-
-  while ((match = commentRegex.exec(text)) !== null) {
-    threats.push({
-      category: ThreatCategory.Smuggling,
-      severity: "LOW",
-      message: "Detected Markdown comment",
-      loc: getLocForIndex(match.index, context),
-      offendingText: match[0],
-      readableLabel: "[Hidden Comment]",
-      suggestion:
-        "Comments are not visible in rendered Markdown but can carry instructions.",
-    });
-
-    if (options.stopOnFirstThreat && options.minSeverity === "LOW") {
-      return threats;
-    }
-  }
-
-  /**
-   * 3. Empty Markdown links
-   */
-  const linkRegex = new RegExp(EMPTY_LINK_REGEX);
-
-  while ((match = linkRegex.exec(text)) !== null) {
-    threats.push({
-      category: ThreatCategory.Smuggling,
-      severity: "LOW",
-      message: "Detected empty link (invisible in rendered Markdown)",
-      loc: getLocForIndex(match.index, context),
-      offendingText: match[0],
-      readableLabel: "[Empty Link]",
-      suggestion: "Empty links can be used to hide URLs or data.",
-    });
-
-    if (options.stopOnFirstThreat && options.minSeverity === "LOW") {
-      return threats;
-    }
-  }
-
-  /**
-   * 4. Invisible-character steganography
+   * 1. Invisible-character steganography (HIGH)
    */
   const stegRegex = new RegExp(STEG_REGEX);
 
@@ -195,6 +123,80 @@ export const scanSmuggling = (
         if (options.stopOnFirstThreat) return threats;
         break;
       }
+    }
+  }
+
+  if (options.minSeverity === "HIGH") return threats;
+
+  /**
+   * 2. Base64 payload detection (MEDIUM)
+   */
+  const b64Regex = new RegExp(BASE64_REGEX);
+
+  while ((match = b64Regex.exec(text)) !== null) {
+    const candidate = match[0];
+    if (candidate.length <= 50) continue;
+
+    const decoded = decodeBase64IfLikely(candidate);
+    if (!decoded) continue;
+
+    const index = match.index;
+
+    threats.push({
+      category: ThreatCategory.Smuggling,
+      severity: "MEDIUM",
+      message: `Detected Base64 payload containing readable text`,
+      loc: getLocForIndex(index, context),
+      offendingText: candidate,
+      readableLabel: `[Base64]: ${decoded.slice(0, 50)}...`,
+      suggestion: "Decoded Base64 contains readable text. Inspect payload.",
+    });
+
+    if (options.stopOnFirstThreat) return threats;
+  }
+
+  if (options.minSeverity === "MEDIUM") return threats;
+
+  /**
+   * 3. Hidden Markdown comments (LOW)
+   */
+  const commentRegex = new RegExp(MARKDOWN_COMMENT_REGEX);
+
+  while ((match = commentRegex.exec(text)) !== null) {
+    threats.push({
+      category: ThreatCategory.Smuggling,
+      severity: "LOW",
+      message: "Detected Markdown comment",
+      loc: getLocForIndex(match.index, context),
+      offendingText: match[0],
+      readableLabel: "[Hidden Comment]",
+      suggestion:
+        "Comments are not visible in rendered Markdown but can carry instructions.",
+    });
+
+    if (options.stopOnFirstThreat) {
+      return threats;
+    }
+  }
+
+  /**
+   * 4. Empty Markdown links (LOW)
+   */
+  const linkRegex = new RegExp(EMPTY_LINK_REGEX);
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    threats.push({
+      category: ThreatCategory.Smuggling,
+      severity: "LOW",
+      message: "Detected empty link (invisible in rendered Markdown)",
+      loc: getLocForIndex(match.index, context),
+      offendingText: match[0],
+      readableLabel: "[Empty Link]",
+      suggestion: "Empty links can be used to hide URLs or data.",
+    });
+
+    if (options.stopOnFirstThreat) {
+      return threats;
     }
   }
 

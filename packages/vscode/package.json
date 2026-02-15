@@ -1,0 +1,122 @@
+{
+  "name": "promptshield",
+  "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
+  "private": false,
+  "version": "0.0.0",
+  "publisher": "mayank1513",
+  "logo": "./promptshield.jpg",
+  "description": "Real-time visual security for prompt engineering. Detects and visualizes hidden &quot;ghost&quot; characters, directional overrides, and malicious Unicode within the VS Code editor.",
+  "license": "MIT",
+  "main": "./dist/extension.js",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "promptshield.scanWorkspace",
+        "title": "PromptShield: Scan Workspace"
+      },
+      {
+        "command": "promptshield.toggleXRay",
+        "title": "PromptShield: Toggle X-Ray Mode"
+      }
+    ],
+    "colors": [
+      {
+        "id": "promptshield.highThreatBackground",
+        "description": "Background color for high-threat characters (e.g., invisible chars, homoglyphs).",
+        "defaults": {
+          "dark": "#ff000040",
+          "light": "#ff000040",
+          "highContrast": "#ff0000"
+        }
+      },
+      {
+        "id": "promptshield.ghostTextForeground",
+        "description": "Foreground color for ghost text overlays.",
+        "defaults": {
+          "dark": "#888888",
+          "light": "#888888",
+          "highContrast": "#ffffff"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "PromptShield",
+      "properties": {
+        "promptshield.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable PromptShield scanning."
+        }
+      }
+    }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/vscode"
+  },
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/vscode/README.md",
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup && gzip -c dist/extension.js | wc -c",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && tsx test/runTest.ts"
+  },
+  "devDependencies": {
+    "@types/glob": "^9.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "latest",
+    "@types/vscode": "^1.109.0",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^13.0.3",
+    "mocha": "^11.7.5",
+    "tsup": "latest",
+    "typescript": "latest"
+  },
+  "forge": {
+    "aliases": [],
+    "icon": "Shield"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/promptshield-io"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/mayank1513"
+    }
+  ],
+  "keywords": [
+    "@promptshield/vscode",
+    "turbo-forge"
+  ],
+  "dependencies": {
+    "@promptshield/core": "workspace:*"
+  }
+}

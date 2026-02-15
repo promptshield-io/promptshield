@@ -1,0 +1,85 @@
+{
+  "name": "@promptshield/sanitizer",
+  "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
+  "private": false,
+  "version": "0.0.0",
+  "description": "PromptShield sanitizer that applies safe, deterministic fixes to text based on detected prompt-injection threats such as invisible characters, markdown smuggling, and BOM artifacts.",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/sanitizer"
+  },
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/sanitizer/README.md",
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup && gzip -c dist/index.js | wc -c",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsup": "latest",
+    "typescript": "latest"
+  },
+  "forge": {
+    "aliases": [
+      "@ghostbuster/sanitizer"
+    ],
+    "icon": "Shield"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/promptshield-io"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/mayank1513"
+    }
+  ],
+  "keywords": [
+    "promptshield",
+    "prompt-security",
+    "prompt-injection",
+    "sanitizer",
+    "text-sanitization",
+    "llm-security",
+    "ai-security",
+    "unicode-security",
+    "markdown-security",
+    "invisible-characters",
+    "bom",
+    "secure-prompts",
+    "prompt-hygiene",
+    "content-sanitizer",
+    "cli-security",
+    "@promptshield/sanitizer",
+    "turbo-forge",
+    "security",
+    "prompt-injection",
+    "llm",
+    "ai"
+  ]
+}

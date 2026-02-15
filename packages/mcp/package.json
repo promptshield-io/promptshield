@@ -1,10 +1,10 @@
 {
-  "name": "{{scopedKebab name}}",
+  "name": "@promptshield/mcp",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": false,
   "version": "0.0.0",
-  "description": "{{description}}",
-  "license": "{{license}}",
+  "description": "Model Context Protocol (MCP) server for PromptShield. Empowers agentic IDEs like Cursor and Windsurf to self-audit prompts and context for malicious hidden characters.",
+  "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -23,11 +23,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/{{owner}}/{{repo}}",
-    "directory": "packages/{{kebabCase fileName}}"
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/mcp"
   },
-  "bugs": "https://github.com/{{owner}}/{{repo}}/issues",
-  "homepage": "https://github.com/{{owner}}/{{repo}}/blob/main/packages/{{kebabCase fileName}}/README.md",
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/mcp/README.md",
   "sideEffects": false,
   "files": [
     "dist/**"
@@ -44,13 +44,15 @@
     "typescript": "latest"
   },
   "forge": {
-    "aliases": ["@ghostbuster/{{kebabCase fileName}}"],
+    "aliases": [
+      "@ghostbuster/mcp"
+    ],
     "icon": "Shield"
   },
   "funding": [
     {
       "type": "github",
-      "url": "https://github.com/sponsors/{{owner}}"
+      "url": "https://github.com/sponsors/promptshield-io"
     },
     {
       "type": "github",
@@ -58,7 +60,7 @@
     }
   ],
   "keywords": [
-    "{{name}}",
+    "@promptshield/mcp",
     "turbo-forge"
   ]
 }

@@ -41,8 +41,8 @@
     "p-limit": "^7.3.0",
     "plop": "^4.0.5",
     "tsx": "^4.21.0",
-    "turbo": "^2.8.7",
-    "typedoc": "^0.28.16",
+    "turbo": "^2.8.8",
+    "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.18"

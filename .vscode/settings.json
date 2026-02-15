@@ -16,6 +16,9 @@
     "deps",
     "changeset",
     "@promptshield/cli",
+    "@promptshield/core",
+    "@promptshield/mcp",
+    "promptshield",
     "@app/web"
   ],
   "[typescript]": {

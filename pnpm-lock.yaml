@@ -169,6 +169,18 @@ importers:
         specifier: latest
         version: 5.9.3
 
+  packages/ignore:
+    devDependencies:
+      '@types/node':
+        specifier: latest
+        version: 25.2.3
+      tsup:
+        specifier: latest
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: latest
+        version: 5.9.3
+
   packages/mcp:
     devDependencies:
       '@types/node':
@@ -182,6 +194,10 @@ importers:
         version: 5.9.3
 
   packages/sanitizer:
+    dependencies:
+      '@promptshield/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/node':
         specifier: latest

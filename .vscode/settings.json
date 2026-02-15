@@ -17,6 +17,7 @@
     "changeset",
     "@promptshield/cli",
     "@promptshield/core",
+    "@promptshield/ignore",
     "@promptshield/mcp",
     "@promptshield/sanitizer",
     "promptshield",

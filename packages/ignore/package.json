@@ -1,0 +1,76 @@
+{
+  "name": "@promptshield/ignore",
+  "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
+  "private": false,
+  "version": "0.0.0",
+  "description": "Ignore directive parser and threat filtering utilities for PromptShield. Provides file-level and line-level suppression logic for CLI and IDE integrations.",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/ignore"
+  },
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/ignore/README.md",
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup && gzip -c dist/index.js | wc -c",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsup": "latest",
+    "typescript": "latest"
+  },
+  "forge": {
+    "aliases": [
+      "@ghostbuster/ignore"
+    ],
+    "icon": "Shield"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/promptshield-io"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/mayank1513"
+    }
+  ],
+  "keywords": [
+    "promptshield",
+    "ignore-directives",
+    "lint-ignore",
+    "threat-filtering",
+    "security-tooling",
+    "unicode-security",
+    "prompt-injection",
+    "llm-security",
+    "cli-utils",
+    "lsp-utils",
+    "@promptshield/ignore",
+    "turbo-forge"
+  ]
+}

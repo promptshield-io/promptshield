@@ -10,7 +10,7 @@ describe("PromptShield Core Engine", () => {
       expect(result.threats).toHaveLength(1);
       expect(result.threats[0].category).toBe(ThreatCategory.Invisible);
       expect(result.threats[0].offendingText).toBe("\u200B");
-      expect(result.threats[0].readableLabel).toBe("[ZWSP]");
+      expect(result.threats[0].readableLabel).toBe("[[ZWSP]]");
       expect(result.threats[0].loc.index).toBe(5);
     });
 
@@ -22,7 +22,7 @@ describe("PromptShield Core Engine", () => {
       );
 
       expect(trojanThreats.length).toBeGreaterThan(0);
-      expect(trojanThreats[0].readableLabel).toBe("[U+202E]");
+      expect(trojanThreats[0].readableLabel).toBe("[BIDI_UNTERMINATED]");
     });
 
     it("should identify correct line and column", () => {
@@ -31,6 +31,18 @@ describe("PromptShield Core Engine", () => {
       expect(result.threats).toHaveLength(1);
       expect(result.threats[0].loc.line).toBe(2);
       expect(result.threats[0].loc.column).toBe(7);
+    });
+    it("should stop on first threat for invisible characters", () => {
+      const input = "\u200B \u200C"; // ZWSP, ZWNJ (distinct spans due to space)
+      const result = scan(input, { stopOnFirstThreat: true });
+      expect(result.threats).toHaveLength(1);
+      expect(result.threats[0].readableLabel).toBe("[[ZWSP]]");
+    });
+
+    it("should ignore invisible characters if minSeverity is CRITICAL", () => {
+      const input = "\u200B";
+      const result = scan(input, { minSeverity: "CRITICAL" });
+      expect(result.threats).toHaveLength(0);
     });
   });
 
@@ -61,6 +73,21 @@ describe("PromptShield Core Engine", () => {
         (t) => t.category === ThreatCategory.Homoglyph,
       );
       expect(homoglyphs).toHaveLength(0);
+    });
+    it("should detect mixed script (Latin + Greek)", () => {
+      // 'o' is Greek Omicron (U+03BF)
+      const input = "Micr\u03BFsoft";
+      const result = scan(input);
+      expect(result.threats).toHaveLength(1);
+      expect(result.threats[0].category).toBe(ThreatCategory.Homoglyph);
+      expect(result.threats[0].readableLabel).toContain("Micrοsoft");
+    });
+
+    it("should stop on first threat for homoglyphs", () => {
+      const input = "\u0430dmin \u03BFffice"; // Cyrillic 'a', Greek 'o'
+      const result = scan(input, { stopOnFirstThreat: true });
+      expect(result.threats).toHaveLength(1);
+      expect(result.threats[0].offendingText).toBe("\u0430dmin");
     });
   });
 

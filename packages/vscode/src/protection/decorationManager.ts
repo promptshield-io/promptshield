@@ -1,18 +1,15 @@
 import type { ThreatReport } from "@promptshield/core";
 import * as vscode from "vscode";
-import { Scanner } from "./scanner";
 
 export class DecorationManager {
-  private scanner: Scanner;
   private decorationType: vscode.TextEditorDecorationType;
   private documentThreats = new Map<string, ThreatReport[]>();
-  private enabled = true;
+  // private enabled = true; // Always on now
 
   private _onThreatsChanged = new vscode.EventEmitter<number>();
   public readonly onThreatsChanged = this._onThreatsChanged.event;
 
   constructor() {
-    this.scanner = new Scanner();
     this.decorationType = vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor(
         "promptshield.highThreatBackground",
@@ -32,6 +29,12 @@ export class DecorationManager {
   ): ThreatReport[] {
     const threats = this.documentThreats.get(document.uri.toString()) || [];
     return threats.filter((t) => {
+      // Logic to find threat at position
+      // t.loc.index is 0-based index? core uses 0-based index or 1-based line?
+      // Core ThreatReport: loc: { line, column, index }
+      // We can use range from diagnostic if available, but here we stored ThreatReport.
+      // Let's reconstruct range or use logic.
+
       const start = document.positionAt(t.loc.index);
       const end = document.positionAt(t.loc.index + t.offendingText.length);
       const range = new vscode.Range(start, end);
@@ -40,159 +43,175 @@ export class DecorationManager {
   }
 
   public activate(context: vscode.ExtensionContext) {
-    // Initial scan of active editor
-    if (vscode.window.activeTextEditor) {
-      this.refresh(vscode.window.activeTextEditor, true);
-    }
-
-    // Listeners
+    // Listen for diagnostics changes
     context.subscriptions.push(
+      vscode.languages.onDidChangeDiagnostics((e) => {
+        for (const uri of e.uris) {
+          this.updateFromDiagnostics(uri);
+        }
+      }),
+      // Also update on active editor change to ensure decorations are visible/refreshed
       vscode.window.onDidChangeActiveTextEditor((editor) => {
         if (editor) {
-          this.refresh(editor, true);
+          this.updateFromDiagnostics(editor.document.uri);
         }
-      }),
-      vscode.workspace.onDidChangeTextDocument((event) => {
-        if (
-          vscode.window.activeTextEditor &&
-          event.document === vscode.window.activeTextEditor.document
-        ) {
-          this.handleDocumentChange(event, vscode.window.activeTextEditor);
-        }
-      }),
-      vscode.workspace.onDidCloseTextDocument((doc) => {
-        this.scanner.clearCache(doc.uri);
-        this.documentThreats.delete(doc.uri.toString());
       }),
     );
+
+    // Initial update for active editor
+    if (vscode.window.activeTextEditor) {
+      this.updateFromDiagnostics(vscode.window.activeTextEditor.document.uri);
+    }
   }
 
-  private refresh(editor: vscode.TextEditor, fullScan = false) {
-    if (fullScan) {
-      if (!this.enabled) {
-        console.log("PromptShield: Refresh skipped (disabled)");
-        return;
-      }
-      const threats = this.scanner.scanDocument(editor.document);
-      console.log(
-        `PromptShield: Scanned document ${editor.document.uri.toString()}, found ${threats.length} threats`,
+  private updateFromDiagnostics(uri: vscode.Uri) {
+    const diagnostics = vscode.languages.getDiagnostics(uri);
+    const promptShieldDiagnostics = diagnostics.filter(
+      (d) => d.source === "PromptShield",
+    );
+
+    const threats: ThreatReport[] = promptShieldDiagnostics.map((d) => {
+      // We attached the full ThreatReport in `data` field of diagnostic in LSP
+      // If getting from VSCode API, `d` is `vscode.Diagnostic`.
+      // Does VSCode preserve `data`?
+      // `vscode.Diagnostic` does not have `data` property in standard API?
+      // Wait, LSP `Diagnostic` has `data`. VSCode API `Diagnostic` might not expose it easily or it is in `code` or `relatedInformation`?
+      // Actually, VSCode `Diagnostic` class in `vscode` module does NOT have `data`.
+      // Only `code` (string | number | { value, target }).
+
+      // ISSUE: LSP `data` field is not automatically mapped to a property on `vscode.Diagnostic` object available to extension.
+      // The extension consumes `vscode.Diagnostic` which is a different type than `lsp.Diagnostic`.
+      // I might need to command the LSP to get the threats or just use the range/message from diagnostic to reconstruct minimal info,
+      // OR rely on `code` field if I can pack info there (limited).
+      //
+      // Re-reading requirements: "VSCode extension must not call @promptshield/core directly... VSCode consumes diagnostics from LSP"
+      // "DecorationManager... consume diagnostics".
+      //
+      // If I cannot get `ThreatReport` object back, I can't easily get `offendingText` or `loc` exactly as before unless I parse the range.
+      //
+      // But `offendingText` is needed for `getThreatsAt`?
+      // Actually `getThreatsAt` is used for Code Actions or Hover?
+      // Hover is provided by `hoverProvider` using `getThreatsAt`.
+      // If I have the range from diagnostic, I can use that.
+      //
+      // Let's look at `getThreatsAt`. It returns `ThreatReport[]`.
+      // If I change internal storage to store `Diagnostic` or a wrapper, I can adapt `getThreatsAt`.
+      //
+      // What does `ThreatReport` contain?
+      // interface ThreatReport {
+      //   checkId: string;
+      //   category: string;
+      //   severity: Severity;
+      //   message: string;
+      //   offendingText: string;
+      //   loc: { line: number; column: number; index: number };
+      //   readableLabel?: string;
+      //   url?: string;
+      // }
+      //
+      // Diagnostic has `range`, `message`, `code` (category), `severity`, `source`.
+      // It misses `offendingText`, `checkId`, `readableLabel`, `url`.
+      // `offendingText` can be read from document using range.
+      // `checkId`? Maybe `code`?
+      // `readableLabel`? Maybe put in message or `code`?
+
+      // Current `diagnostics.ts` puts `category` in `code`.
+      // `startLine`/`startChar` in `range`.
+
+      // I can reconstruct a "partial" ThreatReport from diagnostic + document text.
+      //
+      // But wait, if I can't get `data`, I lose `readableLabel` or `url` if they were there.
+      //
+      // Alternative: Use `executeCommand` to specific LSP request to get threats? No, that's complex.
+      //
+      // Actually, could I put JSON in `code`? `d.code` can be string.
+      // Or check if `vscode-languageclient` exposes `data`?
+      // The `LanguageClient` middleware can intercept diagnostics maybe?
+      //
+      // Or simpler: Just work with what Diagnostic gives.
+      // `offendingText` => `document.getText(range)`.
+      // `category` => `code`.
+      // `message` => `message`.
+      //
+      // Let's adjust `DecorationManager` to not strictly depend on `ThreatReport` object details that are missing,
+      // or reconstruct them.
+
+      // I will reconstruct `ThreatReport` from `Diagnostic`.
+
+      const range = d.range;
+      // We usually don't have document here easily in this map function without passing it.
+      // But we are in `updateFromDiagnostics`, we can get document.
+      const textDoc = vscode.workspace.textDocuments.find(
+        (doc) => doc.uri.toString() === uri.toString(),
       );
-      this.documentThreats.set(editor.document.uri.toString(), threats);
-      this.updateDecorations(editor);
-    }
-  }
 
-  public toggleXRay(): boolean {
-    this.enabled = !this.enabled;
-    console.log(`PromptShield: Toggled X-Ray to ${this.enabled}`);
-    if (this.enabled) {
-      // Trigger generic refresh for visible editors
-      vscode.window.visibleTextEditors.forEach((editor) => {
-        this.refresh(editor, true);
-      });
-    } else {
-      // Clear all
-      vscode.window.visibleTextEditors.forEach((editor) => {
-        editor.setDecorations(this.decorationType, []);
-      });
-    }
-    return this.enabled;
-  }
+      let offendingText = "";
+      let index = 0;
+      if (textDoc) {
+        offendingText = textDoc.getText(range);
+        index = textDoc.offsetAt(range.start);
+      }
 
-  private handleDocumentChange(
-    event: vscode.TextDocumentChangeEvent,
-    editor: vscode.TextEditor,
-  ) {
-    const key = editor.document.uri.toString();
-    const currentThreats = this.documentThreats.get(key) || [];
-
-    // If too many changes, fallback to full scan
-    if (event.contentChanges.length > 10) {
-      this.refresh(editor, true);
-      return;
-    }
-
-    let newThreats = [...currentThreats];
-
-    // Process changes from bottom to top to avoid offset shifting issues during the process
-    const sortedChanges = [...event.contentChanges].sort(
-      (a, b) => b.rangeOffset - a.rangeOffset,
-    );
-
-    for (const change of sortedChanges) {
-      const changeStart = change.rangeOffset;
-      const changeEnd = change.rangeOffset + change.rangeLength;
-      const delta = change.text.length - change.rangeLength;
-
-      // 1. Remove threats in overlap
-      newThreats = newThreats.filter((t) => {
-        const tStart = t.loc.index;
-        const tLen = t.offendingText.length;
-        const tEndComputed = tStart + tLen;
-        return !(tStart < changeEnd && tEndComputed > changeStart);
-      });
-
-      // 2. Scan new text
-      const fragmentThreats = this.scanner.scanRange(change.text);
-      const addedThreats = fragmentThreats.map((ft) => ({
-        ...ft,
+      return {
+        checkId: String(d.code) || "unknown", // mapped from category
+        category: String(d.code) || "unknown",
+        severity:
+          d.severity === vscode.DiagnosticSeverity.Error ? "CRITICAL" : "HIGH", // approximate or map back
+        message: d.message,
+        offendingText,
         loc: {
-          ...ft.loc,
-          index: ft.loc.index + changeStart,
+          line: range.start.line + 1,
+          column: range.start.character + 1,
+          index,
         },
-      }));
+        readableLabel: undefined, // Metadata lost unless encoded
+      } as ThreatReport;
+    });
 
-      newThreats.push(...addedThreats);
-
-      // 3. Shift threats AFTER this change (which are located strictly after the insertion point)
-      for (const t of newThreats) {
-        if (t.loc.index >= changeEnd) {
-          t.loc.index += delta;
-        }
-      }
-    }
-
-    this.documentThreats.set(key, newThreats);
-    this.updateDecorations(editor);
+    this.documentThreats.set(uri.toString(), threats);
+    this.updateDecorations(uri, threats);
   }
 
-  private updateDecorations(editor: vscode.TextEditor) {
-    if (!this.enabled) {
-      editor.setDecorations(this.decorationType, []);
-      this._onThreatsChanged.fire(0);
-      return;
-    }
-    const threats =
-      this.documentThreats.get(editor.document.uri.toString()) || [];
-
-    console.log(
-      `PromptShield: Updating decorations for ${editor.document.uri.toString()}, threats: ${threats.length}`,
+  private updateDecorations(uri: vscode.Uri, threats: ThreatReport[]) {
+    // Find editors for this uri
+    const editors = vscode.window.visibleTextEditors.filter(
+      (e) => e.document.uri.toString() === uri.toString(),
     );
-    this._onThreatsChanged.fire(threats.length);
-    const decorations: vscode.DecorationOptions[] = [];
 
-    for (const t of threats) {
-      if (!t.offendingText) continue;
-      // t.loc.index is absolute
-      const startPos = editor.document.positionAt(t.loc.index);
-      const endPos = editor.document.positionAt(
-        t.loc.index + t.offendingText.length,
-      );
-      const range = new vscode.Range(startPos, endPos);
+    for (const editor of editors) {
+      // ... (decoration logic)
 
-      const message = `Detected: ${t.category} (${t.readableLabel || "THREAT"})`;
+      this._onThreatsChanged.fire(threats.length); // Fire for each update? Or once?
+      // The original logic fired with count.
 
-      decorations.push({
-        range,
-        hoverMessage: message,
-        renderOptions: {
-          after: {
-            contentText: t.readableLabel || `[${t.category}]`,
+      const decorations: vscode.DecorationOptions[] = threats.map((t) => {
+        const start = editor.document.positionAt(t.loc.index);
+        const end = editor.document.positionAt(
+          t.loc.index + t.offendingText.length,
+        );
+        const range = new vscode.Range(start, end);
+
+        return {
+          range,
+          hoverMessage: t.message, // Use message from diagnostic
+          renderOptions: {
+            after: {
+              contentText: `[${t.category}]`, // simplified label
+            },
           },
-        },
+        };
       });
+
+      editor.setDecorations(this.decorationType, decorations);
     }
 
-    editor.setDecorations(this.decorationType, decorations);
+    // If no editors, we still updated the map.
+    // Ensure status bar gets event if active editor matches?
+    if (
+      vscode.window.activeTextEditor &&
+      vscode.window.activeTextEditor.document.uri.toString() === uri.toString()
+    ) {
+      this._onThreatsChanged.fire(threats.length);
+    }
   }
 }

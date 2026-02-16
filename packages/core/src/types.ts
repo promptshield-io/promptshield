@@ -1,139 +1,211 @@
 /**
- * Severity levels for detected threats.
- * - LOW: Informational or minor issues (e.g., hidden comments).
- * - MEDIUM: Suspicious patterns that require attention (e.g., Base64 strings).
- * - HIGH: Likely malicious or dangerous characters (e.g., invisible characters).
- * - CRITICAL: Confirmed high-risk attack vectors (e.g., homoglyph spoofing).
+ * Severity levels assigned to detected threats.
+ *
+ * These levels are ordered by risk:
+ *
+ * LOW < MEDIUM < HIGH < CRITICAL
+ *
+ * The scanner may filter results using `ScanOptions.minSeverity`.
  */
 export type Severity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 /**
- * Categories of threats detected by the engine.
+ * Categories of threats detected by PromptShield.
+ *
+ * Categories describe the *type of attack vector* rather than
+ * the specific implementation detail.
  */
 export enum ThreatCategory {
   /**
-   * Invisible characters like Zero Width Spaces, BIDI controls, etc.
+   * Invisible Unicode characters such as:
+   * - Zero Width Space (ZWSP)
+   * - Zero Width Joiner (ZWJ)
+   * - BIDI markers
+   *
+   * These are commonly used for prompt injection smuggling.
    */
   Invisible = "INVISIBLE_CHAR",
+
   /**
-   * Characters from mixed scripts that can look identical to others (e.g. Cyrillic 'a' vs Latin 'a').
+   * Mixed-script characters that visually resemble others.
+   *
+   * Example:
+   * Cyrillic "а" vs Latin "a".
    */
   Homoglyph = "HOMOGLYPH",
+
   /**
-   * Techniques used to hide data or instructions, such as Base64 encoding or hidden Markdown.
+   * Encoded or concealed content intended to bypass inspection.
+   *
+   * Examples:
+   * - Base64 payloads
+   * - hidden markdown
+   * - encoded instructions
    */
   Smuggling = "SMUGGLING",
+
   /**
-   * Reserved for future prompt injection detection.
+   * Prompt injection patterns.
+   *
+   * Reserved for semantic detection layers.
    */
   Injection = "PROMPT_INJECTION",
+
   /**
-   * Trojan Source attacks (CVE-2021-42574) using BIDI overrides to manipulate logic.
+   * Trojan Source attack vectors (CVE-2021-42574).
+   *
+   * These use bidirectional override characters to manipulate
+   * code or prompt interpretation.
    */
   Trojan = "TROJAN_SOURCE",
+
   /**
-   * Unicode Normalization attacks where visual characters differ from code points.
+   * Unicode normalization inconsistencies where visually identical
+   * characters differ at the code-point level.
    */
   Normalization = "NORMALIZATION",
 }
 
 /**
- * Location of a threat within the source text.
+ * Location of a threat within the scanned text.
+ *
+ * The scanner reports both human-readable and machine-friendly
+ * position data.
  */
 export interface ThreatLoc {
   /** 1-based line number */
   line: number;
+
   /** 1-based column number */
   column: number;
-  /** 0-based character index */
+
+  /** 0-based character index in the scanned text */
   index: number;
 }
 
 /**
- * Report detailing a single detected threat.
+ * Report describing a detected threat span.
+ *
+ * NOTE:
+ * A ThreatReport represents a **span**, not a single character.
+ * Adjacent suspicious characters should be grouped into one report.
  */
 export interface ThreatReport {
-  /** The category of the threat. */
+  /** Threat classification */
   category: ThreatCategory;
-  /** The severity level of the threat. */
+
+  /** Risk severity */
   severity: Severity;
-  /** A human-readable message describing the threat. */
+
+  /** Human-readable description */
   message: string;
-  /** The specific location of the threat. */
+
+  /** Location of the threat start */
   loc: ThreatLoc;
-  /** The exact substring that triggered the detection. */
+
+  /**
+   * The substring responsible for the detection.
+   *
+   * This may contain multiple characters if the threat
+   * represents a sequence.
+   */
   offendingText: string;
-  /** A readable label for invisible or confusing characters (e.g., "[ZWSP]"). */
+
+  /**
+   * Optional readable label for UI rendering.
+   *
+   * Example:
+   * "[ZWSP × 3]"
+   */
   readableLabel?: string;
-  /** Actionable suggestion for the user. */
+
+  /**
+   * Suggested remediation guidance.
+   */
   suggestion?: string;
+
+  /**
+   * Optional decoded payload extracted from invisible sequences.
+   *
+   * Example:
+   * "ignore previous instructions"
+   */
+  decodedPayload?: string;
 }
 
 /**
- * Options to configure the scanning process.
+ * Scanner configuration options.
  */
 export interface ScanOptions {
   /**
-   * If true, the scanner will stop immediately after finding the first threat.
-   * Useful for "fail-fast" validations where performance is critical.
+   * Stop scanning after the first detected threat.
+   *
+   * Useful for CI validation or fast-fail scenarios.
+   *
    * @default false
    */
   stopOnFirstThreat?: boolean;
 
   /**
-   * Only report threats with severity equal to or higher than this threshold.
-   * Priority: LOW < MEDIUM < HIGH < CRITICAL
+   * Minimum severity to report.
+   *
    * @default "LOW"
    */
   minSeverity?: Severity;
 
-  /**
-   * Disable default detectors.
-   */
+  /** Disable invisible-character detection */
   disableInvisible?: boolean;
+
+  /** Disable homoglyph detection */
   disableHomoglyphs?: boolean;
+
+  /** Disable smuggling detection */
   disableSmuggling?: boolean;
+
+  /** Disable Trojan Source detection */
   disableTrojan?: boolean;
+
+  /** Disable normalization detection */
   disableNormalization?: boolean;
 }
 
 /**
- * Execution context for a scan operation.
+ * Execution context for scanning text fragments.
  *
- * Provides positional metadata when scanning text that originates
- * from a larger document (e.g., code blocks, diff hunks, AST nodes,
- * streamed content, or IDE buffers).
- *
- * All fields are optional. The scanner will fall back to defaults
- * when values are not provided.
+ * Used when scanning partial content extracted from a larger source,
+ * such as:
+ * - markdown code blocks
+ * - AST nodes
+ * - editor buffers
+ * - diff hunks
  */
 export interface ScanContext {
   /**
-   * Line offset to apply when reporting locations.
-   *
-   * Useful when scanning a substring that begins later in a file.
-   * Defaults to `1`.
+   * Base line offset.
+   * @default 1
    */
   baseLine?: number;
 
   /**
-   * Column offset to apply when reporting locations.
-   *
-   * Used when the scanned text does not begin at column 1.
-   * Defaults to `1`.
+   * Base column offset.
+   * @default 1
    */
   baseCol?: number;
 
   /**
-   * Precomputed line start offsets for the scanned text.
-   *
-   * This is an optional performance optimization that allows the
-   * core scanner to compute line offsets once and share them across
-   * detectors instead of recomputing per detector.
+   * Precomputed line offsets for performance.
    */
   lineOffsets?: number[];
 }
 
+/**
+ * Detector function contract.
+ *
+ * Detectors must be:
+ * - deterministic
+ * - side-effect free
+ * - synchronous
+ */
 export type Detector = (
   text: string,
   options: ScanOptions,
@@ -141,23 +213,18 @@ export type Detector = (
 ) => ThreatReport[];
 
 /**
- * Performance statistics for a scan operation.
+ * Performance metrics for a scan.
  */
 export interface ScanStats {
-  /** Time taken to scan in milliseconds. */
   durationMs: number;
-  /** Total number of characters scanned. */
   totalChars: number;
 }
 
 /**
- * The complete result of a scan operation.
+ * Result returned by the scanner.
  */
 export interface ScanResult {
-  /** List of detected threats. */
   threats: ThreatReport[];
-  /** Performance statistics. */
   stats: ScanStats;
-  /** True if no threats were found. */
   isClean: boolean;
 }

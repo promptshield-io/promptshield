@@ -9,22 +9,43 @@ import { getLineOffsets, getLocForIndex } from "./utils";
 
 /**
  * Regex for Base64-like payloads.
+ *
+ * Matches long Base64 sequences that are likely to contain embedded
+ * readable content rather than hashes or binary blobs.
  */
 const BASE64_REGEX =
   /(?:[A-Za-z0-9+/]{4}){8,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g;
 
-/** Detect hidden Markdown comments */
+/**
+ * Detect hidden Markdown comments.
+ *
+ * Markdown comments are invisible in rendered output but remain
+ * present in source text.
+ */
 const MARKDOWN_COMMENT_REGEX = /<!--[\s\S]*?-->/g;
 
-/** Detect empty Markdown links */
+/**
+ * Detect empty Markdown links.
+ *
+ * Example:
+ * [](...)
+ *
+ * These render invisibly but may carry payload URLs or instructions.
+ */
 const EMPTY_LINK_REGEX = /\[\s*\]\([^)]+\)/g;
 
-/** Detect invisible-character runs for steganography - Detect runs of invisible characters that may encode hidden binary data*/
+/**
+ * Detect runs of invisible characters potentially used for binary
+ * steganography encoding.
+ */
 const STEG_REGEX = /([\u200B-\u200D\u2060\uFEFF\u3164\uFFA0]+)/g;
 
 /**
- * Attempts Base64 decoding and checks printable ASCII ratio.
- * Helps reduce false positives from hashes or random tokens.
+ * Attempts Base64 decoding and verifies printable ASCII ratio.
+ *
+ * This reduces false positives from hashes, UUIDs, and random tokens.
+ *
+ * Returns decoded text only when content appears human-readable.
  */
 const decodeBase64IfLikely = (value: string): string | null => {
   try {
@@ -47,11 +68,23 @@ const decodeBase64IfLikely = (value: string): string | null => {
 /**
  * Smuggling detector.
  *
- * Detects techniques used to conceal instructions or data inside text:
- * - Base64 payloads
+ * Detects techniques used to conceal instructions or data inside text.
+ *
+ * Detection categories:
+ *
+ * HIGH:
+ * - Invisible-character steganography
+ *
+ * MEDIUM:
+ * - Base64 payloads containing readable content
+ *
+ * LOW:
  * - Hidden Markdown comments
  * - Invisible Markdown links
- * - Invisible-character steganography
+ *
+ * Span semantics:
+ *   offendingText = entire suspicious region
+ *   decodedPayload = recovered payload when available
  *
  * Context is intentionally mutable so detectors can share `lineOffsets`.
  */
@@ -76,7 +109,7 @@ export const scanSmuggling = (
     const captured = match[0];
 
     if (captured.length < 8) continue;
-    if (captured.length > 4096) continue; // safety cap
+    if (captured.length > 4096) continue;
 
     const distinctChars = Array.from(new Set(captured.split("")));
     if (distinctChars.length !== 2) continue;
@@ -112,10 +145,11 @@ export const scanSmuggling = (
         threats.push({
           category: ThreatCategory.Smuggling,
           severity: "HIGH",
-          message: `Detected hidden steganography message: "${decoded}"`,
+          message: `Detected hidden steganography message`,
           loc: getLocForIndex(match.index, context),
           offendingText: captured,
-          readableLabel: `[Hidden: "${decoded}"]`,
+          decodedPayload: decoded,
+          readableLabel: `[Hidden]: ${decoded.slice(0, 50)}...`,
           suggestion:
             "Invisible-character encoding detected. Inspect hidden content.",
         });
@@ -140,14 +174,13 @@ export const scanSmuggling = (
     const decoded = decodeBase64IfLikely(candidate);
     if (!decoded) continue;
 
-    const index = match.index;
-
     threats.push({
       category: ThreatCategory.Smuggling,
       severity: "MEDIUM",
       message: `Detected Base64 payload containing readable text`,
-      loc: getLocForIndex(index, context),
+      loc: getLocForIndex(match.index, context),
       offendingText: candidate,
+      decodedPayload: decoded,
       readableLabel: `[Base64]: ${decoded.slice(0, 50)}...`,
       suggestion: "Decoded Base64 contains readable text. Inspect payload.",
     });
@@ -174,9 +207,7 @@ export const scanSmuggling = (
         "Comments are not visible in rendered Markdown but can carry instructions.",
     });
 
-    if (options.stopOnFirstThreat) {
-      return threats;
-    }
+    if (options.stopOnFirstThreat) return threats;
   }
 
   /**
@@ -195,9 +226,7 @@ export const scanSmuggling = (
       suggestion: "Empty links can be used to hide URLs or data.",
     });
 
-    if (options.stopOnFirstThreat) {
-      return threats;
-    }
+    if (options.stopOnFirstThreat) return threats;
   }
 
   return threats;

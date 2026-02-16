@@ -1,4 +1,11 @@
+import * as path from "path";
 import * as vscode from "vscode";
+import {
+  LanguageClient,
+  type LanguageClientOptions,
+  type ServerOptions,
+  TransportKind,
+} from "vscode-languageclient/node";
 import { DecorationManager } from "./protection/decorationManager";
 import {
   handleFixWithAI,
@@ -7,13 +14,60 @@ import {
 import { PromptShieldHoverProvider } from "./providers/hoverProvider";
 import { PromptShieldStatusBar } from "./ui/statusBar";
 
+let client: LanguageClient;
+
 export function activate(context: vscode.ExtensionContext) {
   console.log("PromptShield is active!");
+
+  // The server is implemented in node
+  const serverModule = context.asAbsolutePath(
+    path.join("..", "lsp", "dist", "index.js"),
+  );
+
+  // If the extension is launched in debug mode then the debug server options are used
+  // Otherwise the run options are used
+  const serverOptions: ServerOptions = {
+    run: { module: serverModule, transport: TransportKind.ipc },
+    debug: {
+      module: serverModule,
+      transport: TransportKind.ipc,
+    },
+  };
+
+  // Options to control the language client
+  const clientOptions: LanguageClientOptions = {
+    // Register the server for plain text documents
+    documentSelector: [
+      { scheme: "file", language: "plaintext" },
+      { scheme: "file", language: "typescript" },
+      { scheme: "file", language: "javascript" },
+      { scheme: "file", pattern: "**/*" },
+    ], // Broad selector for now, or match specific languages
+    synchronize: {
+      // Notify the server about file changes to '.clientrc files contained in the workspace
+      fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc"),
+    },
+  };
+
+  // Create the language client and start the client.
+  client = new LanguageClient(
+    "promptShieldLsp",
+    "PromptShield LSP",
+    serverOptions,
+    clientOptions,
+  );
+
+  // Start the client. This will also launch the server
+  client.start();
 
   const decorationManager = new DecorationManager();
   decorationManager.activate(context);
 
   const hoverProvider = new PromptShieldHoverProvider(decorationManager);
+
+  // CodeActionProvider might need update or be removed if LSP handles it
+  // But requirement says "Code Action Provider... Keep existing provider... It should read threats from DecorationManager."
+  // And "Do not move AI fix logic to LSP."
   const codeActionProvider = new PromptShieldCodeActionProvider(
     decorationManager,
   );
@@ -28,21 +82,14 @@ export function activate(context: vscode.ExtensionContext) {
     ),
 
     vscode.commands.registerCommand("promptshield.scanWorkspace", () => {
-      vscode.window.showInformationMessage(
-        "Scanning workspace... (Implement full scan if needed)",
-      );
-      // Trigger refresh on active editor for now
-      if (vscode.window.activeTextEditor) {
-        // private method, but we can rely on file open/change events or expose a public refresh
-        // forcing a re-open or just letting the user modify the file works.
-        // For v1, let's keep it simple.
-      }
+      // Delegate to LSP command
+      vscode.commands.executeCommand("promptshield.scanWorkspace");
     }),
 
     vscode.commands.registerCommand("promptshield.toggleXRay", () => {
-      const enabled = decorationManager.toggleXRay();
+      // Read-only status bar, maybe show message?
       vscode.window.showInformationMessage(
-        `X-Ray Mode: ${enabled ? "Enabled" : "Disabled"}`,
+        "PromptShield X-Ray is always active.",
       );
     }),
 
@@ -55,4 +102,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined;
+  }
+  return client.stop();
+}

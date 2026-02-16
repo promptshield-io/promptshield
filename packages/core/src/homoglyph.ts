@@ -6,27 +6,54 @@ import {
 } from "./types";
 import { getLineOffsets, getLocForIndex } from "./utils";
 
-// Scripts of interest
+/**
+ * Unicode script detectors.
+ *
+ * These are intentionally scoped to scripts most commonly used
+ * in homoglyph spoofing attacks involving Latin text.
+ */
 const LATIN = /\p{Script=Latin}/u;
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 const GREEK = /\p{Script=Greek}/u;
 
 /**
- * Regex to find "words" (contiguous sequences of letters, numbers, or underscores).
- * Uses Unicode property escapes for letters and numbers.
+ * Regex to find candidate "words".
+ *
+ * A word is defined as a contiguous sequence of:
+ * - letters
+ * - numbers
+ * - underscores
+ *
+ * Using Unicode property escapes ensures support for international text.
  */
 const WORD_REGEX = /[\p{L}\p{N}_]+/gu;
 
 /**
- * Scans a string for homoglyphs (mixed-script words).
- * Specifically targets words mixing Latin with Cyrillic or Greek characters.
+ * Homoglyph detector.
  *
- * Requires Unicode property escape support (Node 18+)
+ * Detects visually deceptive words that mix characters from different
+ * Unicode scripts — a common technique used in spoofing attacks.
  *
- * @param text - The text to scan.
+ * Example:
+ *
+ *   "pаypal"  (Cyrillic "а" inside Latin word)
+ *   "admіn"   (Cyrillic "і")
+ *
+ * These words appear normal to humans but differ at the code-point level.
+ *
+ * Detection model:
+ * - Scan text for "word spans"
+ * - Check script composition per word
+ * - Emit ONE threat per suspicious word
+ *
+ * Span semantics:
+ *   offendingText = entire word
+ *
+ * Requires Unicode property escape support (Node 18+).
+ *
+ * @param text Raw text to scan
  * @param options Scanner configuration
- * @param context Optional scanning context for location tracking
- * @returns An array of detected threats.
+ * @param context Location context
  */
 export const scanHomoglyphs = (
   text: string,
@@ -50,9 +77,13 @@ export const scanHomoglyphs = (
     const hasCyrillic = CYRILLIC.test(word);
     const hasGreek = GREEK.test(word);
 
-    // We strictly flag Latin + (Cyrillic/Greek) as these are most common for spoofing
+    /**
+     * Flag Latin mixed with Cyrillic or Greek.
+     *
+     * This intentionally avoids flagging all mixed-script cases to
+     * reduce false positives in multilingual content.
+     */
     if (hasLatin && (hasCyrillic || hasGreek)) {
-      // Construct a readable label showing which scripts are mixed
       const scripts: string[] = [];
       if (hasLatin) scripts.push("Latin");
       if (hasCyrillic) scripts.push("Cyrillic");
@@ -68,12 +99,12 @@ export const scanHomoglyphs = (
         offendingText: word,
         readableLabel: `[Mixed-Script] ${word}`,
         suggestion:
-          "Replace with standard characters. This may be a spoofing attempt.",
+          "Replace with standard characters. This may indicate a spoofing attempt.",
       });
 
-      // CRITICAL threats always bypass severity filtering.
       if (options?.stopOnFirstThreat) return threats;
     }
+
     match = regex.exec(text);
   }
 

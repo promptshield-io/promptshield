@@ -29,6 +29,7 @@
       "@promptshield/cli": ["./packages/cli/src"],
       "@promptshield/core": ["./packages/core/src"],
       "@promptshield/ignore": ["./packages/ignore/src"],
+      "@promptshield/lsp": ["./packages/lsp/src"],
       "@promptshield/mcp": ["./packages/mcp/src"],
       "@promptshield/sanitizer": ["./packages/sanitizer/src"],
       "promptshield": ["./packages/vscode/src"]

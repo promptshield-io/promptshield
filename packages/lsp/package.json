@@ -1,0 +1,73 @@
+{
+  "name": "@promptshield/lsp",
+  "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
+  "private": false,
+  "version": "0.0.0",
+  "description": "Language Server for PromptShield",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptshield-io/promptshield",
+    "directory": "packages/lsp"
+  },
+  "bugs": "https://github.com/promptshield-io/promptshield/issues",
+  "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/lsp/README.md",
+  "sideEffects": true,
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup && gzip -c dist/index.js | wc -c",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11",
+    "@promptshield/core": "workspace:*",
+    "@promptshield/ignore": "workspace:*",
+    "@promptshield/sanitizer": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsup": "latest",
+    "typescript": "latest"
+  },
+  "forge": {
+    "aliases": [
+      "@ghostbuster/lsp"
+    ],
+    "icon": "Shield"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/promptshield-io"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/mayank1513"
+    }
+  ],
+  "keywords": [
+    "@promptshield/lsp",
+    "turbo-forge"
+  ]
+}

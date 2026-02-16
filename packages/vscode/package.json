@@ -117,6 +117,7 @@
     "turbo-forge"
   ],
   "dependencies": {
-    "@promptshield/core": "workspace:*"
+    "@promptshield/core": "workspace:*",
+    "vscode-languageclient": "^9.0.1"
   }
 }

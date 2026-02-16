@@ -14,11 +14,12 @@ describe("scanTrojanSource", () => {
     expect(threats[0].severity).toBe("CRITICAL");
   });
 
-  it("should ignore safe, terminated BIDI sequences", () => {
+  it("should flag all BIDI sequences as finding", () => {
     // Valid use of BIDI in a string literal, properly closed
     const safe = 'const msg = "Hebrew: \u202Eshalom\u202C";';
     const threats = scanTrojanSource(safe);
-    expect(threats).toHaveLength(0);
+    expect(threats).toHaveLength(1);
+    expect(threats[0].readableLabel).toBe("[BIDI_OVERRIDE]");
   });
 
   it("should detect multiple threats in multi-line text", () => {
@@ -39,6 +40,12 @@ describe("scanTrojanSource", () => {
         /* \u202E } \u2066 */
         /* \u202E } \u2066 */
     `;
+    const threats = scanTrojanSource(text, { stopOnFirstThreat: true });
+    expect(threats).toHaveLength(1);
+  });
+
+  it("should stop on first threat with unterminated sequences", () => {
+    const text = "\u202E \n \u202E"; // Two lines with RLO
     const threats = scanTrojanSource(text, { stopOnFirstThreat: true });
     expect(threats).toHaveLength(1);
   });

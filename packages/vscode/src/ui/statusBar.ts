@@ -12,6 +12,7 @@ export class PromptShieldStatusBar {
       vscode.StatusBarAlignment.Right,
       100,
     );
+    this.statusBarItem.command = "promptshield.showDetailedReport";
     this.context.subscriptions.push(this.statusBarItem);
 
     // Initial State
@@ -38,7 +39,7 @@ export class PromptShieldStatusBar {
       this.statusBarItem.backgroundColor = undefined;
     } else {
       this.statusBarItem.text = `$(shield) ${threatCount} Threats`;
-      this.statusBarItem.tooltip = `PromptShield: ${threatCount} threats detected.`;
+      this.statusBarItem.tooltip = `PromptShield: ${threatCount} threats detected. Click to view detailed report.`;
       this.statusBarItem.backgroundColor = new vscode.ThemeColor(
         "statusBarItem.errorBackground",
       );

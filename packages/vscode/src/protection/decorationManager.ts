@@ -2,25 +2,31 @@ import type { ThreatReport } from "@promptshield/core";
 import * as vscode from "vscode";
 
 export class DecorationManager {
-  private decorationType: vscode.TextEditorDecorationType;
+  private rangeDecorationType: vscode.TextEditorDecorationType;
+  private eolDecorationType: vscode.TextEditorDecorationType;
   private documentThreats = new Map<string, ThreatReport[]>();
-  // private enabled = true; // Always on now
 
   private _onThreatsChanged = new vscode.EventEmitter<number>();
   public readonly onThreatsChanged = this._onThreatsChanged.event;
 
   constructor() {
-    this.decorationType = vscode.window.createTextEditorDecorationType({
-      backgroundColor: new vscode.ThemeColor(
-        "promptshield.highThreatBackground",
-      ),
+    this.rangeDecorationType = vscode.window.createTextEditorDecorationType({
+      textDecoration: "underline wavy red",
       overviewRulerColor: "red",
       overviewRulerLane: vscode.OverviewRulerLane.Right,
+    });
+
+    this.eolDecorationType = vscode.window.createTextEditorDecorationType({
+      isWholeLine: true,
       after: {
         color: new vscode.ThemeColor("promptshield.ghostTextForeground"),
-        margin: "0 0 0 4px",
+        margin: "0 0 0 20px",
       },
     });
+  }
+
+  public getAllThreats(uri: vscode.Uri): ThreatReport[] {
+    return this.documentThreats.get(uri.toString()) || [];
   }
 
   public getThreatsAt(
@@ -173,40 +179,59 @@ export class DecorationManager {
   }
 
   private updateDecorations(uri: vscode.Uri, threats: ThreatReport[]) {
-    // Find editors for this uri
     const editors = vscode.window.visibleTextEditors.filter(
       (e) => e.document.uri.toString() === uri.toString(),
     );
 
     for (const editor of editors) {
-      // ... (decoration logic)
+      this._onThreatsChanged.fire(threats.length);
 
-      this._onThreatsChanged.fire(threats.length); // Fire for each update? Or once?
-      // The original logic fired with count.
+      const rangeDecorations: vscode.DecorationOptions[] = [];
+      const eolDecorations: vscode.DecorationOptions[] = [];
 
-      const decorations: vscode.DecorationOptions[] = threats.map((t) => {
+      // Group by line
+      const threatsByLine = new Map<number, ThreatReport[]>();
+      for (const t of threats) {
+        const line = t.loc.line - 1;
+        if (!threatsByLine.has(line)) {
+          threatsByLine.set(line, []);
+        }
+        threatsByLine.get(line)?.push(t);
+      }
+
+      // Create Range Decorations
+      for (const t of threats) {
         const start = editor.document.positionAt(t.loc.index);
         const end = editor.document.positionAt(
           t.loc.index + t.offendingText.length,
         );
-        const range = new vscode.Range(start, end);
 
-        return {
-          range,
-          hoverMessage: t.message, // Use message from diagnostic
+        rangeDecorations.push({
+          range: new vscode.Range(start, end),
+          hoverMessage: t.message,
+        });
+      }
+
+      // Create EOL Decorations
+      for (const [line, lineThreats] of threatsByLine) {
+        // Summarize
+        const categories = new Set(lineThreats.map((t) => t.category));
+        const summary = Array.from(categories).join(", ");
+
+        eolDecorations.push({
+          range: new vscode.Range(line, 0, line, 0),
           renderOptions: {
             after: {
-              contentText: `[${t.category}]`, // simplified label
+              contentText: `🛡️ ${lineThreats.length} threat(s) [${summary}]`,
             },
           },
-        };
-      });
+        });
+      }
 
-      editor.setDecorations(this.decorationType, decorations);
+      editor.setDecorations(this.rangeDecorationType, rangeDecorations);
+      editor.setDecorations(this.eolDecorationType, eolDecorations);
     }
 
-    // If no editors, we still updated the map.
-    // Ensure status bar gets event if active editor matches?
     if (
       vscode.window.activeTextEditor &&
       vscode.window.activeTextEditor.document.uri.toString() === uri.toString()

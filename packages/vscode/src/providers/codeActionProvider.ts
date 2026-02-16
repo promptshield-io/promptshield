@@ -16,13 +16,16 @@ export class PromptShieldCodeActionProvider
     const actions: vscode.CodeAction[] = [];
 
     // Find threats in the range
-    // Since range can be a selection or cursor, we check if any threat intersects
-    const threats = this.decorationManager.getThreatsAt(document, range.start); // Simplified for cursor
+    const threats = this.decorationManager.getThreatsAt(document, range.start);
+
+    let aiFixAdded = false;
+    let ignoreAdded = false;
 
     for (const t of threats) {
       // 1. Deterministic Fix: Remove
+      const label = t.readableLabel || "Character";
       const removeAction = new vscode.CodeAction(
-        `Remove ${t.readableLabel || "Character"}`,
+        `Remove ${label}`,
         vscode.CodeActionKind.QuickFix,
       );
       removeAction.edit = new vscode.WorkspaceEdit();
@@ -31,17 +34,36 @@ export class PromptShieldCodeActionProvider
       removeAction.edit.delete(document.uri, new vscode.Range(start, end));
       actions.push(removeAction);
 
-      // 2. AI Fix
-      const aiAction = new vscode.CodeAction(
-        `✨ Fix with AI`,
-        vscode.CodeActionKind.QuickFix,
-      );
-      aiAction.command = {
-        command: "promptshield.fixWithAI",
-        title: "Fix with AI",
-        arguments: [document, t],
-      };
-      actions.push(aiAction);
+      // 2. Ignore Action (Once per line/group)
+      if (!ignoreAdded) {
+        const ignoreAction = new vscode.CodeAction(
+          "Ignore this line (PromptShield)",
+          vscode.CodeActionKind.QuickFix,
+        );
+        ignoreAction.edit = new vscode.WorkspaceEdit();
+        // Insert comment on previous line
+        const line = document.lineAt(range.start.line);
+        const indentation = line.text.match(/^\s*/)?.[0] || "";
+        const comment = `${indentation}// promptshield-ignore\n`;
+        ignoreAction.edit.insert(document.uri, line.range.start, comment);
+        actions.push(ignoreAction);
+        ignoreAdded = true;
+      }
+
+      // 3. AI Fix (Once)
+      if (!aiFixAdded) {
+        const aiAction = new vscode.CodeAction(
+          `✨ Fix with AI`,
+          vscode.CodeActionKind.QuickFix,
+        );
+        aiAction.command = {
+          command: "promptshield.fixWithAI",
+          title: "Fix with AI",
+          arguments: [document, t], // Pass the first threat as primary context
+        };
+        actions.push(aiAction);
+        aiFixAdded = true;
+      }
     }
 
     return actions;

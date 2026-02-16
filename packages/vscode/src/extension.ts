@@ -94,6 +94,46 @@ export function activate(context: vscode.ExtensionContext) {
     }),
 
     vscode.commands.registerCommand(
+      "promptshield.showDetailedReport",
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          vscode.window.showInformationMessage("No active editor.");
+          return;
+        }
+
+        const threats = decorationManager.getAllThreats(editor.document.uri);
+        if (threats.length === 0) {
+          vscode.window.showInformationMessage(
+            "No PromptShield threats detected in this file.",
+          );
+          return;
+        }
+
+        const items = threats.map((t) => ({
+          label: `[${t.severity}] ${t.category}`,
+          description: `Line ${t.loc.line}, Col ${t.loc.column}`,
+          detail: t.message,
+          threat: t,
+        }));
+
+        const selection = await vscode.window.showQuickPick(items, {
+          placeHolder: `Detected ${threats.length} threats. Select to jump to location.`,
+        });
+
+        if (selection) {
+          const t = selection.threat;
+          const pos = editor.document.positionAt(t.loc.index);
+          editor.selection = new vscode.Selection(pos, pos);
+          editor.revealRange(
+            new vscode.Range(pos, pos),
+            vscode.TextEditorRevealType.InCenter,
+          );
+        }
+      },
+    ),
+
+    vscode.commands.registerCommand(
       "promptshield.fixWithAI",
       async (document: vscode.TextDocument, threat: any) => {
         await handleFixWithAI(document, threat);

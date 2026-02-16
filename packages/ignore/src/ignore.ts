@@ -3,6 +3,7 @@ import type { ThreatReport } from "@promptshield/core";
 interface IgnoreRange {
   start: number;
   end: number;
+  definedAt: number;
   used?: boolean;
 }
 
@@ -38,6 +39,7 @@ const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
       ranges.push({
         start: lineNo + 1,
         end: lineNo + count,
+        definedAt: lineNo,
       });
       continue;
     }
@@ -49,11 +51,13 @@ const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
       ranges.push({
         start: lineNo + 1,
         end: lineNo + 1,
+        definedAt: lineNo,
       });
     } else {
       ranges.push({
         start: lineNo,
         end: lineNo,
+        definedAt: lineNo,
       });
     }
   }
@@ -74,27 +78,21 @@ export const filterThreats = (
   threats: ThreatReport[],
 ): {
   threats: ThreatReport[];
-  unusedIgnores: { start: number; end: number }[];
+  unusedIgnores: Omit<IgnoreRange, "used">[];
 } => {
   const ignore = parseIgnoreDirectives(text);
 
   if (ignore.ignoreFile) {
     return {
       threats: [],
-      unusedIgnores: ignore.ranges.map((r) => ({
-        start: r.start,
-        end: r.end,
-      })),
+      unusedIgnores: ignore.ranges.map(({ used, ...r }) => r),
     };
   }
 
   if (ignore.ranges.length === 0 || threats.length === 0) {
     return {
       threats,
-      unusedIgnores: ignore.ranges.map((r) => ({
-        start: r.start,
-        end: r.end,
-      })),
+      unusedIgnores: ignore.ranges.map(({ used, ...r }) => r),
     };
   }
 
@@ -130,10 +128,7 @@ export const filterThreats = (
 
   const unusedIgnores = ranges
     .filter((r) => !r.used)
-    .map((r) => ({
-      start: r.start,
-      end: r.end,
-    }));
+    .map(({ used, ...r }) => r);
 
   return {
     threats: filtered,

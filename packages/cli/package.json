@@ -33,7 +33,7 @@
     "dist/**"
   ],
   "bin": {
-    "promptshield-cli": "./dist/cli.mjs"
+    "promptshield": "./dist/cli.mjs"
   },
   "scripts": {
     "build": "tsup && gzip -c dist/index.js | wc -c",
@@ -42,10 +42,10 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@turbo-forge/cli-kit": "latest",
     "@types/node": "latest",
     "tsup": "latest",
-    "typescript": "latest",
-    "@turbo-forge/cli-kit": "latest"
+    "typescript": "latest"
   },
   "forge": {
     "aliases": [
@@ -75,5 +75,12 @@
     "ghostbuster",
     "promptshield-cli",
     "turbo-forge"
-  ]
+  ],
+  "dependencies": {
+    "@promptshield/core": "workspace:*",
+    "@promptshield/ignore": "workspace:*",
+    "@promptshield/sanitizer": "workspace:*",
+    "fast-glob": "^3.3.3",
+    "ignore": "^7.0.5"
+  }
 }

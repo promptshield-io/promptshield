@@ -106,3 +106,5 @@ export const sanitize = (text: string): string =>
  */
 export const sanitizeStrict = (text: string): string =>
   sanitize(text).normalize("NFKC");
+
+export * from "./fix";

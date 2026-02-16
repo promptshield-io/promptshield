@@ -19,6 +19,16 @@
         "default": "./dist/index.js"
       }
     },
+    "./fix": {
+      "import": {
+        "types": "./dist/fix.d.mts",
+        "default": "./dist/fix.mjs"
+      },
+      "require": {
+        "types": "./dist/fix.d.ts",
+        "default": "./dist/fix.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "repository": {
@@ -81,5 +91,8 @@
     "prompt-injection",
     "llm",
     "ai"
-  ]
+  ],
+  "dependencies": {
+    "@promptshield/core": "workspace:*"
+  }
 }

@@ -1,6 +1,6 @@
 import type { ThreatReport } from "@promptshield/core";
 import * as vscode from "vscode";
-import type { DecorationManager } from "../protection/decorationManager";
+import type { DecorationManager } from "./decoration-manager";
 
 export class PromptShieldCodeActionProvider
   implements vscode.CodeActionProvider

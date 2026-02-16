@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { DecorationManager } from "../protection/decorationManager";
+import type { DecorationManager } from "./decoration-manager";
 
 export class PromptShieldStatusBar {
   private statusBarItem: vscode.StatusBarItem;

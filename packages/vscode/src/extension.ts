@@ -6,13 +6,13 @@ import {
   type ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { DecorationManager } from "./protection/decorationManager";
 import {
   handleFixWithAI,
   PromptShieldCodeActionProvider,
-} from "./providers/codeActionProvider";
-import { PromptShieldHoverProvider } from "./providers/hoverProvider";
-import { PromptShieldStatusBar } from "./ui/statusBar";
+} from "./code-action-provider";
+import { DecorationManager } from "./decoration-manager";
+import { PromptShieldHoverProvider } from "./hover-provider";
+import { PromptShieldStatusBar } from "./status-bar";
 
 let client: LanguageClient;
 

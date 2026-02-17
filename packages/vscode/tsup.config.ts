@@ -6,9 +6,12 @@ export default defineConfig(
       format: ["cjs"],
       target: "es2022",
       dts: false, // VS Code doesn't need dts for running
-      entry: ["./src/extension.ts"],
+      entry: {
+        extension: "src/extension.ts",
+        server: "src/server.ts",
+      },
       external: ["vscode"],
-      noExternal: ["@promptshield/core"],
+      noExternal: ["@promptshield/core", "@promptshield/lsp"],
       sourcemap: !options.watch,
       clean: !options.watch,
       bundle: true,

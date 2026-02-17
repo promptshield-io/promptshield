@@ -2,7 +2,11 @@ import type { ThreatReport } from "@promptshield/core";
 import * as vscode from "vscode";
 
 export class DecorationManager {
-  private rangeDecorationType: vscode.TextEditorDecorationType;
+  private criticalDecorationType: vscode.TextEditorDecorationType;
+  private highDecorationType: vscode.TextEditorDecorationType;
+  private mediumDecorationType: vscode.TextEditorDecorationType;
+  private lowDecorationType: vscode.TextEditorDecorationType;
+  private hiddenTextDecorationType: vscode.TextEditorDecorationType;
   private eolDecorationType: vscode.TextEditorDecorationType;
   private documentThreats = new Map<string, ThreatReport[]>();
 
@@ -10,11 +14,45 @@ export class DecorationManager {
   public readonly onThreatsChanged = this._onThreatsChanged.event;
 
   constructor() {
-    this.rangeDecorationType = vscode.window.createTextEditorDecorationType({
+    // Shared properties for range decorations
+    const baseRangeOptions: vscode.DecorationRenderOptions = {
       textDecoration: "underline wavy red",
       overviewRulerColor: "red",
       overviewRulerLane: vscode.OverviewRulerLane.Right,
+    };
+
+    this.criticalDecorationType = vscode.window.createTextEditorDecorationType({
+      ...baseRangeOptions,
+      backgroundColor: new vscode.ThemeColor(
+        "promptshield.criticalThreatBackground",
+      ),
     });
+
+    this.highDecorationType = vscode.window.createTextEditorDecorationType({
+      ...baseRangeOptions,
+      backgroundColor: new vscode.ThemeColor(
+        "promptshield.highThreatBackground",
+      ),
+    });
+
+    this.mediumDecorationType = vscode.window.createTextEditorDecorationType({
+      ...baseRangeOptions,
+      backgroundColor: new vscode.ThemeColor(
+        "promptshield.mediumThreatBackground",
+      ),
+    });
+
+    this.lowDecorationType = vscode.window.createTextEditorDecorationType({
+      ...baseRangeOptions,
+      backgroundColor: new vscode.ThemeColor(
+        "promptshield.lowThreatBackground",
+      ),
+    });
+
+    this.hiddenTextDecorationType =
+      vscode.window.createTextEditorDecorationType({
+        color: "transparent",
+      });
 
     this.eolDecorationType = vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
@@ -35,12 +73,6 @@ export class DecorationManager {
   ): ThreatReport[] {
     const threats = this.documentThreats.get(document.uri.toString()) || [];
     return threats.filter((t) => {
-      // Logic to find threat at position
-      // t.loc.index is 0-based index? core uses 0-based index or 1-based line?
-      // Core ThreatReport: loc: { line, column, index }
-      // We can use range from diagnostic if available, but here we stored ThreatReport.
-      // Let's reconstruct range or use logic.
-
       const start = document.positionAt(t.loc.index);
       const end = document.positionAt(t.loc.index + t.offendingText.length);
       const range = new vscode.Range(start, end);
@@ -77,76 +109,8 @@ export class DecorationManager {
     );
 
     const threats: ThreatReport[] = promptShieldDiagnostics.map((d) => {
-      // We attached the full ThreatReport in `data` field of diagnostic in LSP
-      // If getting from VSCode API, `d` is `vscode.Diagnostic`.
-      // Does VSCode preserve `data`?
-      // `vscode.Diagnostic` does not have `data` property in standard API?
-      // Wait, LSP `Diagnostic` has `data`. VSCode API `Diagnostic` might not expose it easily or it is in `code` or `relatedInformation`?
-      // Actually, VSCode `Diagnostic` class in `vscode` module does NOT have `data`.
-      // Only `code` (string | number | { value, target }).
-
-      // ISSUE: LSP `data` field is not automatically mapped to a property on `vscode.Diagnostic` object available to extension.
-      // The extension consumes `vscode.Diagnostic` which is a different type than `lsp.Diagnostic`.
-      // I might need to command the LSP to get the threats or just use the range/message from diagnostic to reconstruct minimal info,
-      // OR rely on `code` field if I can pack info there (limited).
-      //
-      // Re-reading requirements: "VSCode extension must not call @promptshield/core directly... VSCode consumes diagnostics from LSP"
-      // "DecorationManager... consume diagnostics".
-      //
-      // If I cannot get `ThreatReport` object back, I can't easily get `offendingText` or `loc` exactly as before unless I parse the range.
-      //
-      // But `offendingText` is needed for `getThreatsAt`?
-      // Actually `getThreatsAt` is used for Code Actions or Hover?
-      // Hover is provided by `hoverProvider` using `getThreatsAt`.
-      // If I have the range from diagnostic, I can use that.
-      //
-      // Let's look at `getThreatsAt`. It returns `ThreatReport[]`.
-      // If I change internal storage to store `Diagnostic` or a wrapper, I can adapt `getThreatsAt`.
-      //
-      // What does `ThreatReport` contain?
-      // interface ThreatReport {
-      //   checkId: string;
-      //   category: string;
-      //   severity: Severity;
-      //   message: string;
-      //   offendingText: string;
-      //   loc: { line: number; column: number; index: number };
-      //   readableLabel?: string;
-      //   url?: string;
-      // }
-      //
-      // Diagnostic has `range`, `message`, `code` (category), `severity`, `source`.
-      // It misses `offendingText`, `checkId`, `readableLabel`, `url`.
-      // `offendingText` can be read from document using range.
-      // `checkId`? Maybe `code`?
-      // `readableLabel`? Maybe put in message or `code`?
-
-      // Current `diagnostics.ts` puts `category` in `code`.
-      // `startLine`/`startChar` in `range`.
-
-      // I can reconstruct a "partial" ThreatReport from diagnostic + document text.
-      //
-      // But wait, if I can't get `data`, I lose `readableLabel` or `url` if they were there.
-      //
-      // Alternative: Use `executeCommand` to specific LSP request to get threats? No, that's complex.
-      //
-      // Actually, could I put JSON in `code`? `d.code` can be string.
-      // Or check if `vscode-languageclient` exposes `data`?
-      // The `LanguageClient` middleware can intercept diagnostics maybe?
-      //
-      // Or simpler: Just work with what Diagnostic gives.
-      // `offendingText` => `document.getText(range)`.
-      // `category` => `code`.
-      // `message` => `message`.
-      //
-      // Let's adjust `DecorationManager` to not strictly depend on `ThreatReport` object details that are missing,
-      // or reconstruct them.
-
-      // I will reconstruct `ThreatReport` from `Diagnostic`.
-
+      // Reconstruct ThreatReport from Diagnostic
       const range = d.range;
-      // We usually don't have document here easily in this map function without passing it.
-      // But we are in `updateFromDiagnostics`, we can get document.
       const textDoc = vscode.workspace.textDocuments.find(
         (doc) => doc.uri.toString() === uri.toString(),
       );
@@ -170,7 +134,6 @@ export class DecorationManager {
           column: range.start.character + 1,
           index,
         },
-        readableLabel: undefined, // Metadata lost unless encoded
       } as ThreatReport;
     });
 
@@ -186,10 +149,131 @@ export class DecorationManager {
     for (const editor of editors) {
       this._onThreatsChanged.fire(threats.length);
 
-      const rangeDecorations: vscode.DecorationOptions[] = [];
+      const criticalDecorations: vscode.DecorationOptions[] = [];
+      const highDecorations: vscode.DecorationOptions[] = [];
+      const mediumDecorations: vscode.DecorationOptions[] = [];
+      const lowDecorations: vscode.DecorationOptions[] = [];
+      const hiddenDecorations: vscode.DecorationOptions[] = [];
       const eolDecorations: vscode.DecorationOptions[] = [];
 
-      // Group by line
+      // Group threats by range (start:end) to deduplicate decorations
+      const threatsByRange = new Map<string, ThreatReport[]>();
+      for (const t of threats) {
+        const key = `${t.loc.index}:${t.loc.index + t.offendingText.length}`;
+        if (!threatsByRange.has(key)) {
+          threatsByRange.set(key, []);
+        }
+        threatsByRange.get(key)?.push(t);
+      }
+
+      // Create Range Decorations
+      for (const [, rangeThreats] of threatsByRange) {
+        // Pick the "worst" threat to determine color
+        let maxSeverity: ThreatReport["severity"] = "LOW";
+        // Simple mapping for comparison
+        const severityScore = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+
+        let primaryThreat: ThreatReport = rangeThreats[0];
+
+        // Combine messages
+        const messages = rangeThreats.map((t) => t.message).join("\n\n");
+
+        for (const t of rangeThreats) {
+          if (severityScore[t.severity] > severityScore[maxSeverity]) {
+            maxSeverity = t.severity;
+            primaryThreat = t;
+          }
+        }
+
+        const start = editor.document.positionAt(primaryThreat.loc.index);
+        const end = editor.document.positionAt(
+          primaryThreat.loc.index + primaryThreat.offendingText.length,
+        );
+
+        // Check if the threat consists entirely of invisible/whitespace characters/payloads
+        // that should be "replaced" by the label.
+        // Regex checks for NO "Graphic" characters (Letters, Numbers, Punctuation, Symbols, Marks).
+        // Actually simpler: check if it matches *only* Control (C), Separator (Z), or Other (C/Z/Format).
+        // If it has a payload, we usually want to show the payload instead of the invisible text.
+
+        // We consider "Replaceable" if it contains characters that are typically invisible or just whitespace.
+        // Use a broad check for "Graphic" characters. If any graphic char exists, we don't replace.
+        // \P{C} means "Not Control". \P{Z} means "Not Separator".
+        // Use negation: Is there any char that is NOT (Control OR Separator)?
+        // If yes, it's printable -> Show as is.
+        // If no, it's invisible/whitespace -> Replace with code.
+        const isReplaceable = !/[^\p{C}\p{Z}]/u.test(
+          primaryThreat.offendingText,
+        );
+
+        const decoration: vscode.DecorationOptions = {
+          range: new vscode.Range(start, end),
+          hoverMessage: messages,
+        };
+
+        if (isReplaceable) {
+          // Invisible/Whitespace -> Replace with Label "In Place"
+
+          // 1. Determine Label
+          const threatWithPayload =
+            rangeThreats.find((t) => t.decodedPayload) || primaryThreat;
+          let label = "";
+
+          if (threatWithPayload.decodedPayload) {
+            label = `[${threatWithPayload.decodedPayload}]`;
+          } else {
+            // Hex codes
+            const hexCodes = Array.from(primaryThreat.offendingText)
+              .map(
+                (c) =>
+                  `U+${c.codePointAt(0)?.toString(16).toUpperCase().padStart(4, "0")}`,
+              )
+              .join(" ");
+            label = `[${hexCodes}]`;
+          }
+
+          // 2. Determine Background Color for Label
+          let backgroundColorName = "promptshield.lowThreatBackground";
+          if (maxSeverity === "CRITICAL") {
+            backgroundColorName = "promptshield.criticalThreatBackground";
+          } else if (maxSeverity === "HIGH") {
+            backgroundColorName = "promptshield.highThreatBackground";
+          } else if (maxSeverity === "MEDIUM") {
+            backgroundColorName = "promptshield.mediumThreatBackground";
+          }
+
+          // 3. Create Hidden Decoration with Styled Label
+          hiddenDecorations.push({
+            range: new vscode.Range(start, end),
+            renderOptions: {
+              before: {
+                contentText: label,
+                backgroundColor: new vscode.ThemeColor(backgroundColorName),
+                color: new vscode.ThemeColor(
+                  "promptshield.ghostTextForeground",
+                ),
+                margin: "0 4px 0 0",
+                fontStyle: "normal",
+                fontWeight: "bold",
+              },
+            },
+          });
+        }
+        // Else: Visible -> No label, no hiding.
+
+        // Apply background color via the correct bucket
+        if (maxSeverity === "CRITICAL") {
+          criticalDecorations.push(decoration);
+        } else if (maxSeverity === "HIGH") {
+          highDecorations.push(decoration);
+        } else if (maxSeverity === "MEDIUM") {
+          mediumDecorations.push(decoration);
+        } else {
+          lowDecorations.push(decoration);
+        }
+      }
+
+      // Group by line for EOL decorations
       const threatsByLine = new Map<number, ThreatReport[]>();
       for (const t of threats) {
         const line = t.loc.line - 1;
@@ -197,19 +281,6 @@ export class DecorationManager {
           threatsByLine.set(line, []);
         }
         threatsByLine.get(line)?.push(t);
-      }
-
-      // Create Range Decorations
-      for (const t of threats) {
-        const start = editor.document.positionAt(t.loc.index);
-        const end = editor.document.positionAt(
-          t.loc.index + t.offendingText.length,
-        );
-
-        rangeDecorations.push({
-          range: new vscode.Range(start, end),
-          hoverMessage: t.message,
-        });
       }
 
       // Create EOL Decorations
@@ -228,7 +299,11 @@ export class DecorationManager {
         });
       }
 
-      editor.setDecorations(this.rangeDecorationType, rangeDecorations);
+      editor.setDecorations(this.criticalDecorationType, criticalDecorations);
+      editor.setDecorations(this.highDecorationType, highDecorations);
+      editor.setDecorations(this.mediumDecorationType, mediumDecorations);
+      editor.setDecorations(this.lowDecorationType, lowDecorations);
+      editor.setDecorations(this.hiddenTextDecorationType, hiddenDecorations);
       editor.setDecorations(this.eolDecorationType, eolDecorations);
     }
 

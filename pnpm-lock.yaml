@@ -258,6 +258,9 @@ importers:
       '@promptshield/core':
         specifier: workspace:*
         version: link:../core
+      '@promptshield/lsp':
+        specifier: workspace:*
+        version: link:../lsp
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1

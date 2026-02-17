@@ -149,5 +149,10 @@ connection.onExecuteCommand(async (params) => {
 /**
  * Start document manager and LSP connection.
  */
-documents.listen(connection);
-connection.listen();
+/**
+ * Start document manager and LSP connection.
+ */
+export function startLspServer() {
+  documents.listen(connection);
+  connection.listen();
+}

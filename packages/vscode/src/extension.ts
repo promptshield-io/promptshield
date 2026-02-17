@@ -20,9 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   console.log("PromptShield is active!");
 
   // The server is implemented in node
-  const serverModule = context.asAbsolutePath(
-    path.join("..", "lsp", "dist", "index.js"),
-  );
+  const serverModule = context.asAbsolutePath(path.join("dist", "server.js"));
 
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used

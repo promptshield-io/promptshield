@@ -3,6 +3,8 @@ import type { DecorationManager } from "./decoration-manager";
 
 export class PromptShieldStatusBar {
   private statusBarItem: vscode.StatusBarItem;
+  private isLoading = false;
+  private lastThreatCount = 0;
 
   constructor(
     private context: vscode.ExtensionContext,
@@ -15,34 +17,51 @@ export class PromptShieldStatusBar {
     this.statusBarItem.command = "promptshield.showDetailedReport";
     this.context.subscriptions.push(this.statusBarItem);
 
-    // Initial State
-    this.updateStatus(0);
     this.statusBarItem.show();
 
-    // Listen for changes
+    // React to threat updates
     this.decorationManager.onThreatsChanged((count) => {
-      this.updateStatus(count);
+      this.lastThreatCount = count;
+      // If we get an update, loading is done
+      this.setLoading(false);
     });
-
-    // Handle Active Editor Change (Reset to 0 or handle logic to get current threats if manager exposed them)
-    // NOTE: The decorationManager fires the event when it refreshes for the active editor,
-    // so we might rely on that. But if we switch to a file that hasn't changed, we need the current state.
-    // Ideally DecorationManager should re-emit on active editor change for the new editor.
-    // DecorationManager.activate handles onDidChangeActiveTextEditor -> refresh -> updateDecorations -> fires event.
-    // So we are good!
   }
 
-  private updateStatus(threatCount: number) {
+  /**
+   * Set loading state.
+   */
+  public setLoading(isLoading: boolean): void {
+    this.isLoading = isLoading;
+    this.updateStatus(this.lastThreatCount);
+  }
+
+  /**
+   * Update status bar UI based on threat count.
+   */
+  private updateStatus(threatCount: number): void {
+    if (this.isLoading) {
+      this.statusBarItem.text = "$(sync~spin) PromptShield";
+      this.statusBarItem.tooltip = "PromptShield: Scanning...";
+      this.statusBarItem.backgroundColor = undefined;
+      return;
+    }
+
     if (threatCount === 0) {
       this.statusBarItem.text = "$(shield) PromptShield";
       this.statusBarItem.tooltip = "PromptShield: No threats detected";
       this.statusBarItem.backgroundColor = undefined;
-    } else {
-      this.statusBarItem.text = `$(shield) ${threatCount} Threats`;
-      this.statusBarItem.tooltip = `PromptShield: ${threatCount} threats detected. Click to view detailed report.`;
-      this.statusBarItem.backgroundColor = new vscode.ThemeColor(
-        "statusBarItem.errorBackground",
-      );
+      return;
     }
+
+    this.statusBarItem.text = `$(shield) ${threatCount} Threat${
+      threatCount === 1 ? "" : "s"
+    }`;
+
+    this.statusBarItem.tooltip =
+      "PromptShield: Threats detected — click to view report.";
+
+    this.statusBarItem.backgroundColor = new vscode.ThemeColor(
+      "statusBarItem.errorBackground",
+    );
   }
 }

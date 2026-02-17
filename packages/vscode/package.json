@@ -36,6 +36,33 @@
         }
       },
       {
+        "id": "promptshield.criticalThreatBackground",
+        "description": "Background color for CRITICAL threats (e.g. execution exploits).",
+        "defaults": {
+          "dark": "#ff000060",
+          "light": "#ff000060",
+          "highContrast": "#ff0000"
+        }
+      },
+      {
+        "id": "promptshield.mediumThreatBackground",
+        "description": "Background color for MEDIUM threats (e.g. suspicious patterns).",
+        "defaults": {
+          "dark": "#ffa50040",
+          "light": "#ffa50040",
+          "highContrast": "#ffa500"
+        }
+      },
+      {
+        "id": "promptshield.lowThreatBackground",
+        "description": "Background color for LOW threats (e.g. minor issues).",
+        "defaults": {
+          "dark": "#ffff0020",
+          "light": "#ffff0020",
+          "highContrast": "#ffff00"
+        }
+      },
+      {
         "id": "promptshield.ghostTextForeground",
         "description": "Foreground color for ghost text overlays.",
         "defaults": {
@@ -118,6 +145,7 @@
   ],
   "dependencies": {
     "@promptshield/core": "workspace:*",
+    "@promptshield/lsp": "workspace:*",
     "vscode-languageclient": "^9.0.1"
   }
 }

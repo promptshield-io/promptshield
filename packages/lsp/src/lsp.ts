@@ -5,12 +5,14 @@ import {
   DidChangeConfigurationNotification,
   type InitializeParams,
   type InitializeResult,
+  type Position,
   ProposedFeatures,
   TextDocumentSyncKind,
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { getFixAllAction, getThreatFixActions } from "./code-actions";
+import { getHover } from "./hover";
 import { DEFAULT_CONFIG, type LspConfig } from "./types";
 import { validateDocument } from "./validation";
 import { scanWorkspace } from "./workspace-scanning";
@@ -60,6 +62,7 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       codeActionProvider: true,
+      hoverProvider: true,
     },
   };
 
@@ -121,7 +124,23 @@ connection.onCodeAction((params) => {
   const result = scan(text);
   const { threats } = filterThreats(text, result.threats);
 
-  const actions = getThreatFixActions(document, threats);
+  /*
+   * Filter threats to those intersecting the requested range.
+   * This ensures we only provide actions for relevant threats.
+   */
+  const activeThreats = threats.filter((t) => {
+    const start = document.positionAt(t.loc.index);
+    const end = document.positionAt(t.loc.index + t.offendingText.length);
+
+    // Check intersection with params.range
+    // Overlap exists if (StartA <= EndB) AND (EndA >= StartB)
+    return (
+      comparePositions(start, params.range.end) <= 0 &&
+      comparePositions(end, params.range.start) >= 0
+    );
+  });
+
+  const actions = getThreatFixActions(document, activeThreats);
 
   const fixAll = getFixAllAction(document, threats);
   if (fixAll) {
@@ -130,6 +149,26 @@ connection.onCodeAction((params) => {
 
   return actions;
 });
+
+/**
+ * Provide hover information.
+ */
+connection.onHover((params) => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return null;
+  return getHover(document, params.position);
+});
+
+/**
+ * Compare two positions.
+ * Returns < 0 if p1 is before p2, 0 if equal, > 0 if p1 is after p2.
+ */
+function comparePositions(p1: Position, p2: Position): number {
+  if (p1.line !== p2.line) {
+    return p1.line - p2.line;
+  }
+  return p1.character - p2.character;
+}
 
 /**
  * Execute PromptShield workspace commands.

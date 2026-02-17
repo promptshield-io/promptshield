@@ -112,7 +112,7 @@ export const scanSmuggling = (
     if (captured.length > 4096) continue;
 
     const distinctChars = Array.from(new Set(captured.split("")));
-    if (distinctChars.length !== 2) continue;
+    if (distinctChars.length < 2 || distinctChars.length > 3) continue;
 
     const [bit0, bit1] = distinctChars;
 
@@ -169,7 +169,7 @@ export const scanSmuggling = (
 
   while ((match = b64Regex.exec(text)) !== null) {
     const candidate = match[0];
-    if (candidate.length <= 50) continue;
+    if (candidate.length < 24) continue;
 
     const decoded = decodeBase64IfLikely(candidate);
     if (!decoded) continue;

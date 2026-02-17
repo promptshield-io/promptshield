@@ -43,7 +43,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build & Test
-        run: pnpm build && pnpm test
+        run: pnpm build && pnpm test && node --experimental-strip-types ./tooling/scripts/split-lcov.ts
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}

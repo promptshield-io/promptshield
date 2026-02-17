@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: test file */
 import { describe, expect, it } from "vitest";
 import { filterThreats } from "./ignore";
 

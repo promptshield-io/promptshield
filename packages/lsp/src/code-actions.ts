@@ -9,6 +9,24 @@ import {
 import type { TextDocument } from "vscode-languageserver-textdocument";
 
 /**
+ * Create "Fix with AI" code action.
+ */
+export const getAiFixAction = (
+  document: TextDocument,
+  threat: ThreatReport,
+): CodeAction => {
+  return {
+    title: "✨ Fix with AI",
+    kind: CodeActionKind.QuickFix,
+    command: {
+      title: "Fix with AI",
+      command: "promptshield.fixWithAI",
+      arguments: [document.uri, threat],
+    },
+  };
+};
+
+/**
  * Compute a minimal edit between original and updated text.
  */
 const computeMinimalEdit = (
@@ -74,6 +92,60 @@ export const getFixAllAction = (
 };
 
 /**
+ * Map language ID to comment style.
+ */
+const COMMENT_STYLES: Record<string, string> = {
+  javascript: "//",
+  typescript: "//",
+  javascriptreact: "//",
+  typescriptreact: "//",
+  java: "//",
+  c: "//",
+  cpp: "//",
+  csharp: "//",
+  go: "//",
+  rust: "//",
+  python: "#",
+  ruby: "#",
+  shellscript: "#",
+  yaml: "#",
+  dockerfile: "#",
+};
+
+/**
+ * Create "Ignore this line" code action.
+ */
+export const getIgnoreAction = (
+  document: TextDocument,
+  threat: ThreatReport,
+): CodeAction | null => {
+  const commentPrefix = COMMENT_STYLES[document.languageId];
+  if (!commentPrefix) return null; // Don't offer ignore if we don't know how to comment
+
+  const line = threat.loc.line - 1;
+  const lineStart = document.offsetAt({ line, character: 0 });
+
+  // Better: Get indentation from the current line to match
+  const lineText = document.getText({
+    start: { line, character: 0 },
+    end: { line, character: 100 },
+  });
+  const match = lineText.match(/^(\s*)/);
+  const indentation = match ? match[1] : "";
+
+  const edit = TextEdit.insert(
+    document.positionAt(lineStart),
+    `${indentation}${commentPrefix} promptshield-ignore\n`,
+  );
+
+  return {
+    title: "PromptShield: Ignore this line",
+    kind: CodeActionKind.QuickFix,
+    edit: { changes: { [document.uri]: [edit] } },
+  };
+};
+
+/**
  * Create per-threat quick fixes.
  */
 export const getThreatFixActions = (
@@ -83,17 +155,29 @@ export const getThreatFixActions = (
   const original = document.getText();
 
   return threats.flatMap((threat) => {
+    const actions: CodeAction[] = [];
+
+    // 1. Fix Action (Remove/Replace)
     const result = applyFixes(original, [threat]);
     const edit = computeMinimalEdit(document, original, result.text);
 
-    if (!edit) return [];
-
-    return [
-      {
+    if (edit) {
+      actions.push({
         title: `PromptShield: Fix ${threat.category}`,
         kind: CodeActionKind.QuickFix,
         edit: { changes: { [document.uri]: [edit] } },
-      },
-    ];
+      });
+    }
+
+    // 2. Ignore Action
+    const ignoreAction = getIgnoreAction(document, threat);
+    if (ignoreAction) {
+      actions.push(ignoreAction);
+    }
+
+    // 3. AI Fix
+    actions.push(getAiFixAction(document, threat));
+
+    return actions;
   });
 };

@@ -1,5 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { scanHomoglyphs } from "./homoglyph";
+import { scanInjectionPatterns } from "./injection-patterns";
 import { scanInvisibleChars } from "./invisible";
 import { scanNormalization } from "./normalization";
 import { scanSmuggling } from "./smuggling";
@@ -13,6 +14,7 @@ import type {
 } from "./types";
 
 export * from "./homoglyph";
+export * from "./injection-patterns";
 export * from "./invisible";
 export * from "./normalization";
 export * from "./smuggling";
@@ -58,6 +60,7 @@ export const scan = (
   if (!options.disableHomoglyphs) detectors.push(scanHomoglyphs);
   if (!options.disableNormalization) detectors.push(scanNormalization);
   if (!options.disableSmuggling) detectors.push(scanSmuggling);
+  if (!options.disableInjectionPatterns) detectors.push(scanInjectionPatterns);
 
   for (const detector of detectors) {
     const detectorThreats = detector(text, options, context);

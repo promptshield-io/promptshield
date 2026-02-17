@@ -16,13 +16,16 @@ export class DecorationManager {
   constructor() {
     // Shared properties for range decorations
     const baseRangeOptions: vscode.DecorationRenderOptions = {
-      textDecoration: "underline wavy red",
-      overviewRulerColor: "red",
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     };
 
     this.criticalDecorationType = vscode.window.createTextEditorDecorationType({
       ...baseRangeOptions,
+      textDecoration:
+        "underline wavy var(--vscode-promptshield-criticalThreatForeground)",
+      overviewRulerColor: new vscode.ThemeColor(
+        "promptshield.criticalThreatForeground",
+      ),
       backgroundColor: new vscode.ThemeColor(
         "promptshield.criticalThreatBackground",
       ),
@@ -30,6 +33,11 @@ export class DecorationManager {
 
     this.highDecorationType = vscode.window.createTextEditorDecorationType({
       ...baseRangeOptions,
+      textDecoration:
+        "underline wavy var(--vscode-promptshield-highThreatForeground)",
+      overviewRulerColor: new vscode.ThemeColor(
+        "promptshield.highThreatForeground",
+      ),
       backgroundColor: new vscode.ThemeColor(
         "promptshield.highThreatBackground",
       ),
@@ -37,6 +45,11 @@ export class DecorationManager {
 
     this.mediumDecorationType = vscode.window.createTextEditorDecorationType({
       ...baseRangeOptions,
+      textDecoration:
+        "underline wavy var(--vscode-promptshield-mediumThreatForeground)",
+      overviewRulerColor: new vscode.ThemeColor(
+        "promptshield.mediumThreatForeground",
+      ),
       backgroundColor: new vscode.ThemeColor(
         "promptshield.mediumThreatBackground",
       ),
@@ -44,6 +57,11 @@ export class DecorationManager {
 
     this.lowDecorationType = vscode.window.createTextEditorDecorationType({
       ...baseRangeOptions,
+      textDecoration:
+        "underline wavy var(--vscode-promptshield-lowThreatForeground)",
+      overviewRulerColor: new vscode.ThemeColor(
+        "promptshield.lowThreatForeground",
+      ),
       backgroundColor: new vscode.ThemeColor(
         "promptshield.lowThreatBackground",
       ),
@@ -109,7 +127,11 @@ export class DecorationManager {
     );
 
     const threats: ThreatReport[] = promptShieldDiagnostics.map((d) => {
-      // Reconstruct ThreatReport from Diagnostic
+      if (d.data && d.code !== undefined) {
+        return d.data as ThreatReport;
+      }
+
+      // Fallback: Reconstruct ThreatReport from Diagnostic
       const range = d.range;
       const textDoc = vscode.workspace.textDocuments.find(
         (doc) => doc.uri.toString() === uri.toString(),
@@ -175,8 +197,20 @@ export class DecorationManager {
 
         let primaryThreat: ThreatReport = rangeThreats[0];
 
-        // Combine messages
-        const messages = rangeThreats.map((t) => t.message).join("\n\n");
+        // Combine messages into rich hover
+        const messages = rangeThreats
+          .map((t) => {
+            const icon =
+              t.severity === "CRITICAL" || t.severity === "HIGH"
+                ? "$(alert)"
+                : "$(shield)";
+            return `### ${icon} PromptShield Threat Detected\n\n**Category:** ${t.category}\n**Severity:** ${t.severity}\n\n${t.message}\n\n**Offending Text:** \`${t.offendingText}\`${t.decodedPayload ? `\n\n**Decoded Payload:** \`${t.decodedPayload}\`` : ""}`;
+          })
+          .join("\n\n---\n\n");
+
+        const hoverMessage = new vscode.MarkdownString(messages);
+        hoverMessage.isTrusted = true;
+        hoverMessage.supportThemeIcons = true;
 
         for (const t of rangeThreats) {
           if (severityScore[t.severity] > severityScore[maxSeverity]) {
@@ -208,7 +242,7 @@ export class DecorationManager {
 
         const decoration: vscode.DecorationOptions = {
           range: new vscode.Range(start, end),
-          hoverMessage: messages,
+          hoverMessage,
         };
 
         if (isReplaceable) {

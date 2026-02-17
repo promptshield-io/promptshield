@@ -70,6 +70,42 @@
           "light": "#888888",
           "highContrast": "#ffffff"
         }
+      },
+      {
+        "id": "promptshield.criticalThreatForeground",
+        "description": "Foreground color for CRITICAL threat wavy underlines.",
+        "defaults": {
+          "dark": "#e11d48",
+          "light": "#e11d48",
+          "highContrast": "#ff0000"
+        }
+      },
+      {
+        "id": "promptshield.highThreatForeground",
+        "description": "Foreground color for HIGH threat wavy underlines.",
+        "defaults": {
+          "dark": "#f97316",
+          "light": "#f97316",
+          "highContrast": "#ff0000"
+        }
+      },
+      {
+        "id": "promptshield.mediumThreatForeground",
+        "description": "Foreground color for MEDIUM threat wavy underlines.",
+        "defaults": {
+          "dark": "#eab308",
+          "light": "#eab308",
+          "highContrast": "#ffff00"
+        }
+      },
+      {
+        "id": "promptshield.lowThreatForeground",
+        "description": "Foreground color for LOW threat wavy underlines.",
+        "defaults": {
+          "dark": "#3b82f6",
+          "light": "#3b82f6",
+          "highContrast": "#0000ff"
+        }
       }
     ],
     "configuration": {

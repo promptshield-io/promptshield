@@ -167,6 +167,9 @@ export interface ScanOptions {
 
   /** Disable normalization detection */
   disableNormalization?: boolean;
+
+  /** Disable injection-pattern detection */
+  disableInjectionPatterns?: boolean;
 }
 
 /**

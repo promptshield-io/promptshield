@@ -1,4 +1,5 @@
-import * as path from "path";
+import * as path from "node:path";
+import type { ThreatReport } from "@promptshield/core";
 import * as vscode from "vscode";
 import {
   LanguageClient,
@@ -6,12 +7,7 @@ import {
   type ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import {
-  handleFixWithAI,
-  PromptShieldCodeActionProvider,
-} from "./code-action-provider";
 import { DecorationManager } from "./decoration-manager";
-import { PromptShieldHoverProvider } from "./hover-provider";
 import { PromptShieldStatusBar } from "./status-bar";
 
 let client: LanguageClient;
@@ -61,24 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
   const decorationManager = new DecorationManager();
   decorationManager.activate(context);
 
-  const hoverProvider = new PromptShieldHoverProvider(decorationManager);
-
-  // CodeActionProvider might need update or be removed if LSP handles it
-  // But requirement says "Code Action Provider... Keep existing provider... It should read threats from DecorationManager."
-  // And "Do not move AI fix logic to LSP."
-  const codeActionProvider = new PromptShieldCodeActionProvider(
-    decorationManager,
-  );
-
   new PromptShieldStatusBar(context, decorationManager); // Init UI
 
   context.subscriptions.push(
-    vscode.languages.registerHoverProvider({ scheme: "file" }, hoverProvider),
-    vscode.languages.registerCodeActionsProvider(
-      { scheme: "file" },
-      codeActionProvider,
-    ),
-
     vscode.commands.registerCommand("promptshield.scanWorkspace", () => {
       // Delegate to LSP command
       vscode.commands.executeCommand("promptshield.scanWorkspace");
@@ -133,11 +114,70 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.registerCommand(
       "promptshield.fixWithAI",
-      async (document: vscode.TextDocument, threat: any) => {
+      async (uri: string, threat: ThreatReport) => {
+        const docUri = vscode.Uri.parse(uri);
+        const document = await vscode.workspace.openTextDocument(docUri);
         await handleFixWithAI(document, threat);
       },
     ),
   );
+}
+
+async function handleFixWithAI(
+  document: vscode.TextDocument,
+  threat: ThreatReport,
+) {
+  try {
+    const models = await vscode.lm.selectChatModels({ family: "gpt-4" }); // Prefer GPT-4
+    let model = models[0];
+    if (!model) {
+      const allModels = await vscode.lm.selectChatModels({});
+      model = allModels[0];
+    }
+
+    if (!model) {
+      vscode.window.showErrorMessage(
+        "No language models available for PromptShield AI Fix.",
+      );
+      return;
+    }
+
+    const start = document.positionAt(threat.loc.index);
+    const end = document.positionAt(
+      threat.loc.index + threat.offendingText.length,
+    );
+    const range = new vscode.Range(start, end);
+
+    // Context: Get line or surrounding context
+    const line = document.lineAt(start.line).text;
+
+    const messages = [
+      vscode.LanguageModelChatMessage.User(
+        `Fix the following security threat in the code snippet below. 
+                Threat: ${threat.message}
+                Offending Text: "${threat.offendingText}"
+                Context: "${line}"
+                
+                Return ONLY the corrected text replacement for the offending text, nothing else.`,
+      ),
+    ];
+
+    const cancellationToken = new vscode.CancellationTokenSource().token;
+    const response = await model.sendRequest(messages, {}, cancellationToken);
+
+    let fixedText = "";
+    for await (const fragment of response.text) {
+      fixedText += fragment;
+    }
+
+    if (fixedText) {
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, range, fixedText.trim()); // Trim to be safe
+      await vscode.workspace.applyEdit(edit);
+    }
+  } catch (e) {
+    vscode.window.showErrorMessage(`PromptShield AI Fix failed: ${e}`);
+  }
 }
 
 export function deactivate(): Thenable<void> | undefined {

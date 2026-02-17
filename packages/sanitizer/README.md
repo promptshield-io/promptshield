@@ -1,5 +1,7 @@
 # @promptshield/sanitizer <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
+![PromptShield Banner](./banner.jpg)
+
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
     <img alt="CI" src="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml/badge.svg" />
@@ -19,14 +21,16 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/sanitizer" />
 </p>
 
-> @promptshield/sanitizer: 
+> **Deterministic sanitizer** for prompt hygiene. Applies safe, idempotent text transformations to remove invisible threats and normalization artifacts.
 
 ---
 
-## ✨ Why @promptshield/sanitizer?
+## ✨ Features
 
-- 
-- 
+- **Safe Defaults**: Removes only objectively dangerous characters (BOM, ZWSP, control chars).
+- **Idempotent**: Running it twice produces the same result.
+- **Strict Mode**: Optional NFKC normalization for aggressive cleaning.
+- **Zero-Dependency**: Lightweight and fast.
 
 ---
 
@@ -36,18 +40,33 @@
 $ pnpm add @promptshield/sanitizer
 ```
 
-**_or_**
+---
 
-```bash
-$ npm install @promptshield/sanitizer
+## 🚀 Usage
+
+```ts
+import { sanitize, sanitizeStrict } from "@promptshield/sanitizer";
+
+const dirty = "Hello\u200BWorld"; // Contains Zero-Width Space
+
+// Safe sanitize (removes invisible chars)
+const clean = sanitize(dirty); 
+console.log(clean); // "HelloWorld"
+
+// Strict sanitize (also applies NFKC normalization)
+const strict = sanitizeStrict("ℍ𝕖𝕝𝕝𝕠"); 
+console.log(strict); // "Hello"
 ```
 
-**_or_**
+### What gets removed?
 
-```bash
-$ yarn add @promptshield/sanitizer
-```
+1.  **Invisible Characters**: `\u200B` (ZWSP), `\u200C` (ZWNJ), `\u200D` (ZWJ), etc.
+2.  **Byte Order Marks**: `\uFEFF`.
+3.  **Variation Selectors**: `\uFE00`-`\uFE0F` (often used to break tokenizers).
+4.  **Markdown Comments**: `<!-- hidden payload -->`.
+5.  **Empty Links**: `[](javascript:...)`.
 
+---
 
 ## License
 

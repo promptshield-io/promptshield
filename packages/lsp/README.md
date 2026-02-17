@@ -1,5 +1,7 @@
 # @promptshield/lsp <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
+![PromptShield Banner](./banner.jpg)
+
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
     <img alt="CI" src="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml/badge.svg" />
@@ -19,14 +21,20 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/lsp" />
 </p>
 
-> @promptshield/lsp: 
+> **The Brain of PromptShield.** A fully compliant Language Server Protocol (LSP) implementation that provides threat detection, diagnostics, and remediation for any editor.
 
 ---
 
-## ✨ Why @promptshield/lsp?
+## ✨ Features
 
-- 
-- 
+- **Universal Compatibility**: Works with VS Code, Neovim, Sublime Text, IntelliJ, and more.
+- **Real-Time Analysis**: Debounced scanning of documents as you type.
+- **Code Actions**:
+    - `Quick Fix`: Remove invisible characters or fix BIDI overrides.
+    - `Fix All`: Apply all safe fixes in the document.
+- **Diagnostics**: Publishes standard LSP diagnostics for detected threats.
+- **Hover Support**: detailed explanation of threats when hovering over underlined text.
+- **Workspace Scanning**: Capability to scan entire project trees.
 
 ---
 
@@ -36,18 +44,37 @@
 $ pnpm add @promptshield/lsp
 ```
 
-**_or_**
+---
 
-```bash
-$ npm install @promptshield/lsp
+## 🏗️ internal Architecture
+
+The server is built on `vscode-languageserver` and orchestrates:
+
+1.  **Document Lifecycle**: Tracks open files and changes via `TextDocuments`.
+2.  **Validation Loop**:
+    - Debounces input (default 300ms).
+    - Calls `@promptshield/core` to scan text.
+    - Filters false positives via `@promptshield/ignore`.
+    - Publishes `Diagnostic[]` back to the client.
+3.  **Code Action Provider**:
+    - Generates `WorkspaceEdit` objects to surgically repair text.
+
+---
+
+## 🔌 Integration
+
+To use this with a custom LSP client:
+
+```ts
+import { startLspServer } from "@promptshield/lsp";
+
+// Start scanning on stdio (default)
+startLspServer();
 ```
 
-**_or_**
+Or connect via IPC/Socket depending on your host environment.
 
-```bash
-$ yarn add @promptshield/lsp
-```
-
+---
 
 ## License
 

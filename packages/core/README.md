@@ -1,5 +1,7 @@
 # @promptshield/core <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
+![PromptShield Banner](./banner.jpg)
+
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
     <img alt="CI" src="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml/badge.svg" />
@@ -134,7 +136,12 @@ import { type ScanOptions, type ScanContext, type ScanResult } from "@promptshie
 const result: ScanResult = scan(text, {
   stopOnFirstThreat: true,       // Ideal for fast-fail API gateways
   minSeverity: "HIGH",           // Filter out 'LOW' or 'MEDIUM' noise
-  disableHomoglyphs: false       // Toggle specific detectors
+  disableHomoglyphs: false,      // Toggle specific detectors
+  disableInvisible: false,
+  disableSmuggling: false,       // Detect hidden content
+  disableTrojan: false,          // Detect BIDI attacks
+  disableNormalization: false,   // Detect NFKC anomalies
+  disableInjectionPatterns: false // Detect common injection patterns
 }, context);
 
 ```

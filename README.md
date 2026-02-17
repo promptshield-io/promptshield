@@ -1,41 +1,78 @@
-## UI: [ZWSP] vs. Encoded Logic
+# PromptShield <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-**The Hybrid Approach:**
+<p className="flex gap-2">
+  <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
+    <img alt="CI" src="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml/badge.svg" />
+  </a>
+  <a href="https://codecov.io/gh/promptshield-io/promptshield" rel="noopener noreferrer">
+    <img alt="codecov" src="https://codecov.io/gh/promptshield-io/promptshield/graph/badge.svg" />
+  </a>
+  <img alt="license" src="https://img.shields.io/github/license/promptshield-io/promptshield" />
+</p>
 
-* **For pure invisible chars (`ZWSP`, `NBSP`):** Use inline decorators like `[ZWSP]` or a subtle `·`.
-* **For logic-altering chars (`BIDI`, `Homoglyphs`):** Use a "Split-View Hover" or "Ghost Overlay." If the code says `print("Safe")` but the BIDI override makes the AI see `print("Malicious")`, show the **True Prompt** in a side-by-side ghost window.
-* **The "X-Ray" Toggle:** A global command to toggle all invisible characters into their escaped hex forms (e.g., `\u200B`) for editing.
+![PromptShield Banner](./root_banner.jpg)
 
+> **The "Clean Room" for AI inputs.** A comprehensive security ecosystem to detect, visualize, and sanitize invisible threats in LLM prompts.
 
-## 3. PRD: Stage 1 — The "Skeleton" & Core Engine
+---
 
-### Project Vision
+## 🛑 The Problem
 
-To create the industry-standard "Clean Room" for AI prompts, ensuring what the human sees is exactly what the LLM receives.
+LLM inputs are code. If you can't see the text, you can't trust the execution. Attackers use:
+*   **Invisible Characters**: Zero-width spaces (`\u200B`) to smuggle instructions past keyword filters.
+*   **Trojan Source**: BIDI overrides to make code look like it does one thing while doing another.
+*   **Homoglyphs**: Cyrillic `а` looking like Latin `a` to spoof trusted domains or commands.
 
-### Architecture Breakdown (The Monorepo)
+PromptShield provides the tooling to detect these threats at every stage of your development lifecycle.
 
-| Component | Responsibility | Tech Stack |
-| --- | --- | --- |
-| **`@ghostbuster/core`** | Functional AST/Regex logic for detection. | TypeScript (Zero-deps) |
-| **`@promptshield/vscode`** | UI/UX, Decorations, Quick-fixes, Status Bar. | VS Code API |
-| **`@ghostbuster/cli`** | CI/CD gatekeeper; exits with code 1 on "High" threats. | Oclif / Commander |
-| **`@promptshield/web`** | Education, "Visualizer" tool, and API demo. | Next.js + Tailwind |
+---
 
-### Implementation Phases
+## 📦 Ecosystem
 
-#### **Stage 1: The Detection Engine (Alpha)**
+| Package | Status | Description |
+| :--- | :--- | :--- |
+| [**@promptshield/core**](./packages/core) | [![npm](https://img.shields.io/npm/v/@promptshield/core)](https://www.npmjs.com/package/@promptshield/core) | **The Engine.** Zero-dependency, high-performance threat detection logic. |
+| [**@promptshield/cli**](./packages/cli) | [![npm](https://img.shields.io/npm/v/@promptshield/cli)](https://www.npmjs.com/package/@promptshield/cli) | **The Gatekeeper.** CI/CD tool to block malicious prompts from entering your codebase. |
+| [**@promptshield/vscode**](./packages/vscode) | [![npm](https://img.shields.io/npm/v/@promptshield/vscode)](https://www.npmjs.com/package/@promptshield/vscode) | **The Lens.** VS Code extension for real-time threat visualization (X-Ray Mode). |
+| [**@promptshield/lsp**](./packages/lsp) | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp) | **The Brain.** Language Server Protocol implementation for universal editor support. |
+| [**@promptshield/sanitizer**](./packages/sanitizer) | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer) | **The Cure.** Deterministic logic to strip invisible threats safely. |
+| [**@promptshield/ignore**](./packages/ignore) | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore) | **The Filter.** Standardized syntax for suppressing false positives. |
 
-* **Goal:** 100% accuracy in detecting "The Big 4": Invisible spaces, BIDI overrides, Homoglyphs, and Hidden Markdown.
-* **Deliverable:** A `@ghostbuster/core` library that passes a comprehensive Vitest suite.
+---
 
-#### **Stage 2: The IDE Experience (Beta)**
+## ⚡ Quick Start
 
-* **Goal:** Zero-friction highlighting in VS Code.
-* **Deliverable:** Extension that highlights threats and provides "Sanitize" code actions.
+### For Developers (VS Code)
+1.  Install the **[PromptShield Extension](https://marketplace.visualstudio.com/items?itemName=mayank1513.promptshield)**.
+2.  Open any file. Invisible characters and threats are instantly highlighted.
 
-#### **Stage 3: The Ecosystem (Production)**
+### For CI/CD (CLI)
+```bash
+# Scan your prompts directory and fail if threats are found
+npx promptshield-cli scan "prompts/**/*.txt" --check
+```
 
-* **Goal:** Agentic support and CI/CD integration.
-* **Deliverable:** MCP Server for Agentic IDEs (Cursor/Windsurf) and the `.promptignore` logic.
+### For Node.js Apps
+```ts
+import { scan } from "@promptshield/core";
 
+const result = scan(userInput);
+if (!result.isClean) {
+  throw new Error("Security threat detected!");
+}
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome security researchers and engineers! This monorepo is managed with [Turbo](https://turbo.build/) and [PNPM](https://pnpm.io/).
+
+1.  Clone the repo
+2.  `pnpm install`
+3.  `pnpm build`
+4.  `pnpm test`
+
+---
+
+<p align="center">with 💖 by <a href="https://mayankchaudhari.com" target="_blank">Mayank Kumar Chaudhari</a></p>

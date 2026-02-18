@@ -50,6 +50,10 @@ for (const pkgName_ of packageDirs) {
   const major = pkgJson.version.split(".")[0];
   const outDir = path.join(DOCS_ROOT, pkgName, `v${major}`, "api");
 
+  if (pkgName_ === "core") {
+    await fs.cp(path.join(pkgPath, "docs"), outDir);
+  }
+
   execSync(
     [
       "pnpm typedoc",

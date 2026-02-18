@@ -11,6 +11,7 @@ describe("scanTrojanSource", () => {
     const threats = scanTrojanSource(attack);
     expect(threats.length).toBeGreaterThan(0);
     expect(threats[0].category).toBe("TROJAN_SOURCE");
+    expect(threats[0].ruleId).toBe("PST002");
     expect(threats[0].severity).toBe("CRITICAL");
   });
 
@@ -20,6 +21,7 @@ describe("scanTrojanSource", () => {
     const threats = scanTrojanSource(safe);
     expect(threats).toHaveLength(1);
     expect(threats[0].readableLabel).toBe("[BIDI_OVERRIDE]");
+    expect(threats[0].ruleId).toBe("PST001");
   });
 
   it("should detect multiple threats in multi-line text", () => {

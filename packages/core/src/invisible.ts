@@ -22,12 +22,12 @@ import { getLineOffsets, getLocForIndex } from "./utils";
  * by the Trojan Source detector.
  */
 const CHAR_LABELS: Readonly<Record<string, string>> = {
-  "\u200B": "[ZWSP]", // Zero Width Space
-  "\u200C": "[ZWNJ]", // Zero Width Non-Joiner
-  "\u200D": "[ZWJ]", // Zero Width Joiner
-  "\uFEFF": "[BOM]", // Byte Order Mark
-  "\u3164": "[HF]", // Hangul Filler
-  "\uFFA0": "[HHF]", // Halfwidth Hangul Filler
+  "\u200B": "ZWSP", // Zero Width Space
+  "\u200C": "ZWNJ", // Zero Width Non-Joiner
+  "\u200D": "ZWJ", // Zero Width Joiner
+  "\uFEFF": "BOM", // Byte Order Mark
+  "\u3164": "HF", // Hangul Filler
+  "\uFFA0": "HHF", // Halfwidth Hangul Filler
 };
 
 /**
@@ -96,7 +96,7 @@ export const scanInvisibleChars = (
 
     const labels = [...offendingText].map((c) => {
       const cp = c.codePointAt(0);
-      return CHAR_LABELS[c] || `[U+${cp?.toString(16).toUpperCase()}]`;
+      return CHAR_LABELS[c] || `U+${cp?.toString(16).toUpperCase()}`;
     });
 
     const loc = getLocForIndex(spanStart, context);
@@ -196,7 +196,7 @@ export const scanInvisibleChars = (
             "https://promptshield.js.org/docs/detectors/invisible-chars#PSU002",
           loc: getLocForIndex(index, context),
           offendingText: char,
-          readableLabel: CHAR_LABELS[char] || "[INVISIBLE]",
+          readableLabel: `[${CHAR_LABELS[char]}]` || "[INVISIBLE]",
           suggestion: "Remove invisible characters embedded within words.",
         });
 

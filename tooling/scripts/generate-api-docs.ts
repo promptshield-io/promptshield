@@ -68,7 +68,9 @@ for (const pkgName_ of packageDirs) {
 
   // Copy reference docs
   if (pkgName_ === "core") {
-    await fs.cp(path.join(pkgPath, "docs"), outDir, { recursive: true });
+    await fs.cp(path.join(pkgPath, "docs"), path.resolve(outDir, ".."), {
+      recursive: true,
+    });
   }
 
   const rootMetaFilePath = path.join(DOCS_ROOT, pkgName, "meta.json");

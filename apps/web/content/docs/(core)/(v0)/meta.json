@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "README",
+    "threat-model",
+    "scanning-pipeline",
+    "ignore-directives",
+    "detectors",
+    "api"
+  ]
+}

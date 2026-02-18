@@ -16,10 +16,12 @@ const packageDirs = (await fs.readdir(PACKAGES_DIR, { withFileTypes: true }))
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
 
-for (const pkgName of packageDirs) {
-  const pkgPath = path.join(PACKAGES_DIR, pkgName);
+for (const pkgName_ of packageDirs) {
+  const pkgPath = path.join(PACKAGES_DIR, pkgName_);
   const pkgJsonPath = path.join(pkgPath, "package.json");
   const entry = path.join(pkgPath, "src/index.ts").replaceAll("\\", "/");
+
+  const pkgName = pkgName_ === "core" ? "(core)" : pkgName_;
 
   try {
     await fs.access(pkgJsonPath);
@@ -38,7 +40,7 @@ for (const pkgName of packageDirs) {
       }
     }
     execSync(
-      `git add ${DOCS_ROOT} && git commit -m 'chore(docs): remove brackets for proper git diff'`,
+      `git add ${DOCS_ROOT} && git commit -m "chore(docs): remove brackets for proper git diff"`,
     );
   } catch {
     // ignore
@@ -59,13 +61,13 @@ for (const pkgName of packageDirs) {
     { stdio: "inherit" },
   );
 
-  fs.copyFile(
+  await fs.copyFile(
     path.join(pkgPath, "README.md"),
     path.join(outDir, "..", "README.mdx"),
   );
 
   // copy banner image
-  fs.copyFile(
+  await fs.copyFile(
     path.join(pkgPath, "banner.jpg"),
     path.join(outDir, "..", "banner.jpg"),
   );
@@ -74,7 +76,7 @@ for (const pkgName of packageDirs) {
   try {
     await fs.access(rootMetaFilePath);
   } catch {
-    fs.writeFile(
+    await fs.writeFile(
       rootMetaFilePath,
       JSON.stringify(
         {

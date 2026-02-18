@@ -1,4 +1,4 @@
-import type { ThreatReport } from "@promptshield/core";
+import type { Severity, ThreatReport } from "@promptshield/core";
 
 interface IgnoreRange {
   start: number;
@@ -12,8 +12,21 @@ interface IgnoreParseResult {
   ranges: IgnoreRange[];
 }
 
+export interface FilterThreatsResult {
+  threats: ThreatReport[];
+  ignoredThreats: ThreatReport[];
+  unusedIgnores: Omit<IgnoreRange, "used">[];
+  ignoredBySeverity: Record<Severity, number>;
+}
+
 /**
- * INTERNAL — parses ignore directives from text.
+ * INTERNAL
+ * Parses promptshield-ignore directives from text.
+ *
+ * Supported directives:
+ * - promptshield-ignore all     (must appear near top of file)
+ * - promptshield-ignore next N
+ * - promptshield-ignore         (line or next-line)
  */
 const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
   const lines = text.split("\n");
@@ -36,30 +49,24 @@ const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
     const nextMatch = line.match(/promptshield-ignore\s+next\s*(\d+)?/);
     if (nextMatch) {
       const count = Math.max(nextMatch[1] ? parseInt(nextMatch[1], 10) : 1, 1);
+
       ranges.push({
         start: lineNo + 1,
         end: lineNo + count,
         definedAt: lineNo,
       });
+
       continue;
     }
 
     const commentOnly =
       line.startsWith("#") || line.startsWith("//") || line.startsWith("/*");
 
-    if (commentOnly) {
-      ranges.push({
-        start: lineNo + 1,
-        end: lineNo + 1,
-        definedAt: lineNo,
-      });
-    } else {
-      ranges.push({
-        start: lineNo,
-        end: lineNo,
-        definedAt: lineNo,
-      });
-    }
+    ranges.push({
+      start: commentOnly ? lineNo + 1 : lineNo,
+      end: commentOnly ? lineNo + 1 : lineNo,
+      definedAt: lineNo,
+    });
   }
 
   ranges.sort((a, b) => a.start - b.start);
@@ -69,39 +76,48 @@ const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
 /**
  * Filters threats using PromptShield ignore directives.
  *
- * Returns:
- * - filtered threats
- * - unused ignore ranges (for IDE warnings)
+ * Additionally tracks ignored threats for reporting.
  */
 export const filterThreats = (
   text: string,
   threats: ThreatReport[],
-): {
-  threats: ThreatReport[];
-  unusedIgnores: Omit<IgnoreRange, "used">[];
-} => {
+): FilterThreatsResult => {
   const ignore = parseIgnoreDirectives(text);
 
+  const ignoredBySeverity: Record<Severity, number> = {
+    CRITICAL: 0,
+    HIGH: 0,
+    MEDIUM: 0,
+    LOW: 0,
+  };
+
   if (ignore.ignoreFile) {
+    threats.forEach((t) => {
+      ignoredBySeverity[t.severity]++;
+    });
+
     return {
       threats: [],
+      ignoredThreats: threats,
       unusedIgnores: ignore.ranges.map(({ used, ...r }) => r),
+      ignoredBySeverity,
     };
   }
 
   if (ignore.ranges.length === 0 || threats.length === 0) {
     return {
       threats,
+      ignoredThreats: [],
       unusedIgnores: ignore.ranges.map(({ used, ...r }) => r),
+      ignoredBySeverity,
     };
   }
 
-  // Step 1: sort threats by line
   const sortedThreats = [...threats].sort((a, b) => a.loc.line - b.loc.line);
-
   const ranges = ignore.ranges;
 
   const filtered: ThreatReport[] = [];
+  const ignoredThreats: ThreatReport[] = [];
 
   let t = 0;
   let r = 0;
@@ -119,6 +135,8 @@ export const filterThreats = (
 
       if (line >= range.start && line <= range.end) {
         range.used = true;
+        ignoredThreats.push(threat);
+        ignoredBySeverity[threat.severity]++;
         continue;
       }
     }
@@ -132,6 +150,8 @@ export const filterThreats = (
 
   return {
     threats: filtered,
+    ignoredThreats,
     unusedIgnores,
+    ignoredBySeverity,
   };
 };

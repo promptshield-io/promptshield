@@ -52,6 +52,8 @@ describe("runPromptShield", () => {
     mockFilterThreats.mockImplementation((_: any, threats: any) => ({
       threats,
       unusedIgnores: [],
+      ignoredThreats: [],
+      ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
     }));
   });
 
@@ -100,6 +102,8 @@ describe("runPromptShield", () => {
       mockFilterThreats.mockReturnValue({
         threats: [],
         unusedIgnores: [{ definedAt: 10 }],
+        ignoredThreats: [],
+        ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
       });
 
       await runPromptShield(OPTIONS);
@@ -119,7 +123,12 @@ describe("runPromptShield", () => {
         },
       ];
       mockScan.mockReturnValue({ threats });
-      mockFilterThreats.mockReturnValue({ threats, unusedIgnores: [] });
+      mockFilterThreats.mockReturnValue({
+        threats,
+        unusedIgnores: [],
+        ignoredThreats: [],
+        ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
+      });
 
       await runPromptShield({ ...OPTIONS, check: true });
 
@@ -173,6 +182,8 @@ describe("runPromptShield", () => {
       mockFilterThreats.mockReturnValue({
         threats: [{ category: "INVISIBLE" }],
         unusedIgnores: [],
+        ignoredThreats: [],
+        ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
       });
       mockApplyFixes.mockReturnValue({
         text: "fixed",
@@ -191,6 +202,8 @@ describe("runPromptShield", () => {
       mockFilterThreats.mockReturnValue({
         threats: [{ category: "TROJAN" }],
         unusedIgnores: [],
+        ignoredThreats: [],
+        ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
       });
       mockApplyFixes.mockReturnValue({
         text: "original",

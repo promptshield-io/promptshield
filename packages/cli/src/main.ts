@@ -1,39 +1,79 @@
 /**
  * PromptShield CLI runtime.
  *
- * This module orchestrates scanning, ignore filtering, fixing,
- * and sanitization across files provided by the CLI.
+ * Orchestrates file processing for the PromptShield CLI.
+ * This module coordinates scanning, ignore filtering, fixing,
+ * sanitization, logging, and CI check behavior.
  *
- * Responsibilities:
- * - file IO
- * - command routing
- * - logging
+ * Responsibilities
+ * ----------------
+ * - File IO
+ * - Command routing
+ * - Logging + reporting
  * - CI fast-fail mode
  *
- * Non-responsibilities:
- * - detection logic (@promptshield/core)
- * - ignore parsing (@promptshield/ignore)
- * - text rewriting (@promptshield/sanitizer)
+ * Non-responsibilities
+ * --------------------
+ * - Detection logic (@promptshield/core)
+ * - Ignore parsing (@promptshield/ignore)
+ * - Text rewriting (@promptshield/sanitizer)
  */
 
 import { readFile, writeFile } from "node:fs/promises";
 import { type Severity, scan } from "@promptshield/core";
-import { filterThreats } from "@promptshield/ignore";
+import { type FilterThreatsResult, filterThreats } from "@promptshield/ignore";
 import { applyFixes, sanitize, sanitizeStrict } from "@promptshield/sanitizer";
 import { createLogger, deepMerge, type LogLevel } from "@turbo-forge/cli-kit";
 
 /**
- * CLI configuration options.
+ * Options accepted by the PromptShield CLI runtime.
  */
 export interface PromptshieldCliOptions {
+  /**
+   * Logging verbosity level.
+   */
   logLevel?: LogLevel;
+
+  /**
+   * CLI command to execute.
+   */
   command?: "scan" | "fix" | "sanitize";
+
+  /**
+   * Minimum severity threshold to report.
+   */
   minSeverity?: Severity;
+
+  /**
+   * Files to process.
+   */
   files?: string[];
+
+  /**
+   * Emit JSON output instead of logs.
+   */
   json?: boolean;
+
+  /**
+   * Enable strict sanitization mode.
+   */
   strict?: boolean;
+
+  /**
+   * Persist changes to disk.
+   */
   write?: boolean;
+
+  /**
+   * CI mode — fail on first detected threat.
+   */
   check?: boolean;
+
+  /**
+   * Disable ignore directives.
+   * Forces all rules to be evaluated.
+   */
+  noIgnore?: boolean;
 }
 
 /**
@@ -48,6 +88,7 @@ export const DEFAULT_CONFIG: Required<PromptshieldCliOptions> = {
   strict: false,
   write: false,
   check: false,
+  noIgnore: process.env["CI"] === "true" || process.env["CI"] === "1",
 };
 
 /**
@@ -61,9 +102,10 @@ const SEVERITY_TO_LOG_LEVEL: Record<Severity, LogLevel> = {
 };
 
 /**
- * Executes PromptShield CLI workflow.
+ * Executes the PromptShield CLI workflow.
  *
  * Processing flow:
+ * ---------------
  *
  * sanitize:
  *   file → sanitize → write/preview
@@ -75,8 +117,7 @@ const SEVERITY_TO_LOG_LEVEL: Record<Severity, LogLevel> = {
  *   file → scan → filter ignores → applyFixes → write/preview
  *
  * check mode:
- *   stop scanning immediately after first detected threat
- *   and exit with non-zero status.
+ *   scanning stops immediately after the first detected threat.
  */
 export const runPromptShield = async (
   options: PromptshieldCliOptions,
@@ -96,9 +137,9 @@ export const runPromptShield = async (
   for (const file of config.files) {
     const content = await readFile(file, "utf-8");
 
-    /* ----------------------------- SANITIZE ----------------------------- */
-
     if (config.command === "sanitize") {
+      /* ----------------------------- SANITIZE ----------------------------- */
+
       const sanitized = config.strict
         ? sanitizeStrict(content)
         : sanitize(content);
@@ -120,10 +161,20 @@ export const runPromptShield = async (
       stopOnFirstThreat: config.check,
     });
 
-    const { threats: filtered, unusedIgnores } = filterThreats(
-      content,
-      scanResult.threats,
-    );
+    const filteredResult: FilterThreatsResult = config.noIgnore
+      ? {
+          threats: scanResult.threats,
+          unusedIgnores: [],
+          ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
+          ignoredThreats: [],
+        }
+      : filterThreats(content, scanResult.threats);
+
+    const {
+      threats: filtered,
+      unusedIgnores,
+      ignoredBySeverity,
+    } = filteredResult;
 
     if (config.check && filtered.length > 0) {
       logger.error(`Threat detected in ${file}`);
@@ -133,14 +184,13 @@ export const runPromptShield = async (
 
     if (config.command === "scan") {
       if (config.json) {
-        // Use console.log so JSON output can be piped safely
         console.log(JSON.stringify({ file, threats: filtered }));
       } else {
         logger.info(`${file}: ${filtered.length} threat(s)`);
 
         filtered.forEach((threat) => {
           logger[SEVERITY_TO_LOG_LEVEL[threat.severity]](
-            `${threat.loc.line}:${threat.loc.column} ${threat.category} — ${threat.message}`,
+            `${threat.loc.line}:${threat.loc.column} ${threat.ruleId} — ${threat.message}\nRefer: ${threat.referenceUrl}\n\n`,
           );
         });
 
@@ -152,9 +202,9 @@ export const runPromptShield = async (
       continue;
     }
 
-    /* -------------------------------- FIX ------------------------------- */
-
     if (config.command === "fix") {
+      /* -------------------------------- FIX ------------------------------- */
+
       const result = applyFixes(content, filtered);
 
       if (config.write) {
@@ -167,6 +217,16 @@ export const runPromptShield = async (
       if (result.skipped.length > 0) {
         logger.warn(`${file}: skipped ${result.skipped.length} threat(s)`);
       }
+    }
+
+    const parts = Object.entries(ignoredBySeverity)
+      .filter(([, count]) => count > 0)
+      .map(([severity, count]) => `${count} ${severity.toLowerCase()}`);
+
+    if (parts.length > 0) {
+      logger.warn(
+        `Skipped ${parts.join(", ")} threat(s) via promptshield-ignore`,
+      );
     }
   }
 };

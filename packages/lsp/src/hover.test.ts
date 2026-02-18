@@ -53,7 +53,7 @@ describe("LSP Hover", () => {
     const hover = getHover(document, { line: 0, character: 1 });
     expect(hover).not.toBeNull();
     const value = (hover?.contents as any).value;
-    expect(value).toContain("$(alert)");
+    expect(value).toContain("![HIGH](data:image/svg+xml;base64,");
     expect(value).toContain("HIGH");
   });
 
@@ -79,7 +79,7 @@ describe("LSP Hover", () => {
     const hover = getHover(document, { line: 0, character: 1 });
     expect(hover).not.toBeNull();
     const value = (hover?.contents as any).value;
-    expect(value).toContain("$(shield)");
+    expect(value).toContain("![LOW](data:image/svg+xml;base64,");
     expect(value).toContain("LOW");
   });
 });

@@ -1,6 +1,6 @@
 # @promptshield/lsp <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](./banner.jpg)
+![PromptShield Banner](../../banner.jpg)
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -30,8 +30,8 @@
 - **Universal Compatibility**: Works with VS Code, Neovim, Sublime Text, IntelliJ, and more.
 - **Real-Time Analysis**: Debounced scanning of documents as you type.
 - **Code Actions**:
-    - `Quick Fix`: Remove invisible characters or fix BIDI overrides.
-    - `Fix All`: Apply all safe fixes in the document.
+  - `Quick Fix`: Remove invisible characters or fix BIDI overrides.
+  - `Fix All`: Apply all safe fixes in the document.
 - **Diagnostics**: Publishes standard LSP diagnostics for detected threats.
 - **Hover Support**: detailed explanation of threats when hovering over underlined text.
 - **Workspace Scanning**: Capability to scan entire project trees.

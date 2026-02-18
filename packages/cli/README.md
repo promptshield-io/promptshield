@@ -1,6 +1,6 @@
 # @promptshield/cli <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](./banner.jpg)
+![PromptShield Banner](../../banner.jpg)
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -65,18 +65,19 @@ $ promptshield scan "prompts/**/*.txt" "src/**/*.ts"
 
 ### Options
 
-| Option | Description |
-| :--- | :--- |
-| `--check` | Fail (exit code 1) on the first detected threat. Ideal for CI. |
-| `--json` | Output results in JSON format. |
-| `--strict` | Enable stricter sanitization rules. |
-| `--write` | Write fixes to disk (used with `fix` or `sanitize`). |
-| `--config <file>` | Path to a specific config file. |
-| `--init` | Generate a default configuration file. |
+| Option            | Description                                                    |
+| :---------------- | :------------------------------------------------------------- |
+| `--check`         | Fail (exit code 1) on the first detected threat. Ideal for CI. |
+| `--json`          | Output results in JSON format.                                 |
+| `--strict`        | Enable stricter sanitization rules.                            |
+| `--write`         | Write fixes to disk (used with `fix` or `sanitize`).           |
+| `--config <file>` | Path to a specific config file.                                |
+| `--init`          | Generate a default configuration file.                         |
 
 ### Commands
 
 #### `scan`
+
 Analyzes files for threats without modifying them.
 
 ```bash
@@ -84,6 +85,7 @@ $ promptshield scan --json > report.json
 ```
 
 #### `fix`
+
 Applies safe automatic fixes to files.
 
 ```bash
@@ -91,6 +93,7 @@ $ promptshield fix --write
 ```
 
 #### `sanitize`
+
 Aggressively cleans text content (may be destructive for some binary/encoded data).
 
 ```bash

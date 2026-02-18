@@ -2,6 +2,7 @@ import { scan } from "@promptshield/core";
 import { filterThreats } from "@promptshield/ignore";
 import { type Hover, MarkupKind, type Position } from "vscode-languageserver";
 import type { TextDocument } from "vscode-languageserver-textdocument";
+import { getIconMarkdown, ICONS } from "./icons";
 
 /**
  * Provide hover information for threats at the given position.
@@ -37,12 +38,14 @@ export const getHover = (
   const contents: string[] = [];
 
   for (const t of activeThreats) {
-    const icon =
-      t.severity === "CRITICAL" || t.severity === "HIGH"
-        ? "$(alert)"
-        : "$(shield)";
-    let md = `### ${icon} PromptShield: ${t.category}\n\n`;
-    md += `**Severity:** ${t.severity}\n\n`;
+    let iconUrl = ICONS.TRIANGLE_ALERT;
+    if (t.severity === "CRITICAL" || t.severity === "HIGH") {
+      iconUrl = ICONS.SHIELD_ALERT;
+    }
+
+    const iconMd = getIconMarkdown(iconUrl, t.severity);
+
+    let md = `### ${iconMd} ${t.category}\n\n`;
     md += `${t.message}\n\n`;
 
     if (t.suggestion) {

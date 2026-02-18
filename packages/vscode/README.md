@@ -1,6 +1,6 @@
 # @promptshield/vscode <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](./banner.jpg)
+![PromptShield Banner](../../banner.jpg)
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -46,11 +46,11 @@ Install via the Visual Studio Code Marketplace:
 
 ### Commands
 
-| Command | Description |
-| :--- | :--- |
-| `PromptShield: Scan Workspace` | Triggers a full audit of the current workspace. |
-| `PromptShield: Show Detailed Report` | Opens a quick-pick list of all threats in the active file. |
-| `PromptShield: Toggle X-Ray` | (Currently always active) Toggles visual overlays for invisible characters. |
+| Command                              | Description                                                                 |
+| :----------------------------------- | :-------------------------------------------------------------------------- |
+| `PromptShield: Scan Workspace`       | Triggers a full audit of the current workspace.                             |
+| `PromptShield: Show Detailed Report` | Opens a quick-pick list of all threats in the active file.                  |
+| `PromptShield: Toggle X-Ray`         | (Currently always active) Toggles visual overlays for invisible characters. |
 
 ### Configuration
 

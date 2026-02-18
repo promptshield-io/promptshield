@@ -127,8 +127,11 @@ export class DecorationManager {
     );
 
     const threats: ThreatReport[] = promptShieldDiagnostics.map((d) => {
-      if (d.data && d.code !== undefined) {
-        return d.data as ThreatReport;
+      if (
+        (d as unknown as { data: ThreatReport }).data &&
+        d.code !== undefined
+      ) {
+        return (d as unknown as { data: ThreatReport }).data;
       }
 
       // Fallback: Reconstruct ThreatReport from Diagnostic

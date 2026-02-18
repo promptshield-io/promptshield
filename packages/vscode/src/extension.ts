@@ -114,10 +114,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.registerCommand(
       "promptshield.fixWithAI",
-      async (uri: string, threat: ThreatReport) => {
+      async (uri: string, threats: ThreatReport[]) => {
         const docUri = vscode.Uri.parse(uri);
         const document = await vscode.workspace.openTextDocument(docUri);
-        await handleFixWithAI(document, threat);
+        await handleFixWithAI(document, threats);
       },
     ),
   );
@@ -125,59 +125,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function handleFixWithAI(
   document: vscode.TextDocument,
-  threat: ThreatReport,
+  threats: ThreatReport[],
 ) {
-  try {
-    const models = await vscode.lm.selectChatModels({ family: "gpt-4" }); // Prefer GPT-4
-    let model = models[0];
-    if (!model) {
-      const allModels = await vscode.lm.selectChatModels({});
-      model = allModels[0];
-    }
-
-    if (!model) {
-      vscode.window.showErrorMessage(
-        "No language models available for PromptShield AI Fix.",
-      );
-      return;
-    }
-
-    const start = document.positionAt(threat.loc.index);
-    const end = document.positionAt(
-      threat.loc.index + threat.offendingText.length,
-    );
-    const range = new vscode.Range(start, end);
-
-    // Context: Get line or surrounding context
-    const line = document.lineAt(start.line).text;
-
-    const messages = [
-      vscode.LanguageModelChatMessage.User(
-        `Fix the following security threat in the code snippet below. 
-                Threat: ${threat.message}
-                Offending Text: "${threat.offendingText}"
-                Context: "${line}"
-                
-                Return ONLY the corrected text replacement for the offending text, nothing else.`,
-      ),
-    ];
-
-    const cancellationToken = new vscode.CancellationTokenSource().token;
-    const response = await model.sendRequest(messages, {}, cancellationToken);
-
-    let fixedText = "";
-    for await (const fragment of response.text) {
-      fixedText += fragment;
-    }
-
-    if (fixedText) {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, range, fixedText.trim()); // Trim to be safe
-      await vscode.workspace.applyEdit(edit);
-    }
-  } catch (e) {
-    vscode.window.showErrorMessage(`PromptShield AI Fix failed: ${e}`);
-  }
+  console.log({ document, threats });
+  vscode.window.showWarningMessage("Not implemented yet!");
 }
 
 export function deactivate(): Thenable<void> | undefined {

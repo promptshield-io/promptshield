@@ -64,6 +64,12 @@ for (const pkgName of packageDirs) {
     path.join(outDir, "..", "README.mdx"),
   );
 
+  // copy banner image
+  fs.copyFile(
+    path.join(pkgPath, "banner.jpg"),
+    path.join(outDir, "..", "banner.jpg"),
+  );
+
   const rootMetaFilePath = path.join(DOCS_ROOT, pkgName, "meta.json");
   try {
     await fs.access(rootMetaFilePath);

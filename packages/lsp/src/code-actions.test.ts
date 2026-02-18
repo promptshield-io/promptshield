@@ -53,7 +53,7 @@ describe("LSP Code Actions", () => {
 
   // Simple test for existence, logic is complex to mock fully without sanitizer
   describe("getThreatFixActions", () => {
-    it("should return actions including ignore", () => {
+    it("should return actions without including ignore", () => {
       const threat = createThreat(1, 1, "bad");
       // sanitizer.applyFixes needs to return something for fix action to appear.
       // If sanitizer is mocked or behaves simply, we get actions.
@@ -62,7 +62,7 @@ describe("LSP Code Actions", () => {
       const ignoreAction = actions.find(
         (a) => a.title === "PromptShield: Ignore this line",
       );
-      expect(ignoreAction).toBeDefined();
+      expect(ignoreAction).toBeUndefined();
     });
   });
 });

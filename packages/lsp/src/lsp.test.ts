@@ -194,6 +194,47 @@ describe("LSP Server", () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
+  it("should provide single AI fix action if threats exist", () => {
+    const handler = mocks.mockConnection.onCodeAction.mock.calls[0][0];
+    const document = TextDocument.create(
+      "file:///test.txt",
+      "plaintext",
+      1,
+      "test content",
+    );
+    mocks.mockdocuments.get.mockReturnValue(document);
+
+    vi.mocked(scan).mockReturnValue({
+      threats: [
+        {
+          category: "TEST",
+          severity: "HIGH",
+          message: "threat 1",
+          offendingText: "test",
+          loc: { line: 1, column: 1, index: 0 },
+        },
+        {
+          category: "TEST",
+          severity: "HIGH",
+          message: "threat 2",
+          offendingText: "content",
+          loc: { line: 1, column: 6, index: 5 },
+        },
+      ],
+    } as any);
+
+    const result = handler({
+      textDocument: { uri: "file:///test.txt" },
+      range: {
+        start: { line: 0, character: 0 },
+        end: { line: 0, character: 10 },
+      },
+    });
+
+    const aiFixes = result.filter((a: any) => a.title === "✨ Fix with AI");
+    expect(aiFixes.length).toBe(1);
+  });
+
   it("should support onHover", () => {
     expect(mocks.mockConnection.onHover).toHaveBeenCalled();
     const handler = mocks.mockConnection.onHover.mock.calls[0][0];

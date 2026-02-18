@@ -13,7 +13,7 @@ import type { TextDocument } from "vscode-languageserver-textdocument";
  */
 export const getAiFixAction = (
   document: TextDocument,
-  threat: ThreatReport,
+  threats: ThreatReport[],
 ): CodeAction => {
   return {
     title: "✨ Fix with AI",
@@ -21,7 +21,7 @@ export const getAiFixAction = (
     command: {
       title: "Fix with AI",
       command: "promptshield.fixWithAI",
-      arguments: [document.uri, threat],
+      arguments: [document.uri, threats],
     },
   };
 };
@@ -157,7 +157,6 @@ export const getThreatFixActions = (
   return threats.flatMap((threat) => {
     const actions: CodeAction[] = [];
 
-    // 1. Fix Action (Remove/Replace)
     const result = applyFixes(original, [threat]);
     const edit = computeMinimalEdit(document, original, result.text);
 
@@ -168,15 +167,6 @@ export const getThreatFixActions = (
         edit: { changes: { [document.uri]: [edit] } },
       });
     }
-
-    // 2. Ignore Action
-    const ignoreAction = getIgnoreAction(document, threat);
-    if (ignoreAction) {
-      actions.push(ignoreAction);
-    }
-
-    // 3. AI Fix
-    actions.push(getAiFixAction(document, threat));
 
     return actions;
   });

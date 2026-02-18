@@ -11,7 +11,12 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { getFixAllAction, getThreatFixActions } from "./code-actions";
+import {
+  getAiFixAction,
+  getFixAllAction,
+  getIgnoreAction,
+  getThreatFixActions,
+} from "./code-actions";
 import { getHover } from "./hover";
 import { DEFAULT_CONFIG, type LspConfig } from "./types";
 import { validateDocument } from "./validation";
@@ -145,6 +150,15 @@ connection.onCodeAction((params) => {
   const fixAll = getFixAllAction(document, threats);
   if (fixAll) {
     actions.push(fixAll);
+  }
+
+  // Add single AI Fix action if any threats exist
+  if (threats.length > 0) {
+    const ignoreAction = getIgnoreAction(document, threats[0]);
+    if (ignoreAction) {
+      actions.push(ignoreAction);
+    }
+    actions.push(getAiFixAction(document, threats));
   }
 
   return actions;

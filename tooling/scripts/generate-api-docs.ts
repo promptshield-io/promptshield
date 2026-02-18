@@ -174,9 +174,7 @@ const createMeta = async (file: string) => {
           .trim() ?? path.basename(file, ".mdx"));
 
   const editURL = src.match(DEFINED_IN_REGEXP)?.[1];
-  const metaPath = file
-    .replace("/api/", "/api.meta/")
-    .replace(/\.mdx$/, ".json");
+  const metaPath = file.replace("/api/", "/.meta/").replace(/\.mdx$/, ".json");
 
   await fs.mkdir(path.dirname(metaPath), { recursive: true });
 

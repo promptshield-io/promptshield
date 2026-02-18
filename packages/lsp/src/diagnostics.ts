@@ -3,7 +3,13 @@ import { type Diagnostic, DiagnosticSeverity } from "vscode-languageserver";
 import type { TextDocument } from "vscode-languageserver-textdocument";
 
 /**
- * Maps PromptShield severity to LSP DiagnosticSeverity.
+ * Maps PromptShield severity levels to LSP DiagnosticSeverity.
+ *
+ * This mapping controls how editors visually present findings:
+ * - CRITICAL → Error
+ * - HIGH → Warning
+ * - MEDIUM → Information
+ * - LOW → Hint
  */
 export const SEVERITY_MAP: Record<Severity, DiagnosticSeverity> = {
   CRITICAL: DiagnosticSeverity.Error,
@@ -14,6 +20,12 @@ export const SEVERITY_MAP: Record<Severity, DiagnosticSeverity> = {
 
 /**
  * Convert a ThreatReport into an LSP Diagnostic.
+ *
+ * Design notes:
+ * - PromptShield locations are 1-based; LSP is 0-based.
+ * - `ruleId` is preferred for the diagnostic code.
+ * - The full ThreatReport is attached via `data` so the
+ *   VSCode extension can reconstruct decorations and actions.
  */
 export const convertReportToDiagnostic = (
   report: ThreatReport,
@@ -33,15 +45,16 @@ export const convertReportToDiagnostic = (
     },
     message: report.message,
     source: "PromptShield",
-    code: report.category,
+    code: report.ruleId,
     data: report,
   };
 };
 
 /**
- * Convert multiple ThreatReports to diagnostics.
+ * Convert multiple ThreatReports into LSP diagnostics.
  */
 export const convertReportsToDiagnostics = (
   reports: ThreatReport[],
   document: TextDocument,
-): Diagnostic[] => reports.map((r) => convertReportToDiagnostic(r, document));
+): Diagnostic[] =>
+  reports.map((report) => convertReportToDiagnostic(report, document));

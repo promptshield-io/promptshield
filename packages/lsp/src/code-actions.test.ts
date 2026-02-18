@@ -9,6 +9,7 @@ const createThreat = (
   text: string,
 ): ThreatReport => ({
   category: ThreatCategory.Invisible,
+  ruleId: "PSU001",
   severity: "HIGH",
   message: "Test message",
   offendingText: text,

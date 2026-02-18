@@ -50,10 +50,6 @@ for (const pkgName_ of packageDirs) {
   const major = pkgJson.version.split(".")[0];
   const outDir = path.join(DOCS_ROOT, pkgName, `v${major}`, "api");
 
-  if (pkgName_ === "core") {
-    await fs.cp(path.join(pkgPath, "docs"), outDir);
-  }
-
   execSync(
     [
       "pnpm typedoc",
@@ -69,6 +65,11 @@ for (const pkgName_ of packageDirs) {
     path.join(pkgPath, "README.md"),
     path.join(outDir, "..", "README.mdx"),
   );
+
+  // Copy reference docs
+  if (pkgName_ === "core") {
+    await fs.cp(path.join(pkgPath, "docs"), outDir, { recursive: true });
+  }
 
   const rootMetaFilePath = path.join(DOCS_ROOT, pkgName, "meta.json");
   try {

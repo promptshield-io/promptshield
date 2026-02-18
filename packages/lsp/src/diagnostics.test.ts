@@ -10,6 +10,7 @@ import { convertReportToDiagnostic } from "./diagnostics";
 
 const createThreat = (severity: Severity): ThreatReport => ({
   category: ThreatCategory.Invisible,
+  ruleId: "PSU001",
   severity,
   message: "Test message",
   offendingText: "bad",

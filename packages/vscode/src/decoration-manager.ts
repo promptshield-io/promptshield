@@ -148,7 +148,7 @@ export class DecorationManager {
       }
 
       return {
-        checkId: String(d.code) || "unknown", // mapped from category
+        ruleId: String(d.code) || "unknown", // mapped from category
         category: String(d.code) || "unknown",
         severity:
           d.severity === vscode.DiagnosticSeverity.Error ? "CRITICAL" : "HIGH", // approximate or map back

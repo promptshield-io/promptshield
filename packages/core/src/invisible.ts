@@ -45,30 +45,20 @@ const INVISIBLE_REGEX =
   /([\u200B-\u200D\uFEFF\u3164\uFFA0]|\uDB40[\uDC00-\uDC7F])/gu;
 
 /**
+ * Threshold for detecting excessive invisible padding.
+ */
+const EXCESSIVE_THRESHOLD = 16;
+
+/**
  * Invisible-character detector.
  *
- * Detects spans of adjacent invisible characters that may alter how
- * content is interpreted by LLMs, tokenizers, parsers, or validation logic.
+ * Emits one primary span-level rule using precedence:
  *
- * Detection model:
- * - Groups adjacent invisible characters into a single threat span
- * - Reports HIGH severity
- * - Exits early when `minSeverity === "CRITICAL"`
+ * PSU004 → Unicode tag payload
+ * PSU005 → Excessive invisible padding
+ * PSU001 → Invisible characters present
  *
- * IMPORTANT:
- * Invisible characters typically do NOT contain readable payloads.
- * Their risk comes from structural manipulation rather than hidden text.
- *
- * Examples:
- *
- * "ignore​previous​instructions"
- * "admin" vs "ad​min"
- *
- * In these cases, machines interpret boundaries differently than humans.
- *
- * @param text Raw input text
- * @param options Scanner options
- * @param context Location context
+ * PSU002 is emitted independently for boundary manipulation.
  */
 export const scanInvisibleChars = (
   text: string,
@@ -87,38 +77,132 @@ export const scanInvisibleChars = (
   let spanStart = -1;
   let spanEnd = -1;
 
+  const resetSpan = () => {
+    spanStart = -1;
+    spanEnd = -1;
+  };
+
   /**
    * Emits the currently accumulated invisible span as a threat.
+   *
+   * Span semantics:
+   * offendingText = entire invisible sequence
    */
   const flushSpan = () => {
     if (spanStart === -1) return;
 
     const offendingText = text.slice(spanStart, spanEnd);
+    const decodedPayload = decodeUnicodeTags(offendingText);
 
     const labels = [...offendingText].map((c) => {
       const cp = c.codePointAt(0);
       return CHAR_LABELS[c] || `[U+${cp?.toString(16).toUpperCase()}]`;
     });
 
+    const loc = getLocForIndex(spanStart, context);
+
+    /**
+     * PSU004 — Unicode tag payload
+     */
+    if (decodedPayload) {
+      threats.push({
+        ruleId: "PSU004",
+        category: ThreatCategory.Invisible,
+        severity: "HIGH",
+        message:
+          "Unicode tag characters encode hidden ASCII content inside invisible text.",
+        referenceUrl:
+          "https://promptshield.js.org/docs/detectors/invisible-chars#PSU004",
+        loc,
+        offendingText,
+        decodedPayload,
+        readableLabel: "[TAG_PAYLOAD]",
+        suggestion: "Remove Unicode tag characters containing hidden text.",
+      });
+
+      resetSpan();
+      return;
+    }
+
+    if (options.minSeverity === "HIGH") {
+      return;
+    }
+
+    /**
+     * PSU005 — Excessive invisible padding
+     */
+    if (offendingText.length >= EXCESSIVE_THRESHOLD) {
+      threats.push({
+        ruleId: "PSU005",
+        category: ThreatCategory.Invisible,
+        severity: "MEDIUM",
+        message:
+          "Excessive invisible characters detected. Large invisible sequences are commonly used for padding or obfuscation.",
+        referenceUrl:
+          "https://promptshield.js.org/docs/detectors/invisible-chars#PSU005",
+        loc,
+        offendingText,
+        readableLabel: `[${labels.join(" ")}]`,
+        suggestion: "Remove unnecessary invisible characters.",
+      });
+
+      resetSpan();
+      return;
+    }
+
+    if (options.minSeverity === "MEDIUM") {
+      return;
+    }
+    /**
+     * PSU001 — Invisible characters present
+     */
     threats.push({
+      ruleId: "PSU001",
       category: ThreatCategory.Invisible,
-      severity: "HIGH",
-      message: `Detected invisible character sequence (${labels.length})`,
-      loc: getLocForIndex(spanStart, context),
+      severity: "LOW",
+      message:
+        "Invisible Unicode characters detected. These characters can alter tokenization and prompt interpretation without being visible.",
+      referenceUrl:
+        "https://promptshield.js.org/docs/detectors/invisible-chars#PSU001",
+      loc,
       offendingText,
       readableLabel: `[${labels.join(" ")}]`,
       suggestion:
-        "Remove invisible characters to ensure what you see is what the AI model receives.",
-      decodedPayload: decodeUnicodeTags(offendingText),
+        "Remove invisible characters to ensure the prompt text is interpreted exactly as written.",
     });
 
-    spanStart = -1;
-    spanEnd = -1;
+    resetSpan();
   };
 
   while (match !== null) {
     const index = match.index;
     const char = match[0];
+
+    /**
+     * PSU002 — Token boundary manipulation
+     */
+    if (index > 0 && index < text.length - 1) {
+      const prev = text[index - 1];
+      const next = text[index + char.length];
+
+      if (prev?.trim() && next?.trim()) {
+        threats.push({
+          ruleId: "PSU002",
+          category: ThreatCategory.Invisible,
+          severity: "HIGH",
+          message:
+            "Invisible character detected inside a visible token. This can manipulate token boundaries or bypass validation.",
+          referenceUrl:
+            "https://promptshield.js.org/docs/detectors/invisible-chars#PSU002",
+          loc: getLocForIndex(index, context),
+          offendingText: char,
+          readableLabel: CHAR_LABELS[char] || "[INVISIBLE]",
+          suggestion: "Remove invisible characters embedded within words.",
+        });
+
+        if (options.stopOnFirstThreat) return threats;
+      }
+    }
 
     if (spanStart === -1) {
       spanStart = index;
@@ -127,20 +211,15 @@ export const scanInvisibleChars = (
       spanEnd += char.length;
     } else {
       flushSpan();
+      if (options.stopOnFirstThreat && threats.length) return threats;
       spanStart = index;
       spanEnd = index + char.length;
-    }
-
-    if (options?.stopOnFirstThreat) {
-      flushSpan();
-      return threats;
     }
 
     match = invisibleRegex.exec(text);
   }
 
   flushSpan();
-
   return threats;
 };
 
@@ -158,20 +237,7 @@ export const scanInvisibleChars = (
  * Attackers can use this mechanism to embed hidden instructions
  * or metadata inside otherwise invisible text streams.
  *
- * Example:
- * Invisible sequence encoding:
- *   "ignore previous instructions"
- *
- * This decoder performs a best-effort extraction:
- *
- * - Only printable ASCII (32–126) is decoded
- * - Non-ASCII tags are ignored
- * - Returns `undefined` if no payload is found
- *
- * The function is intentionally tolerant and side-effect free.
- *
- * @param text A string potentially containing Unicode tag characters
- * @returns Decoded ASCII payload if present
+ * This decoder performs a best-effort extraction.
  */
 export const decodeUnicodeTags = (text: string): string | undefined => {
   let result = "";

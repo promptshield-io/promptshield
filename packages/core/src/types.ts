@@ -47,7 +47,7 @@ export enum ThreatCategory {
   /**
    * Prompt injection patterns.
    *
-   * Reserved for semantic detection layers.
+   * Deterministic, rule-based detection only.
    */
   Injection = "PROMPT_INJECTION",
 
@@ -91,13 +91,26 @@ export interface ThreatLoc {
  * Adjacent suspicious characters should be grouped into one report.
  */
 export interface ThreatReport {
+  /**
+   * Stable rule identifier.
+   *
+   * Example:
+   * "PSU001", "PST001", "PSI002"
+   */
+  ruleId: string;
+
   /** Threat classification */
   category: ThreatCategory;
 
   /** Risk severity */
   severity: Severity;
 
-  /** Human-readable description */
+  /**
+   * Human-readable diagnostic message.
+   *
+   * Describes WHAT was detected and WHY it matters.
+   * This should not include remediation steps.
+   */
   message: string;
 
   /** Location of the threat start */
@@ -121,16 +134,32 @@ export interface ThreatReport {
 
   /**
    * Suggested remediation guidance.
+   *
+   * This is optional and may vary by environment (editor, CI, UI).
    */
   suggestion?: string;
 
   /**
-   * Optional decoded payload extracted from invisible sequences.
+   * Optional decoded payload extracted from concealed content.
    *
    * Example:
    * "ignore previous instructions"
    */
   decodedPayload?: string;
+
+  /**
+   * Reference documentation explaining the risk.
+   *
+   * Example:
+   * https://promptshield.js.org/docs/detectors/invisible-chars#PSU001
+   */
+  referenceUrl?: string;
+
+  /**
+   * Indicates whether this threat was suppressed
+   * by an ignore directive.
+   */
+  suppressed?: boolean;
 }
 
 /**
@@ -175,12 +204,7 @@ export interface ScanOptions {
 /**
  * Execution context for scanning text fragments.
  *
- * Used when scanning partial content extracted from a larger source,
- * such as:
- * - markdown code blocks
- * - AST nodes
- * - editor buffers
- * - diff hunks
+ * Used when scanning partial content extracted from a larger source.
  */
 export interface ScanContext {
   /**

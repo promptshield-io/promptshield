@@ -10,8 +10,8 @@ import { getLineOffsets, getLocForIndex } from "./utils";
 /**
  * Regex for Base64-like payloads.
  *
- * Matches long Base64 sequences that are likely to contain embedded
- * readable content rather than hashes or binary blobs.
+ * Matches sufficiently long Base64 sequences likely to contain
+ * human/llm-readable instructions rather than binary data or hashes.
  */
 const BASE64_REGEX =
   /(?:[A-Za-z0-9+/]{4}){8,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g;
@@ -70,17 +70,12 @@ const decodeBase64IfLikely = (value: string): string | null => {
  *
  * Detects techniques used to conceal instructions or data inside text.
  *
- * Detection categories:
+ * Rules emitted:
  *
- * HIGH:
- * - Invisible-character steganography
- *
- * MEDIUM:
- * - Base64 payloads containing readable content
- *
- * LOW:
- * - Hidden Markdown comments
- * - Invisible Markdown links
+ * PSS001 — Invisible-character steganography (HIGH)
+ * PSS002 — Base64 payload with readable content (MEDIUM)
+ * PSS003 — Hidden Markdown comment (LOW)
+ * PSS004 — Invisible Markdown link (LOW)
  *
  * Span semantics:
  *   offendingText = entire suspicious region
@@ -101,7 +96,9 @@ export const scanSmuggling = (
   context.lineOffsets = context.lineOffsets ?? getLineOffsets(text);
 
   /**
-   * 1. Invisible-character steganography (HIGH)
+   * --------------------------------------------------
+   * PSS001 — Invisible-character steganography (HIGH)
+   * --------------------------------------------------
    */
   const stegRegex = new RegExp(STEG_REGEX);
 
@@ -143,9 +140,11 @@ export const scanSmuggling = (
 
       if (decoded.length >= 3) {
         threats.push({
+          ruleId: "PSS001",
           category: ThreatCategory.Smuggling,
           severity: "HIGH",
-          message: `Detected hidden steganography message`,
+          message:
+            "Detected hidden steganography message encoded in invisible characters.",
           loc: getLocForIndex(match.index, context),
           offendingText: captured,
           decodedPayload: decoded,
@@ -163,7 +162,9 @@ export const scanSmuggling = (
   if (options.minSeverity === "HIGH") return threats;
 
   /**
-   * 2. Base64 payload detection (MEDIUM)
+   * --------------------------------------------------
+   * PSS002 — Base64 payload detection (MEDIUM)
+   * --------------------------------------------------
    */
   const b64Regex = new RegExp(BASE64_REGEX);
 
@@ -175,9 +176,10 @@ export const scanSmuggling = (
     if (!decoded) continue;
 
     threats.push({
+      ruleId: "PSS002",
       category: ThreatCategory.Smuggling,
       severity: "MEDIUM",
-      message: `Detected Base64 payload containing readable text`,
+      message: "Detected Base64 payload containing readable content.",
       loc: getLocForIndex(match.index, context),
       offendingText: candidate,
       decodedPayload: decoded,
@@ -191,15 +193,18 @@ export const scanSmuggling = (
   if (options.minSeverity === "MEDIUM") return threats;
 
   /**
-   * 3. Hidden Markdown comments (LOW)
+   * --------------------------------------------------
+   * PSS003 — Hidden Markdown comments (LOW)
+   * --------------------------------------------------
    */
   const commentRegex = new RegExp(MARKDOWN_COMMENT_REGEX);
 
   while ((match = commentRegex.exec(text)) !== null) {
     threats.push({
+      ruleId: "PSS003",
       category: ThreatCategory.Smuggling,
       severity: "LOW",
-      message: "Detected Markdown comment",
+      message: "Detected hidden Markdown comment.",
       loc: getLocForIndex(match.index, context),
       offendingText: match[0],
       readableLabel: "[Hidden Comment]",
@@ -211,15 +216,18 @@ export const scanSmuggling = (
   }
 
   /**
-   * 4. Empty Markdown links (LOW)
+   * --------------------------------------------------
+   * PSS004 — Empty Markdown links (LOW)
+   * --------------------------------------------------
    */
   const linkRegex = new RegExp(EMPTY_LINK_REGEX);
 
   while ((match = linkRegex.exec(text)) !== null) {
     threats.push({
+      ruleId: "PSS004",
       category: ThreatCategory.Smuggling,
       severity: "LOW",
-      message: "Detected empty link (invisible in rendered Markdown)",
+      message: "Detected empty Markdown link (invisible in rendered output).",
       loc: getLocForIndex(match.index, context),
       offendingText: match[0],
       readableLabel: "[Empty Link]",

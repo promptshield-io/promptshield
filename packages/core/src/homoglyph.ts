@@ -51,6 +51,9 @@ const WORD_REGEX = /[\p{L}\p{N}_]+/gu;
  *
  * Requires Unicode property escape support (Node 18+).
  *
+ * Rule:
+ * PSU101 — Mixed-script homoglyph detection
+ *
  * @param text Raw text to scan
  * @param options Scanner configuration
  * @param context Location context
@@ -90,16 +93,19 @@ export const scanHomoglyphs = (
       if (hasGreek) scripts.push("Greek");
 
       threats.push({
+        ruleId: "PSH001",
         category: ThreatCategory.Homoglyph,
         severity: "CRITICAL",
-        message: `Detected mixed-script homoglyph: ${word} (${scripts.join(
+        message: `Mixed-script homoglyph detected: "${word}" (${scripts.join(
           " + ",
         )})`,
+        referenceUrl:
+          "https://promptshield.js.org/docs/detectors/homoglyph#PSH001",
         loc: getLocForIndex(index, context),
         offendingText: word,
         readableLabel: `[Mixed-Script] ${word}`,
         suggestion:
-          "Replace with standard characters. This may indicate a spoofing attempt.",
+          "Replace visually similar characters with characters from a single script.",
       });
 
       if (options?.stopOnFirstThreat) return threats;

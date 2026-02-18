@@ -28,8 +28,10 @@ import { getLineOffsets, getLocForIndex } from "./utils";
  * - reveal system prompt
  * - disable guardrails
  * - override system instructions
+ *
+ * Rule namespace:
+ * PSI — PromptShield Injection
  */
-
 const INJECTION_RULES: Array<{
   id: string;
   severity: "HIGH" | "CRITICAL";
@@ -86,16 +88,20 @@ const normalizeLine = (line: string): string => {
 
 /**
  * Scan for deterministic prompt-injection patterns.
+ *
+ * Detection strategy:
+ * - Scan line-by-line for stable location reporting
+ * - Attempt direct regex detection first
+ * - Fall back to normalized detection
+ *
+ * Span semantics:
+ *   offendingText = matched instruction phrase or entire line
  */
 export const scanInjectionPatterns = (
   text: string,
   options: ScanOptions = {},
   context: ScanContext = {},
 ): ThreatReport[] => {
-  if (options.minSeverity === "CRITICAL") {
-    // still allow CRITICAL rules
-  }
-
   const threats: ThreatReport[] = [];
 
   context.lineOffsets = context.lineOffsets ?? getLineOffsets(text);
@@ -114,6 +120,7 @@ export const scanInjectionPatterns = (
 
       if (directMatch) {
         threats.push({
+          ruleId: rule.id,
           category: ThreatCategory.Injection,
           severity: rule.severity,
           message: rule.message,
@@ -133,6 +140,7 @@ export const scanInjectionPatterns = (
        */
       if (normalized.includes(rule.normalizedPattern)) {
         threats.push({
+          ruleId: rule.id,
           category: ThreatCategory.Injection,
           severity: rule.severity,
           message: `${rule.message} (obfuscated spacing detected)`,

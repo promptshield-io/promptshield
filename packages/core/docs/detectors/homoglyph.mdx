@@ -1,0 +1,155 @@
+---
+title: Homoglyph Detection
+---
+
+# Homoglyph Detection
+
+PromptShield detects **mixed-script homoglyph attacks**, where visually
+similar characters from different Unicode scripts are combined to create
+deceptive identifiers or instructions.
+
+These attacks are commonly used in:
+
+- prompt injection
+- identity spoofing
+- configuration manipulation
+- phishing-style prompt attacks
+- code review bypass
+
+---
+
+## Why this matters
+
+Humans read **glyphs visually**.
+
+Computers interpret **Unicode code points**.
+
+Two characters that look identical can be completely different:
+
+```
+
+a (Latin)     U+0061
+а (Cyrillic)  U+0430
+
+```
+
+This enables spoofing like:
+
+```
+
+admin
+admіn   ← Cyrillic "і"
+
+```
+
+They look identical in most editors.
+
+They are not the same string.
+
+This breaks validation, allow-lists, and policy checks.
+
+---
+
+## Detection model
+
+The PromptShield homoglyph detector:
+
+- scans text for word spans
+- inspects Unicode script composition per word
+- detects suspicious **Latin + Cyrillic** or **Latin + Greek** mixing
+- emits **one diagnostic per word**
+
+The detector intentionally avoids flagging multilingual text to reduce
+false positives.
+
+---
+
+## Rule
+
+---
+
+### PSH001
+
+> Mixed-script homoglyph word
+
+Severity: CRITICAL
+
+A word contains characters from multiple Unicode scripts that can be used
+for spoofing.
+
+Example:
+
+```
+
+pаypal
+
+```
+
+The second character is Cyrillic:
+
+```
+
+p + Cyrillic "а" + ypal
+
+```
+
+Another example:
+
+```
+
+admіn
+
+```
+
+Where:
+
+```
+
+i → Cyrillic "і"
+
+```
+
+These words appear normal to humans but differ at the code-point level.
+
+---
+
+## Suggested remediation
+
+Replace homoglyph characters with characters from the intended script.
+
+For identifiers, prompts, and configuration values:
+
+- use ASCII when possible
+- avoid mixed-script identifiers
+- normalize input before validation
+
+---
+
+## Design notes
+
+PromptShield intentionally detects **mixed-script composition**, not
+individual confusable characters.
+
+This avoids false positives in:
+
+- multilingual documentation
+- international content
+- natural language text
+
+Detection focuses on **security-relevant misuse**, not typography.
+
+---
+
+## Mental model
+
+Homoglyph detection protects against:
+
+- identifier spoofing
+- prompt impersonation
+- policy bypass using confusable characters
+
+It is conceptually similar to:
+
+- IDN homograph protections in browsers
+- Unicode spoofing detection
+- authentication identifier validation

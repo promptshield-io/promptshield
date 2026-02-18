@@ -33,12 +33,17 @@ import { getLineOffsets, getLocForIndex } from "./utils";
  * Span semantics:
  *   offendingText = original span
  *   decodedPayload = normalized span
+ *
+ * Rule:
+ * PSN001 — Normalization-sensitive text detected
  */
 export const scanNormalization = (
   text: string,
   options: ScanOptions = {},
   context: ScanContext = {},
 ): ThreatReport[] => {
+  if (options.minSeverity === "CRITICAL") return [];
+
   const threats: ThreatReport[] = [];
 
   const normalized = text.normalize("NFKC");
@@ -57,9 +62,13 @@ export const scanNormalization = (
     const offendingText = text.slice(spanStart, spanEnd);
 
     threats.push({
+      ruleId: "PSN001",
       category: ThreatCategory.Normalization,
       severity: "HIGH",
-      message: `Detected normalization-sensitive text: '${offendingText}' → '${normalizedSpan}'`,
+      message:
+        "Text changes under Unicode NFKC normalization. This may cause ambiguity between displayed and interpreted content.",
+      referenceUrl:
+        "https://promptshield.js.org/docs/detectors/normalization#PSN001",
       loc: getLocForIndex(spanStart, context),
       offendingText,
       decodedPayload: normalizedSpan,

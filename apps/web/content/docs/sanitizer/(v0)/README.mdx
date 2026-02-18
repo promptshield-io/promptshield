@@ -1,6 +1,6 @@
 # @promptshield/sanitizer <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](./banner.jpg)
+![PromptShield Banner](../../banner.jpg)
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -50,11 +50,11 @@ import { sanitize, sanitizeStrict } from "@promptshield/sanitizer";
 const dirty = "Hello\u200BWorld"; // Contains Zero-Width Space
 
 // Safe sanitize (removes invisible chars)
-const clean = sanitize(dirty); 
+const clean = sanitize(dirty);
 console.log(clean); // "HelloWorld"
 
 // Strict sanitize (also applies NFKC normalization)
-const strict = sanitizeStrict("ℍ𝕖𝕝𝕝𝕠"); 
+const strict = sanitizeStrict("ℍ𝕖𝕝𝕝𝕠");
 console.log(strict); // "Hello"
 ```
 

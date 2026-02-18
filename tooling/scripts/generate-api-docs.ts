@@ -16,6 +16,29 @@ const packageDirs = (await fs.readdir(PACKAGES_DIR, { withFileTypes: true }))
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
 
+// copy banner image
+await fs.copyFile(
+  path.join(process.cwd(), "banner.jpg"),
+  path.join(DOCS_ROOT, "banner.jpg"),
+);
+
+// Copy root readme
+await fs.copyFile(
+  path.join(process.cwd(), "README.md"),
+  path.join(DOCS_ROOT, "index.md"),
+);
+
+await fs.writeFile(
+  path.join(DOCS_ROOT, "index.json"),
+  JSON.stringify(
+    {
+      title: "PromptShield",
+    },
+    null,
+    2,
+  ),
+);
+
 for (const pkgName_ of packageDirs) {
   const pkgPath = path.join(PACKAGES_DIR, pkgName_);
   const pkgJsonPath = path.join(pkgPath, "package.json");
@@ -64,12 +87,6 @@ for (const pkgName_ of packageDirs) {
   await fs.copyFile(
     path.join(pkgPath, "README.md"),
     path.join(outDir, "..", "README.mdx"),
-  );
-
-  // copy banner image
-  await fs.copyFile(
-    path.join(pkgPath, "banner.jpg"),
-    path.join(outDir, "..", "banner.jpg"),
   );
 
   const rootMetaFilePath = path.join(DOCS_ROOT, pkgName, "meta.json");

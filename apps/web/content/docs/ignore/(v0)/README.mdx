@@ -1,6 +1,6 @@
 # @promptshield/ignore <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](./banner.jpg)
+![PromptShield Banner](../../banner.jpg)
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -46,14 +46,18 @@ $ pnpm add @promptshield/ignore
 ### In your PROMPTS (or code)
 
 #### Ignore next line
+
 ```markdown
 <!-- promptshield-ignore -->
+
 I want to use a specific invisible character here: ​
 ```
 
 #### Ignore block (next N lines)
+
 ```markdown
 <!-- promptshield-ignore next 5 -->
+
 This block contains highly suspicious
 text patterns that are actually
 safe in this context.
@@ -61,11 +65,14 @@ safe in this context.
 ```
 
 #### Ignore entire file
+
 Must be placed in the first 10 lines of the file.
 
 ```markdown
 <!-- promptshield-ignore all -->
+
 # Suspicious File
+
 ...
 ```
 

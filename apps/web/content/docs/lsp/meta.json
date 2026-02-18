@@ -1,8 +1,0 @@
-{
-  "title": "@promptshield/lsp",
-  "description": "Language Server for PromptShield",
-  "lastModified": "2026-02-18T07:08:22.294Z",
-  "version": "0.0.0",
-  "root": true,
-  "icon": "Shield"
-}

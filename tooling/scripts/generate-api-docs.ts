@@ -105,23 +105,6 @@ await fs.copyFile(
   path.join(DOCS_ROOT, "banner.jpg"),
 );
 
-// Copy root readme
-await fs.copyFile(
-  path.join(process.cwd(), "README.md"),
-  path.join(DOCS_ROOT, "index.md"),
-);
-
-await fs.writeFile(
-  path.join(DOCS_ROOT, "index.json"),
-  JSON.stringify(
-    {
-      title: "PromptShield",
-    },
-    null,
-    2,
-  ),
-);
-
 /* ---------------------------------- */
 /* 2. Rename .md to .mdx (ASYNC)       */
 /* ---------------------------------- */
@@ -192,7 +175,7 @@ const createMeta = async (file: string) => {
 
   const editURL = src.match(DEFINED_IN_REGEXP)?.[1];
   const metaPath = file
-    .replace("/api/", "/api/.meta/")
+    .replace("/api/", "/api.meta/")
     .replace(/\.mdx$/, ".json");
 
   await fs.mkdir(path.dirname(metaPath), { recursive: true });

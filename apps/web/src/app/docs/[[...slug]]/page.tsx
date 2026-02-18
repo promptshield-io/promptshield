@@ -7,7 +7,7 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
 import { getPageImage, source } from "@/lib/source";
 import { getMDXComponents } from "@/mdx-components";
@@ -21,7 +21,16 @@ const GIT_CONFIG = {
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  if (!page) notFound();
+  console.log(params.slug);
+  if (!page) {
+    if (!params.slug?.length) {
+      redirect(`/docs/README`);
+    } else if (params.slug?.length === 1) {
+      redirect(`/docs/${params.slug[0]}/README`);
+    } else {
+      notFound();
+    }
+  }
 
   const lastSegment = params.slug?.pop() ?? "";
 

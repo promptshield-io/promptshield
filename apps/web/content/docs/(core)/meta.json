@@ -1,8 +1,0 @@
-{
-  "title": "@promptshield/core",
-  "description": "The heart of the PromptShield ecosystem. A zero-dependency, isomorphic TypeScript engine for detecting invisible characters, BIDI overrides, and homoglyph attacks in AI prompts.",
-  "lastModified": "2026-02-18T07:08:11.566Z",
-  "version": "0.0.0",
-  "root": true,
-  "icon": "Shield"
-}

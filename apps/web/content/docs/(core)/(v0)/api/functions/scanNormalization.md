@@ -8,7 +8,7 @@
 
 > **scanNormalization**(`text`, `options?`, `context?`): [`ThreatReport`](../interfaces/ThreatReport.md)[]
 
-Defined in: [normalization.ts:37](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/normalization.ts#L37)
+Defined in: [normalization.ts:40](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/normalization.ts#L40)
 
 Unicode normalization detector.
 
@@ -36,6 +36,9 @@ in prompts or code should be surfaced for inspection.
 Span semantics:
   offendingText = original span
   decodedPayload = normalized span
+
+Rule:
+PSN001 — Normalization-sensitive text detected
 
 ## Parameters
 

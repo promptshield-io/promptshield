@@ -8,7 +8,7 @@
 
 > **scanHomoglyphs**(`text`, `options?`, `context?`): [`ThreatReport`](../interfaces/ThreatReport.md)[]
 
-Defined in: [homoglyph.ts:58](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/homoglyph.ts#L58)
+Defined in: [homoglyph.ts:61](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/homoglyph.ts#L61)
 
 Homoglyph detector.
 
@@ -31,6 +31,9 @@ Span semantics:
   offendingText = entire word
 
 Requires Unicode property escape support (Node 18+).
+
+Rule:
+PSU101 — Mixed-script homoglyph detection
 
 ## Parameters
 

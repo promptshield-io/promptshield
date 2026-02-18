@@ -8,23 +8,18 @@
 
 > **scanSmuggling**(`text`, `options?`, `context?`): [`ThreatReport`](../interfaces/ThreatReport.md)[]
 
-Defined in: [smuggling.ts:91](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/smuggling.ts#L91)
+Defined in: [smuggling.ts:86](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/smuggling.ts#L86)
 
 Smuggling detector.
 
 Detects techniques used to conceal instructions or data inside text.
 
-Detection categories:
+Rules emitted:
 
-HIGH:
-- Invisible-character steganography
-
-MEDIUM:
-- Base64 payloads containing readable content
-
-LOW:
-- Hidden Markdown comments
-- Invisible Markdown links
+PSS001 — Invisible-character steganography (HIGH)
+PSS002 — Base64 payload with readable content (MEDIUM)
+PSS003 — Hidden Markdown comment (LOW)
+PSS004 — Invisible Markdown link (LOW)
 
 Span semantics:
   offendingText = entire suspicious region

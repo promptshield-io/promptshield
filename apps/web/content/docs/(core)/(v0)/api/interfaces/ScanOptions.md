@@ -6,7 +6,7 @@
 
 # Interface: ScanOptions
 
-Defined in: [types.ts:139](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L139)
+Defined in: [types.ts:168](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L168)
 
 Scanner configuration options.
 
@@ -16,7 +16,7 @@ Scanner configuration options.
 
 > `optional` **disableHomoglyphs**: `boolean`
 
-Defined in: [types.ts:160](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L160)
+Defined in: [types.ts:189](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L189)
 
 Disable homoglyph detection
 
@@ -26,7 +26,7 @@ Disable homoglyph detection
 
 > `optional` **disableInjectionPatterns**: `boolean`
 
-Defined in: [types.ts:172](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L172)
+Defined in: [types.ts:201](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L201)
 
 Disable injection-pattern detection
 
@@ -36,7 +36,7 @@ Disable injection-pattern detection
 
 > `optional` **disableInvisible**: `boolean`
 
-Defined in: [types.ts:157](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L157)
+Defined in: [types.ts:186](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L186)
 
 Disable invisible-character detection
 
@@ -46,7 +46,7 @@ Disable invisible-character detection
 
 > `optional` **disableNormalization**: `boolean`
 
-Defined in: [types.ts:169](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L169)
+Defined in: [types.ts:198](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L198)
 
 Disable normalization detection
 
@@ -56,7 +56,7 @@ Disable normalization detection
 
 > `optional` **disableSmuggling**: `boolean`
 
-Defined in: [types.ts:163](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L163)
+Defined in: [types.ts:192](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L192)
 
 Disable smuggling detection
 
@@ -66,7 +66,7 @@ Disable smuggling detection
 
 > `optional` **disableTrojan**: `boolean`
 
-Defined in: [types.ts:166](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L166)
+Defined in: [types.ts:195](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L195)
 
 Disable Trojan Source detection
 
@@ -76,7 +76,7 @@ Disable Trojan Source detection
 
 > `optional` **minSeverity**: [`Severity`](../type-aliases/Severity.md)
 
-Defined in: [types.ts:154](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L154)
+Defined in: [types.ts:183](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L183)
 
 Minimum severity to report.
 
@@ -92,7 +92,7 @@ Minimum severity to report.
 
 > `optional` **stopOnFirstThreat**: `boolean`
 
-Defined in: [types.ts:147](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L147)
+Defined in: [types.ts:176](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L176)
 
 Stop scanning after the first detected threat.
 

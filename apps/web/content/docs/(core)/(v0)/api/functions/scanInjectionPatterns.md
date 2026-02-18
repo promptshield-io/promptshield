@@ -8,9 +8,17 @@
 
 > **scanInjectionPatterns**(`text`, `options?`, `context?`): [`ThreatReport`](../interfaces/ThreatReport.md)[]
 
-Defined in: [injection-patterns.ts:90](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/injection-patterns.ts#L90)
+Defined in: [injection-patterns.ts:100](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/injection-patterns.ts#L100)
 
 Scan for deterministic prompt-injection patterns.
+
+Detection strategy:
+- Scan line-by-line for stable location reporting
+- Attempt direct regex detection first
+- Fall back to normalized detection
+
+Span semantics:
+  offendingText = matched instruction phrase or entire line
 
 ## Parameters
 

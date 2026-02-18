@@ -8,7 +8,7 @@
 
 > **Detector** = (`text`, `options`, `context`) => [`ThreatReport`](../interfaces/ThreatReport.md)[]
 
-Defined in: [types.ts:212](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L212)
+Defined in: [types.ts:236](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L236)
 
 Detector function contract.
 

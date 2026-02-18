@@ -36,7 +36,7 @@ Defined in: [types.ts:52](https://github.com/promptshield-io/promptshield/blob/m
 
 Prompt injection patterns.
 
-Reserved for semantic detection layers.
+Deterministic, rule-based detection only.
 
 ***
 

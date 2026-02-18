@@ -8,7 +8,7 @@
 
 > **decodeUnicodeTags**(`text`): `string` \| `undefined`
 
-Defined in: [invisible.ts:176](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/invisible.ts#L176)
+Defined in: [invisible.ts:242](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/invisible.ts#L242)
 
 Attempts to decode Unicode tag characters into ASCII text.
 
@@ -23,17 +23,7 @@ Each tag character encodes an ASCII value using:
 Attackers can use this mechanism to embed hidden instructions
 or metadata inside otherwise invisible text streams.
 
-Example:
-Invisible sequence encoding:
-  "ignore previous instructions"
-
-This decoder performs a best-effort extraction:
-
-- Only printable ASCII (32–126) is decoded
-- Non-ASCII tags are ignored
-- Returns `undefined` if no payload is found
-
-The function is intentionally tolerant and side-effect free.
+This decoder performs a best-effort extraction.
 
 ## Parameters
 
@@ -41,10 +31,6 @@ The function is intentionally tolerant and side-effect free.
 
 `string`
 
-A string potentially containing Unicode tag characters
-
 ## Returns
 
 `string` \| `undefined`
-
-Decoded ASCII payload if present

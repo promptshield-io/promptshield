@@ -1,0 +1,146 @@
+[**@promptshield/core**](../index.md)
+
+***
+
+[@promptshield/core](../index.md) / ThreatReport
+
+# Interface: ThreatReport
+
+Defined in: [types.ts:93](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L93)
+
+Report describing a detected threat span.
+
+NOTE:
+A ThreatReport represents a **span**, not a single character.
+Adjacent suspicious characters should be grouped into one report.
+
+## Properties
+
+### category
+
+> **category**: [`ThreatCategory`](../enumerations/ThreatCategory.md)
+
+Defined in: [types.ts:103](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L103)
+
+Threat classification
+
+***
+
+### decodedPayload?
+
+> `optional` **decodedPayload**: `string`
+
+Defined in: [types.ts:148](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L148)
+
+Optional decoded payload extracted from concealed content.
+
+Example:
+"ignore previous instructions"
+
+***
+
+### loc
+
+> **loc**: [`ThreatLoc`](ThreatLoc.md)
+
+Defined in: [types.ts:117](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L117)
+
+Location of the threat start
+
+***
+
+### message
+
+> **message**: `string`
+
+Defined in: [types.ts:114](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L114)
+
+Human-readable diagnostic message.
+
+Describes WHAT was detected and WHY it matters.
+This should not include remediation steps.
+
+***
+
+### offendingText
+
+> **offendingText**: `string`
+
+Defined in: [types.ts:125](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L125)
+
+The substring responsible for the detection.
+
+This may contain multiple characters if the threat
+represents a sequence.
+
+***
+
+### readableLabel?
+
+> `optional` **readableLabel**: `string`
+
+Defined in: [types.ts:133](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L133)
+
+Optional readable label for UI rendering.
+
+Example:
+"[ZWSP × 3]"
+
+***
+
+### referenceUrl?
+
+> `optional` **referenceUrl**: `string`
+
+Defined in: [types.ts:156](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L156)
+
+Reference documentation explaining the risk.
+
+Example:
+https://promptshield.js.org/docs/detectors/invisible-chars#PSU001
+
+***
+
+### ruleId
+
+> **ruleId**: `string`
+
+Defined in: [types.ts:100](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L100)
+
+Stable rule identifier.
+
+Example:
+"PSU001", "PST001", "PSI002"
+
+***
+
+### severity
+
+> **severity**: [`Severity`](../type-aliases/Severity.md)
+
+Defined in: [types.ts:106](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L106)
+
+Risk severity
+
+***
+
+### suggestion?
+
+> `optional` **suggestion**: `string`
+
+Defined in: [types.ts:140](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L140)
+
+Suggested remediation guidance.
+
+This is optional and may vary by environment (editor, CI, UI).
+
+***
+
+### suppressed?
+
+> `optional` **suppressed**: `boolean`
+
+Defined in: [types.ts:162](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L162)
+
+Indicates whether this threat was suppressed
+by an ignore directive.

@@ -134,31 +134,30 @@ export const runPromptShield = async (
     return;
   }
 
-  for (const file of config.files) {
-    const content = await readFile(file, "utf-8");
+  if (config.command === "sanitize") {
+    const sanitizer = config.strict ? sanitizeStrict : sanitize;
 
-    if (config.command === "sanitize") {
-      /* ----------------------------- SANITIZE ----------------------------- */
-
-      const sanitized = config.strict
-        ? sanitizeStrict(content)
-        : sanitize(content);
-
+    for (const file of config.files) {
+      const content = await readFile(file, "utf-8");
+      const sanitized = sanitizer(content);
       if (config.write) {
         await writeFile(file, sanitized);
         logger.info(`Sanitized ${file}`);
       } else {
         logger.info(`--- ${file} (sanitized preview) ---\n${sanitized}`);
       }
-
-      continue;
     }
+    return;
+  }
+
+  for (const file of config.files) {
+    const content = await readFile(file, "utf-8");
 
     /* -------------------------------- SCAN ------------------------------ */
 
     const scanResult = scan(content, {
       minSeverity: config.minSeverity,
-      stopOnFirstThreat: config.check,
+      stopOnFirstThreat: config.check && config.noIgnore,
     });
 
     const filteredResult: FilterThreatsResult = config.noIgnore

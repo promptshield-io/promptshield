@@ -3,9 +3,9 @@
   "tasks": [
     {
       "type": "shell",
-      "command": "pnpm build",
+      "command": "pnpm build --filter promptshield",
       "options": {
-        "cwd": "${workspaceFolder}/packages/vscode"
+        "cwd": "${workspaceFolder}"
       },
       "group": {
         "kind": "build",

@@ -3,6 +3,41 @@ import { join, relative } from "node:path";
 import fg from "fast-glob";
 import ignore from "ignore";
 
+/** To Do:
+ * - support sub-directory level ignores similar to default git behavior
+ */
+
+export const IGNORE_FILES = [
+  ".gitignore",
+  ".promptshieldignore",
+  ".psignore",
+] as const;
+
+export const TEXT_LANGUAGES = [
+  "plaintext",
+  "markdown",
+  "javascript",
+  "typescript",
+  "javascriptreact",
+  "typescriptreact",
+  "json",
+  "jsonc",
+  "yaml",
+  "toml",
+  "xml",
+  "html",
+  "css",
+  "scss",
+  "less",
+  "shellscript",
+  "python",
+  "go",
+  "rust",
+  "java",
+  "c",
+  "cpp",
+] as const;
+
 /**
  * Loads ignore rules for PromptShield workspace scanning.
  *
@@ -39,9 +74,9 @@ const loadIgnore = async (root: string) => {
   // Default ignores
   ig.add([".promptshield-cache.json", "promptshield.report.md"]);
 
-  await tryLoad(".gitignore");
-  await tryLoad(".promptshieldignore");
-  await tryLoad(".psignore");
+  for (const file of IGNORE_FILES) {
+    await tryLoad(file);
+  }
 
   return ig;
 };
@@ -62,7 +97,7 @@ const loadIgnore = async (root: string) => {
  */
 export const resolveFiles = async (patterns: string[], root: string) => {
   if (!patterns.length) {
-    patterns = ["**/*.{ts,tsx,js,jsx,md,txt,json}"];
+    patterns = ["**/*"];
   }
 
   const ig = await loadIgnore(root);

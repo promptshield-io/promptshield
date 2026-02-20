@@ -8,6 +8,7 @@ import type { Connection, TextDocuments } from "vscode-languageserver";
 import type { TextDocument } from "vscode-languageserver-textdocument";
 import { CacheManager } from "./cache";
 import { convertReportsToDiagnostics } from "./diagnostics";
+import type { LspConfig } from "./types";
 
 let cacheManager: CacheManager | null = null;
 
@@ -18,9 +19,12 @@ export const scanWorkspace = async (
   connection: Connection,
   documents: TextDocuments<TextDocument>,
   workspaceRoot: string,
-  force = false,
+  options: LspConfig & { force?: boolean },
 ): Promise<void> => {
   if (!workspaceRoot) return;
+
+  const { force = false, ...config } = options;
+  const noIgnore = config.noIgnore ?? false;
 
   const rootPath = fileURLToPath(workspaceRoot);
 
@@ -79,17 +83,6 @@ export const scanWorkspace = async (
         const text = fs.readFileSync(filePath, "utf-8");
         const result = scan(text);
 
-        // Filter threats (ignore logic)
-        // Note: filterThreats might need the text content, which we have here.
-        // Cache should store raw threats? Or filtered?
-        // Storing raw threats allows .promptignore to change without re-scanning content.
-        // BUT for now, let's store filtered threats for simplicity or raw.
-        // Let's store raw threats in cache, and filter them here.
-
-        // Wait, cache stores scan results. Filtering depends on .promptignore context which might change.
-        // If we cache filtered results, we need to invalidate cache when .promptignore changes.
-        // For now, let's assume we cache the RAW scan results.
-
         threats = result.threats;
         if (cacheManager) {
           await cacheManager.set(cacheKey, threats);
@@ -100,18 +93,11 @@ export const scanWorkspace = async (
       }
     }
 
-    // Apply filtering (this happens even if cached, to support changing ignore rules)
-    // We need the text for filtering if line-based ignores are used.
-    // Reading file content again if it was cached might be slow.
-    // Optimization: If cached threats are empty, we don't need to read file.
-    // If cached threats exist, we might need to read file to check ignore comments.
-    // Let's read file if we have threats.
-
     let finalThreats: ThreatReport[] = [];
     if (threats.length > 0) {
       try {
         const text = fs.readFileSync(filePath, "utf-8");
-        const filterResult = filterThreats(text, threats);
+        const filterResult = filterThreats(text, threats, { noIgnore });
         finalThreats = filterResult.threats;
       } catch {
         // File might be deleted mid-scan
@@ -125,13 +111,12 @@ export const scanWorkspace = async (
         uri: cacheKey,
         threats: finalThreats,
       });
+    }
+
+    if (finalThreats.length > 0 || threats?.length > 0) {
       const uri = pathToFileURL(filePath).toString();
-
-      // Get open document if available
       const openDoc = documents.get(uri);
-
       const diagnostics = convertReportsToDiagnostics(finalThreats, openDoc);
-
       connection.sendDiagnostics({ uri, diagnostics });
     }
   }
@@ -151,8 +136,8 @@ export const scanWorkspace = async (
       md += `---\n\n`;
 
       for (const ft of allThreats) {
-        const relativePath = path.relative(rootPath, fileURLToPath(ft.uri));
-        md += `## 📄 [${relativePath}](${ft.uri})\n\n`;
+        const fileUri = pathToFileURL(path.join(rootPath, ft.uri)).toString();
+        md += `## 📄 [${ft.uri}](${fileUri})\n\n`;
 
         // Group by line
         const threatsByLine = new Map<number, ThreatReport[]>();

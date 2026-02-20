@@ -214,7 +214,7 @@ connection.onExecuteCommand(async (params) => {
     if (folders && folders.length > 0) {
       await scanWorkspace(connection, documents, folders[0].uri, {
         force,
-        config: globalConfig,
+        ...globalConfig,
       });
     }
   }

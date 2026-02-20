@@ -115,6 +115,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable PromptShield scanning."
+        },
+        "promptshield.noIgnore": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable inline ignore rules in comments (e.g., // promptshield-ignore)."
         }
       }
     }

@@ -29,7 +29,7 @@ export const SEVERITY_MAP: Record<Severity, DiagnosticSeverity> = {
  */
 export const convertReportToDiagnostic = (
   report: ThreatReport,
-  _document: TextDocument,
+  _document?: TextDocument,
 ): Diagnostic => {
   const startLine = report.loc.line - 1;
   const startChar = report.loc.column - 1;
@@ -55,6 +55,6 @@ export const convertReportToDiagnostic = (
  */
 export const convertReportsToDiagnostics = (
   reports: ThreatReport[],
-  document: TextDocument,
+  document?: TextDocument,
 ): Diagnostic[] =>
   reports.map((report) => convertReportToDiagnostic(report, document));

@@ -1,0 +1,24 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "root",
+        "tooling",
+        "docs",
+        "deps",
+        "changeset",
+        "@promptshield/cli",
+        "@promptshield/core",
+        "@promptshield/ignore",
+        "@promptshield/lsp",
+        "@promptshield/sanitizer",
+        "@promptshield/workspace",
+        "promptshield",
+        "@app/web"
+      ]
+    ]
+  }
+}

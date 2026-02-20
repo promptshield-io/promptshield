@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveFiles } from "@promptshield/workspace";
 import { findProjectRoot, resolveConfig } from "@turbo-forge/cli-kit";
-import fg from "fast-glob";
-import ignore from "ignore";
 import {
   DEFAULT_CONFIG,
   type PromptshieldCliOptions,
@@ -17,52 +16,6 @@ export interface CliOptions extends PromptshieldCliOptions {
   init?: boolean;
   config?: string;
 }
-
-/* -------------------------------------------------------------------------- */
-/* Ignore loading                                                             */
-/* -------------------------------------------------------------------------- */
-
-const loadIgnore = async (root: string) => {
-  const ig = ignore();
-
-  const tryLoad = async (file: string) => {
-    try {
-      const content = await readFile(join(root, file), "utf-8");
-      ig.add(content);
-    } catch {
-      // ignore missing files
-    }
-  };
-
-  await tryLoad(".gitignore");
-  await tryLoad(".promptshieldignore");
-  await tryLoad(".psignore");
-
-  return ig;
-};
-
-/* -------------------------------------------------------------------------- */
-/* File resolution                                                            */
-/* -------------------------------------------------------------------------- */
-
-const resolveFiles = async (patterns: string[], root: string) => {
-  if (!patterns.length) {
-    patterns = ["**/*.{ts,tsx,js,jsx,md,txt,json}"];
-  }
-
-  const ig = await loadIgnore(root);
-
-  const files = await fg(patterns, {
-    cwd: root,
-    dot: false,
-    onlyFiles: true,
-    absolute: true,
-  });
-
-  return files.filter(
-    (f) => !ig.ignores(f.replace(root, "").replace(/^(\/|\\)/, "")),
-  );
-};
 
 /* -------------------------------------------------------------------------- */
 /* Arg parsing                                                                */

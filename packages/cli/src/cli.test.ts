@@ -2,30 +2,31 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { findProjectRoot, resolveConfig } from "@turbo-forge/cli-kit";
-import fg from "fast-glob";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { main, parseArgs, showHelp } from "./cli";
 import { DEFAULT_CONFIG, runPromptShield } from "./main";
 
 // Mocks
 vi.mock("node:fs/promises");
-vi.mock("fast-glob");
 vi.mock("@turbo-forge/cli-kit");
+vi.mock("@promptshield/workspace");
 vi.mock("./main");
+
+import { resolveFiles } from "@promptshield/workspace";
 
 describe("cli.ts", () => {
   const mockReadFile = readFile as any;
   const mockWriteFile = writeFile as any;
-  const mockFg = fg as any;
   const mockFindRoot = findProjectRoot as any;
   const mockResolveConfig = resolveConfig as any;
   const mockRun = runPromptShield as any;
+  const mockResolveFiles = resolveFiles as any;
 
   beforeEach(() => {
     vi.resetAllMocks();
     mockFindRoot.mockReturnValue("/root");
     mockResolveConfig.mockResolvedValue({ ...DEFAULT_CONFIG, files: [] });
-    mockFg.mockResolvedValue([]);
+    mockResolveFiles.mockResolvedValue([]);
     mockReadFile.mockRejectedValue(new Error("ENOENT")); // Default no ignore files
   });
 
@@ -134,16 +135,17 @@ describe("cli.ts", () => {
     });
 
     it("should resolve files and run promptshield", async () => {
-      // Mock finding some files
-      mockFg.mockResolvedValue(["/root/src/file.ts"]);
-      // Mock ignore file that ignores nothing
-      mockReadFile.mockRejectedValue(new Error("No ignore file"));
+      mockResolveFiles.mockResolvedValue(["/root/src/file.ts"]);
+      mockResolveConfig.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        files: ["src"],
+      });
 
       await main(["src"]);
 
       expect(mockFindRoot).toHaveBeenCalled();
       expect(mockResolveConfig).toHaveBeenCalled();
-      expect(mockFg).toHaveBeenCalled();
+      expect(mockResolveFiles).toHaveBeenCalledWith(["src"], "/root");
       expect(mockRun).toHaveBeenCalledWith(
         expect.objectContaining({
           files: ["/root/src/file.ts"],
@@ -151,35 +153,11 @@ describe("cli.ts", () => {
       );
     });
 
-    it("should filter ignored files", async () => {
-      // Mock finding files
-      mockFg.mockResolvedValue(["/root/src/file.ts", "/root/dist/file.js"]);
-
-      // Mock .gitignore
-      mockReadFile.mockImplementation((path: string) => {
-        if (path.endsWith(".gitignore")) {
-          return Promise.resolve("dist/");
-        }
-        return Promise.reject(new Error("ENOENT"));
-      });
-
-      await main(["."]);
-
-      expect(mockRun).toHaveBeenCalledWith(
-        expect.objectContaining({
-          files: ["/root/src/file.ts"],
-        }),
-      );
-    });
-
-    it("should use default pattern if no files provided", async () => {
-      mockFg.mockResolvedValue([]);
+    it("should use default file patterns if no files provided", async () => {
+      mockResolveFiles.mockResolvedValue([]);
       await main([]); // No args
 
-      expect(mockFg).toHaveBeenCalledWith(
-        expect.arrayContaining(["**/*.{ts,tsx,js,jsx,md,txt,json}"]),
-        expect.any(Object),
-      );
+      expect(mockResolveFiles).toHaveBeenCalledWith([], "/root");
     });
   });
 });

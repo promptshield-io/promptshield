@@ -19,8 +19,8 @@
     "@promptshield/core",
     "@promptshield/ignore",
     "@promptshield/lsp",
-    "@promptshield/mcp",
     "@promptshield/sanitizer",
+    "@promptshield/workspace",
     "promptshield",
     "@app/web"
   ],

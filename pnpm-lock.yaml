@@ -153,19 +153,16 @@ importers:
       '@promptshield/sanitizer':
         specifier: workspace:*
         version: link:../sanitizer
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
-      ignore:
-        specifier: ^7.0.5
-        version: 7.0.5
+      '@promptshield/workspace':
+        specifier: workspace:*
+        version: link:../workspace
     devDependencies:
       '@turbo-forge/cli-kit':
         specifier: latest
         version: 0.0.0(jiti@2.6.1)
       '@types/node':
         specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -177,7 +174,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -189,7 +186,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -208,6 +205,9 @@ importers:
       '@promptshield/sanitizer':
         specifier: workspace:*
         version: link:../sanitizer
+      '@promptshield/workspace':
+        specifier: workspace:*
+        version: link:../workspace
       vscode-languageserver:
         specifier: ^9.0.1
         version: 9.0.1
@@ -217,19 +217,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: latest
-        version: 25.2.3
-      tsup:
-        specifier: latest
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
-      typescript:
-        specifier: latest
-        version: 5.9.3
-
-  packages/mcp:
-    devDependencies:
-      '@types/node':
-        specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -245,7 +233,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -273,7 +261,7 @@ importers:
         version: 10.0.10
       '@types/node':
         specifier: latest
-        version: 25.2.3
+        version: 25.3.0
       '@types/vscode':
         specifier: ^1.109.0
         version: 1.109.0
@@ -286,6 +274,25 @@ importers:
       mocha:
         specifier: ^11.7.5
         version: 11.7.5
+      tsup:
+        specifier: latest
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: latest
+        version: 5.9.3
+
+  packages/workspace:
+    dependencies:
+      fast-glob:
+        specifier: ^3.3.3
+        version: 3.3.3
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
+    devDependencies:
+      '@types/node':
+        specifier: latest
+        version: 25.3.0
       tsup:
         specifier: latest
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -1777,6 +1784,9 @@ packages:
 
   '@types/node@25.2.3':
     resolution: {integrity: sha512-m0jEgYlYz+mDJZ2+F4v8D1AyQb+QzsNqRuI7xg1VQX/KlKS0qT9r1Mo16yo5F/MtifXFgaofIFsdFMox2SxIbQ==}
+
+  '@types/node@25.3.0':
+    resolution: {integrity: sha512-4K3bqJpXpqfg2XKGK9bpDTc6xO/xoUP/RBWS7AtRMug6zZFaRekiLzjVtAoZMquxoAbzBvy5nxQ7veS5eYzf8A==}
 
   '@types/picomatch@4.0.2':
     resolution: {integrity: sha512-qHHxQ+P9PysNEGbALT8f8YOSHW0KJu6l2xU8DYY0fu/EmGxXdVnuTLvFUvBgPJMSqXq29SYHveejeAha+4AYgA==}
@@ -4312,6 +4322,9 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
+  undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
 
@@ -6008,7 +6021,7 @@ snapshots:
   '@types/liftoff@4.0.3':
     dependencies:
       '@types/fined': 1.1.5
-      '@types/node': 25.2.3
+      '@types/node': 25.3.0
 
   '@types/mdast@4.0.4':
     dependencies:
@@ -6026,6 +6039,10 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  '@types/node@25.3.0':
+    dependencies:
+      undici-types: 7.18.2
+
   '@types/picomatch@4.0.2': {}
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
@@ -6038,7 +6055,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 25.2.3
+      '@types/node': 25.3.0
 
   '@types/unist@2.0.11': {}
 
@@ -6050,7 +6067,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.2.3
+      '@types/node': 25.3.0
 
   '@ungap/structured-clone@1.3.0': {}
 
@@ -6959,7 +6976,7 @@ snapshots:
 
   happy-dom@20.6.1:
     dependencies:
-      '@types/node': 25.2.3
+      '@types/node': 25.3.0
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 6.0.1
@@ -8976,6 +8993,8 @@ snapshots:
   unc-path-regex@0.1.2: {}
 
   undici-types@7.16.0: {}
+
+  undici-types@7.18.2: {}
 
   unified@11.0.5:
     dependencies:

@@ -18,11 +18,17 @@ export class CacheManager {
   private cache: CacheData = { version: "1.0", entries: {} };
   private cachePath: string | null = null;
   private isLoaded = false;
+  private workspaceRoot: string | null = null;
 
   constructor(workspaceRoot?: string) {
     if (workspaceRoot) {
+      this.workspaceRoot = workspaceRoot;
       this.cachePath = path.join(workspaceRoot, ".promptshield-cache.json");
     }
+  }
+
+  getEntries(): Record<string, CacheEntry> {
+    return this.cache.entries;
   }
 
   async load() {
@@ -57,8 +63,12 @@ export class CacheManager {
     const entry = this.cache.entries[filePath];
     if (!entry) return null;
 
+    const absolutePath = this.workspaceRoot
+      ? path.join(this.workspaceRoot, filePath)
+      : filePath;
+
     try {
-      const stats = await fs.stat(filePath);
+      const stats = await fs.stat(absolutePath);
       if (stats.mtimeMs === entry.mtime && stats.size === entry.size) {
         return entry.results;
       }
@@ -71,8 +81,12 @@ export class CacheManager {
   }
 
   async set(filePath: string, results: ThreatReport[]) {
+    const absolutePath = this.workspaceRoot
+      ? path.join(this.workspaceRoot, filePath)
+      : filePath;
+
     try {
-      const stats = await fs.stat(filePath);
+      const stats = await fs.stat(absolutePath);
       this.cache.entries[filePath] = {
         mtime: stats.mtimeMs,
         size: stats.size,
@@ -83,6 +97,13 @@ export class CacheManager {
       await this.save();
     } catch (e) {
       console.error(`Failed to update cache for ${filePath}:`, e);
+    }
+  }
+
+  async remove(filePath: string) {
+    if (this.cache.entries[filePath]) {
+      delete this.cache.entries[filePath];
+      await this.save();
     }
   }
 

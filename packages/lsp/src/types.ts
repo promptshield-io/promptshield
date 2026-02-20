@@ -43,6 +43,12 @@ export interface LspConfig {
    * @default true
    */
   validateOnSave?: boolean;
+  /**
+   * Disable inline ignore rules in comments (e.g., // promptshield-ignore).
+   *
+   * @default false
+   */
+  noIgnore?: boolean;
 }
 
 /**
@@ -60,4 +66,5 @@ export const DEFAULT_CONFIG: Required<LspConfig> = {
   validateOnChange: true,
   validateOnOpen: true,
   validateOnSave: true,
+  noIgnore: false,
 };

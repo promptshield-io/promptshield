@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import commitlintConfig from "../../.commitlintrc.json";
 import pkgJson from "../../package.json";
 
 const getEntries = (dir: string) =>
@@ -47,6 +48,14 @@ try {
 
   writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
   console.log("✅ VS Code scopes synced with workspace packages!");
+
+  commitlintConfig.rules["scope-enum"][2] = scopes;
+
+  writeFileSync(
+    "./.commitlintrc.json",
+    JSON.stringify(commitlintConfig, null, 2),
+  );
+  console.log("✅ Commitlint config synced with workspace packages!");
 
   // Update biome schema
   const biomeFilePath = path.join(process.cwd(), "biome.json");

@@ -21,8 +21,10 @@ const mocks = vi.hoisted(() => {
     },
     workspace: {
       getWorkspaceFolders: vi.fn(),
+      getConfiguration: vi.fn(),
     },
     sendDiagnostics: vi.fn(),
+    onDidChangeConfiguration: vi.fn(),
   };
 
   const mockdocuments = {

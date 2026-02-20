@@ -112,4 +112,18 @@ danger()
 
     expect(result.threats.map((t) => t.loc.line)).toEqual([1]);
   });
+
+  it("respects noIgnore option to bypass directives", () => {
+    const text = `
+promptshield-ignore all
+danger()
+`.trim();
+
+    const threats = [threat(2)];
+    const result = filterThreats(text, threats, { noIgnore: true });
+
+    expect(result.threats).toHaveLength(1);
+    expect(result.ignoredThreats).toHaveLength(0);
+    expect(result.unusedIgnores).toHaveLength(0);
+  });
 });

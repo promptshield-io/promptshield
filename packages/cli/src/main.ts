@@ -70,7 +70,7 @@ export interface PromptshieldCliOptions {
   check?: boolean;
 
   /**
-   * Disable ignore directives.
+   * Disable inline ignore rules in comments (e.g., // promptshield-ignore).
    * Forces all rules to be evaluated.
    */
   noIgnore?: boolean;
@@ -160,14 +160,11 @@ export const runPromptShield = async (
       stopOnFirstThreat: config.check && config.noIgnore,
     });
 
-    const filteredResult: FilterThreatsResult = config.noIgnore
-      ? {
-          threats: scanResult.threats,
-          unusedIgnores: [],
-          ignoredBySeverity: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
-          ignoredThreats: [],
-        }
-      : filterThreats(content, scanResult.threats);
+    const filteredResult: FilterThreatsResult = filterThreats(
+      content,
+      scanResult.threats,
+      { noIgnore: config.noIgnore },
+    );
 
     const {
       threats: filtered,

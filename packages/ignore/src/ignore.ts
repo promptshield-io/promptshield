@@ -81,15 +81,25 @@ const parseIgnoreDirectives = (text: string): IgnoreParseResult => {
 export const filterThreats = (
   text: string,
   threats: ThreatReport[],
+  options?: { noIgnore?: boolean },
 ): FilterThreatsResult => {
-  const ignore = parseIgnoreDirectives(text);
-
   const ignoredBySeverity: Record<Severity, number> = {
     CRITICAL: 0,
     HIGH: 0,
     MEDIUM: 0,
     LOW: 0,
   };
+
+  if (options?.noIgnore) {
+    return {
+      threats,
+      ignoredThreats: [],
+      unusedIgnores: [],
+      ignoredBySeverity,
+    };
+  }
+
+  const ignore = parseIgnoreDirectives(text);
 
   if (ignore.ignoreFile) {
     threats.forEach((t) => {

@@ -15,14 +15,14 @@ export const validateDocument = async (
 ): Promise<void> => {
   const text = document.getText();
 
-  const { maxFileSize } = { ...DEFAULT_CONFIG, ...config };
+  const { maxFileSize, noIgnore } = { ...DEFAULT_CONFIG, ...config };
 
   if (maxFileSize > 0 && text.length > maxFileSize) {
     return;
   }
 
   const result = scan(text);
-  const { threats } = filterThreats(text, result.threats);
+  const { threats } = filterThreats(text, result.threats, { noIgnore });
   const diagnostics = convertReportsToDiagnostics(threats, document);
 
   connection.sendDiagnostics({ uri: document.uri, diagnostics });

@@ -90,7 +90,27 @@ connection.onInitialized(() => {
       undefined,
     );
   }
+  fetchConfiguration();
 });
+
+connection.onDidChangeConfiguration(() => {
+  fetchConfiguration();
+});
+
+async function fetchConfiguration() {
+  if (hasConfigurationCapability) {
+    try {
+      const config =
+        await connection.workspace.getConfiguration("promptshield");
+      if (config) {
+        globalConfig.noIgnore = config.noIgnore ?? DEFAULT_CONFIG.noIgnore;
+        // Optionally map other config properties here if they get added
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
 
 /**
  * Trigger validation when document content changes.
@@ -188,20 +208,18 @@ function comparePositions(p1: Position, p2: Position): number {
  * Execute PromptShield workspace commands.
  */
 connection.onExecuteCommand(async (params) => {
-  if (params.command !== "promptshield.scanWorkspace") {
-    return;
+  if (params.command === "promptshield.scanWorkspace") {
+    const force = params.arguments?.[0] === true;
+    const folders = await connection.workspace.getWorkspaceFolders();
+    if (folders && folders.length > 0) {
+      await scanWorkspace(connection, documents, folders[0].uri, {
+        force,
+        config: globalConfig,
+      });
+    }
   }
-
-  const folders = await connection.workspace.getWorkspaceFolders();
-  if (!folders) return;
-
-  const folderUris = folders.map((f) => f.uri);
-  await scanWorkspace(connection, documents, folderUris);
 });
 
-/**
- * Start document manager and LSP connection.
- */
 /**
  * Start document manager and LSP connection.
  */

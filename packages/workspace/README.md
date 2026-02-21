@@ -28,7 +28,7 @@
 ## ✨ Why @promptshield/workspace?
 
 - **Centralized Ignore Logic**: Respects `.gitignore`, `.promptshieldignore`, and `.psignore`.
-- **Safe Defaults**: Automatically ignores `.promptshield-cache.json` and `promptshield.report.md`.
+- **Safe Defaults**: Automatically ignores `.promptshield-cache.json` and `promptshield-report.md`.
 - **Fast**: Uses `fast-glob` for efficient file discovery. 
 
 ---

@@ -35,7 +35,7 @@ describe("resolveFiles", () => {
     const files = await resolveFiles([], mockRoot);
 
     expect(fg).toHaveBeenCalledWith(
-      ["**/*.{ts,tsx,js,jsx,md,txt,json}"],
+      ["**/*"],
       expect.objectContaining({ cwd: mockRoot }),
     );
     expect(files).toEqual(["/test/workspace/file.ts"]);
@@ -53,11 +53,11 @@ describe("resolveFiles", () => {
     expect(files).toEqual(["/test/workspace/file.ts"]);
   });
 
-  it("should ignore .promptshield-cache.json and promptshield.report.md by default", async () => {
+  it("should ignore .promptshield-cache.json and promptshield-report.md by default", async () => {
     vi.mocked(fg).mockResolvedValue([
       "/test/workspace/file.ts",
       "/test/workspace/.promptshield-cache.json",
-      "/test/workspace/promptshield.report.md",
+      "/test/workspace/promptshield-report.md",
     ]);
     mockIgnoredFiles({});
 

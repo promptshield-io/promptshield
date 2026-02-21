@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import type { ThreatReport } from "@promptshield/core";
+import { PROMPT_SHIELD_CACHE_FILE } from "@promptshield/workspace";
 
 interface CacheEntry {
   mtime: number;
@@ -23,7 +24,7 @@ export class CacheManager {
   constructor(workspaceRoot?: string) {
     if (workspaceRoot) {
       this.workspaceRoot = workspaceRoot;
-      this.cachePath = path.join(workspaceRoot, ".promptshield-cache.json");
+      this.cachePath = path.join(workspaceRoot, PROMPT_SHIELD_CACHE_FILE);
     }
   }
 

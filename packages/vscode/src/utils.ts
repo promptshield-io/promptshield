@@ -1,17 +1,19 @@
 import type { ThreatReport } from "@promptshield/core";
+import {
+  PROMPT_SHIELD_CACHE_FILE,
+  PROMPT_SHIELD_REPORT_FILE,
+} from "@promptshield/workspace";
+import type { Uri } from "vscode";
 
-export const SEVERITY_SCORE = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+export const PROMPT_SHIELD_ARTIFACTS_REGEXP = new RegExp(
+  `(${PROMPT_SHIELD_CACHE_FILE}|${PROMPT_SHIELD_REPORT_FILE})$`,
+);
+
+export const isPromptShieldArtifact = (uri: Uri) => {
+  return PROMPT_SHIELD_ARTIFACTS_REGEXP.test(uri.toString());
+};
+
 export const getPrimaryThreat = (threats: ThreatReport[]) => {
-  // 1. Identify Primary Threat (Highest Severity)
-  let maxSeverity: ThreatReport["severity"] = "LOW";
-  let primaryThreat: ThreatReport = threats[0];
-
-  for (const t of threats) {
-    if (SEVERITY_SCORE[t.severity] > SEVERITY_SCORE[maxSeverity]) {
-      maxSeverity = t.severity;
-      primaryThreat = t;
-    }
-  }
-
-  return primaryThreat;
+  // Threats are pre-sorted by severity in the LSP diagnostics compiler
+  return threats[0];
 };

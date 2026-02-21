@@ -8,12 +8,15 @@ const mocks = vi.hoisted(() => {
     LanguageClient: {
       start: vi.fn(),
       stop: vi.fn(),
+      sendRequest: vi.fn(),
     },
     DecorationManager: {
       activate: vi.fn(),
       getAllThreats: vi.fn(() => []),
     },
-    PromptShieldStatusBar: vi.fn(),
+    PromptShieldStatusBar: class {
+      setLoading = vi.fn();
+    },
   };
 });
 
@@ -56,6 +59,10 @@ vi.mock("vscode", () => ({
     replace = vi.fn();
   },
   TextEditorRevealType: { InCenter: 1 },
+  languages: {
+    getDiagnostics: vi.fn(() => []),
+    onDidChangeDiagnostics: vi.fn(() => ({ dispose: vi.fn() })),
+  },
 }));
 
 vi.mock("./decoration-manager", () => ({
@@ -88,7 +95,9 @@ describe("VSCode Extension", () => {
       LanguageClient: class {
         start = mocks.LanguageClient.start;
         stop = mocks.LanguageClient.stop;
+        sendRequest = mocks.LanguageClient.sendRequest;
       },
+      ExecuteCommandRequest: { type: "type" },
       TransportKind: { ipc: 1 },
     }));
   });
@@ -99,7 +108,7 @@ describe("VSCode Extension", () => {
 
     expect(mocks.LanguageClient.start).toHaveBeenCalled();
     expect(mocks.DecorationManager.activate).toHaveBeenCalled();
-    expect(vscode.commands.registerCommand).toHaveBeenCalledTimes(4);
+    expect(vscode.commands.registerCommand).toHaveBeenCalledTimes(6);
   });
 
   it("should deactivate extension", async () => {
@@ -119,9 +128,12 @@ describe("VSCode Extension", () => {
     )?.[1];
 
     if (handler) {
-      handler();
-      expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
-        "promptshield.scanWorkspace",
+      await handler();
+      expect(mocks.LanguageClient.sendRequest).toHaveBeenCalledWith(
+        "type",
+        expect.objectContaining({
+          command: "promptshield.scanWorkspace",
+        }),
       );
     } else {
       throw new Error("Handler not found");

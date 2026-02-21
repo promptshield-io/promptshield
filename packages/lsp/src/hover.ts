@@ -5,6 +5,10 @@ import type { TextDocument } from "vscode-languageserver-textdocument";
 import { getIconMarkdown, ICONS } from "./icons";
 
 /**
+ * Redundant file --- will explore later. We have move hover UI responsibility to the extension.
+ */
+
+/**
  * Provide hover information for threats at the given position.
  */
 export const getHover = (

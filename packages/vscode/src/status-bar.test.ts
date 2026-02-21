@@ -17,6 +17,10 @@ vi.mock("vscode", () => ({
   window: {
     createStatusBarItem: vi.fn(() => mockStatusBarItem),
   },
+  languages: {
+    getDiagnostics: vi.fn(() => []),
+    onDidChangeDiagnostics: vi.fn(() => ({ dispose: vi.fn() })),
+  },
   StatusBarAlignment: { Right: 1 },
   ThemeColor: class {
     constructor(public id: string) {}
@@ -27,15 +31,12 @@ describe("PromptShieldStatusBar", () => {
   let statusBar: PromptShieldStatusBar;
   let mockDecorationManager: any;
   let threatCallback: (count: number) => void;
-  let mockContext: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockStatusBarItem.text = "";
     mockStatusBarItem.tooltip = "";
     mockStatusBarItem.backgroundColor = undefined;
-
-    mockContext = { subscriptions: [] };
 
     mockDecorationManager = {
       onThreatsChanged: vi.fn((cb) => {
@@ -44,12 +45,12 @@ describe("PromptShieldStatusBar", () => {
       }),
     };
 
-    statusBar = new PromptShieldStatusBar(mockContext, mockDecorationManager);
+    statusBar = new PromptShieldStatusBar(mockDecorationManager);
   });
 
   it("should initialize and show status bar", () => {
     expect(mockStatusBarItem.show).toHaveBeenCalled();
-    expect(mockStatusBarItem.command).toBe("promptshield.showDetailedReport");
+    expect(mockStatusBarItem.command).toBe("promptshield.showMenu");
   });
 
   it("should show spinning icon when loading", () => {
@@ -70,7 +71,7 @@ describe("PromptShieldStatusBar", () => {
   it("should show threat count and error color when threats detected", () => {
     if (threatCallback) threatCallback(5);
 
-    expect(mockStatusBarItem.text).toContain("5 Threats");
+    expect(mockStatusBarItem.text).toContain("5");
     expect(mockStatusBarItem.backgroundColor).toBeDefined();
   });
 
@@ -79,8 +80,9 @@ describe("PromptShieldStatusBar", () => {
     expect(mockStatusBarItem.text).toContain("$(sync~spin)");
 
     if (threatCallback) threatCallback(2);
+    statusBar.setLoading(false);
 
     expect(mockStatusBarItem.text).not.toContain("$(sync~spin)");
-    expect(mockStatusBarItem.text).toContain("2 Threats");
+    expect(mockStatusBarItem.text).toContain("2");
   });
 });

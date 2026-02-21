@@ -1,16 +1,24 @@
 import type { ThreatReport } from "@promptshield/core";
+import { SOURCE } from "@promptshield/lsp";
 import * as vscode from "vscode";
+import { createHoverMessageAndLabel } from "./decoration-helper";
 
-export class DecorationManager {
+export class DecorationManager implements vscode.Disposable {
   private criticalDecorationType: vscode.TextEditorDecorationType;
   private highDecorationType: vscode.TextEditorDecorationType;
   private mediumDecorationType: vscode.TextEditorDecorationType;
   private lowDecorationType: vscode.TextEditorDecorationType;
-  private hiddenTextDecorationType: vscode.TextEditorDecorationType;
+  private criticalReplacementDecorationType: vscode.TextEditorDecorationType;
+  private highReplacementDecorationType: vscode.TextEditorDecorationType;
+  private mediumReplacementDecorationType: vscode.TextEditorDecorationType;
+  private lowReplacementDecorationType: vscode.TextEditorDecorationType;
   private eolDecorationType: vscode.TextEditorDecorationType;
-  private documentThreats = new Map<string, ThreatReport[]>();
+  private disposables: vscode.Disposable[] = [];
+  private isXRayEnabled = false;
 
-  private _onThreatsChanged = new vscode.EventEmitter<number>();
+  private _onThreatsChanged = new vscode.EventEmitter<{
+    count: number;
+  }>();
   public readonly onThreatsChanged = this._onThreatsChanged.event;
 
   constructor() {
@@ -67,9 +75,58 @@ export class DecorationManager {
       ),
     });
 
-    this.hiddenTextDecorationType =
+    const baseReplacementBeforeOptions = {
+      color: new vscode.ThemeColor("promptshield.ghostTextForeground"),
+      fontStyle: "normal",
+      fontWeight: "bold",
+    };
+
+    this.criticalReplacementDecorationType =
       vscode.window.createTextEditorDecorationType({
-        color: "transparent",
+        before: {
+          ...baseReplacementBeforeOptions,
+          backgroundColor: new vscode.ThemeColor(
+            "promptshield.criticalThreatBackground",
+          ),
+          textDecoration:
+            "underline wavy var(--vscode-promptshield-criticalThreatBackground)",
+        },
+      });
+
+    this.highReplacementDecorationType =
+      vscode.window.createTextEditorDecorationType({
+        before: {
+          ...baseReplacementBeforeOptions,
+          backgroundColor: new vscode.ThemeColor(
+            "promptshield.highThreatBackground",
+          ),
+          textDecoration:
+            "underline wavy var(--vscode-promptshield-highThreatBackground)",
+        },
+      });
+
+    this.mediumReplacementDecorationType =
+      vscode.window.createTextEditorDecorationType({
+        before: {
+          ...baseReplacementBeforeOptions,
+          backgroundColor: new vscode.ThemeColor(
+            "promptshield.mediumThreatBackground",
+          ),
+          textDecoration:
+            "underline wavy var(--vscode-promptshield-mediumThreatBackground)",
+        },
+      });
+
+    this.lowReplacementDecorationType =
+      vscode.window.createTextEditorDecorationType({
+        before: {
+          ...baseReplacementBeforeOptions,
+          backgroundColor: new vscode.ThemeColor(
+            "promptshield.lowThreatBackground",
+          ),
+          textDecoration:
+            "underline wavy var(--vscode-promptshield-lowThreatBackground)",
+        },
       });
 
     this.eolDecorationType = vscode.window.createTextEditorDecorationType({
@@ -79,40 +136,54 @@ export class DecorationManager {
         margin: "0 0 0 20px",
       },
     });
+
+    // Track all decoration types for disposal
+    this.disposables.push(
+      this.criticalDecorationType,
+      this.highDecorationType,
+      this.mediumDecorationType,
+      this.lowDecorationType,
+      this.criticalReplacementDecorationType,
+      this.highReplacementDecorationType,
+      this.mediumReplacementDecorationType,
+      this.lowReplacementDecorationType,
+      this.eolDecorationType,
+      this._onThreatsChanged,
+    );
   }
 
-  public getAllThreats(uri: vscode.Uri): ThreatReport[] {
-    return this.documentThreats.get(uri.toString()) || [];
-  }
-
-  public getThreatsAt(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-  ): ThreatReport[] {
-    const threats = this.documentThreats.get(document.uri.toString()) || [];
-    return threats.filter((t) => {
-      const start = document.positionAt(t.loc.index);
-      const end = document.positionAt(t.loc.index + t.offendingText.length);
-      const range = new vscode.Range(start, end);
-      return range.contains(position);
+  public dispose() {
+    this.disposables.forEach((d) => {
+      d.dispose();
     });
   }
 
-  public activate(context: vscode.ExtensionContext) {
+  public toggleXRay() {
+    this.isXRayEnabled = !this.isXRayEnabled;
+    // Re-render decorations for all visible editors
+    for (const editor of vscode.window.visibleTextEditors) {
+      this.updateFromDiagnostics(editor.document.uri);
+    }
+  }
+
+  public activate() {
     // Listen for diagnostics changes
-    context.subscriptions.push(
-      vscode.languages.onDidChangeDiagnostics((e) => {
-        for (const uri of e.uris) {
-          this.updateFromDiagnostics(uri);
-        }
-      }),
-      // Also update on active editor change to ensure decorations are visible/refreshed
-      vscode.window.onDidChangeActiveTextEditor((editor) => {
+    const diagnosticsListener = vscode.languages.onDidChangeDiagnostics((e) => {
+      for (const uri of e.uris) {
+        this.updateFromDiagnostics(uri);
+      }
+    });
+
+    // Also update on active editor change to ensure decorations are visible/refreshed
+    const editorListener = vscode.window.onDidChangeActiveTextEditor(
+      (editor) => {
         if (editor) {
           this.updateFromDiagnostics(editor.document.uri);
         }
-      }),
+      },
     );
+
+    this.disposables.push(diagnosticsListener, editorListener);
 
     // Initial update for active editor
     if (vscode.window.activeTextEditor) {
@@ -123,214 +194,114 @@ export class DecorationManager {
   private updateFromDiagnostics(uri: vscode.Uri) {
     const diagnostics = vscode.languages.getDiagnostics(uri);
     const promptShieldDiagnostics = diagnostics.filter(
-      (d) => d.source === "PromptShield",
+      (d) => d.source === SOURCE,
     );
 
-    const threats: ThreatReport[] = promptShieldDiagnostics.map((d) => {
-      if (
-        (d as unknown as { data: ThreatReport }).data &&
-        d.code !== undefined
-      ) {
-        return (d as unknown as { data: ThreatReport }).data;
-      }
-
-      // Fallback: Reconstruct ThreatReport from Diagnostic
-      const range = d.range;
-      const textDoc = vscode.workspace.textDocuments.find(
-        (doc) => doc.uri.toString() === uri.toString(),
-      );
-
-      let offendingText = "";
-      let index = 0;
-      if (textDoc) {
-        offendingText = textDoc.getText(range);
-        index = textDoc.offsetAt(range.start);
-      }
-
-      return {
-        ruleId: String(d.code) || "unknown", // mapped from category
-        category: String(d.code) || "unknown",
-        severity:
-          d.severity === vscode.DiagnosticSeverity.Error ? "CRITICAL" : "HIGH", // approximate or map back
-        message: d.message,
-        offendingText,
-        loc: {
-          line: range.start.line + 1,
-          column: range.start.character + 1,
-          index,
-        },
-      } as ThreatReport;
-    });
-
-    this.documentThreats.set(uri.toString(), threats);
-    this.updateDecorations(uri, threats);
+    this.updateDecorations(uri, promptShieldDiagnostics);
   }
 
-  private updateDecorations(uri: vscode.Uri, threats: ThreatReport[]) {
+  private updateDecorations(
+    uri: vscode.Uri,
+    diagnostics: readonly vscode.Diagnostic[],
+  ) {
     const editors = vscode.window.visibleTextEditors.filter(
       (e) => e.document.uri.toString() === uri.toString(),
     );
 
     for (const editor of editors) {
-      this._onThreatsChanged.fire(threats.length);
+      this._onThreatsChanged.fire({
+        count: diagnostics.length,
+      });
 
       const criticalDecorations: vscode.DecorationOptions[] = [];
       const highDecorations: vscode.DecorationOptions[] = [];
       const mediumDecorations: vscode.DecorationOptions[] = [];
       const lowDecorations: vscode.DecorationOptions[] = [];
-      const hiddenDecorations: vscode.DecorationOptions[] = [];
+      const criticalReplacementDecorations: vscode.DecorationOptions[] = [];
+      const highReplacementDecorations: vscode.DecorationOptions[] = [];
+      const mediumReplacementDecorations: vscode.DecorationOptions[] = [];
+      const lowReplacementDecorations: vscode.DecorationOptions[] = [];
       const eolDecorations: vscode.DecorationOptions[] = [];
 
-      // Group threats by range (start:end) to deduplicate decorations
-      const threatsByRange = new Map<string, ThreatReport[]>();
-      for (const t of threats) {
-        const key = `${t.loc.index}:${t.loc.index + t.offendingText.length}`;
-        if (!threatsByRange.has(key)) {
-          threatsByRange.set(key, []);
-        }
-        threatsByRange.get(key)?.push(t);
-      }
+      for (const diagnostic of diagnostics) {
+        const rangeThreats = (diagnostic as unknown as { data: ThreatReport[] })
+          .data;
+        if (!rangeThreats || rangeThreats.length === 0) continue;
 
-      // Create Range Decorations
-      for (const [, rangeThreats] of threatsByRange) {
-        // Pick the "worst" threat to determine color
-        let maxSeverity: ThreatReport["severity"] = "LOW";
-        // Simple mapping for comparison
-        const severityScore = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+        const primaryThreat = rangeThreats[0];
 
-        let primaryThreat: ThreatReport = rangeThreats[0];
+        const start = diagnostic.range.start;
+        const end = diagnostic.range.end;
 
-        // Combine messages into rich hover
-        const messages = rangeThreats
-          .map((t) => {
-            const icon =
-              t.severity === "CRITICAL" || t.severity === "HIGH"
-                ? "$(alert)"
-                : "$(shield)";
-            return `### ${icon} PromptShield Threat Detected\n\n**Category:** ${t.category}\n**Severity:** ${t.severity}\n\n${t.message}\n\n**Offending Text:** \`${t.offendingText}\`${t.decodedPayload ? `\n\n**Decoded Payload:** \`${t.decodedPayload}\`` : ""}`;
-          })
-          .join("\n\n---\n\n");
-
-        const hoverMessage = new vscode.MarkdownString(messages);
-        hoverMessage.isTrusted = true;
-        hoverMessage.supportThemeIcons = true;
-
-        for (const t of rangeThreats) {
-          if (severityScore[t.severity] > severityScore[maxSeverity]) {
-            maxSeverity = t.severity;
-            primaryThreat = t;
-          }
-        }
-
-        const start = editor.document.positionAt(primaryThreat.loc.index);
-        const end = editor.document.positionAt(
-          primaryThreat.loc.index + primaryThreat.offendingText.length,
-        );
-
-        // Check if the threat consists entirely of invisible/whitespace characters/payloads
-        // that should be "replaced" by the label.
-        // Regex checks for NO "Graphic" characters (Letters, Numbers, Punctuation, Symbols, Marks).
-        // Actually simpler: check if it matches *only* Control (C), Separator (Z), or Other (C/Z/Format).
-        // If it has a payload, we usually want to show the payload instead of the invisible text.
-
-        // We consider "Replaceable" if it contains characters that are typically invisible or just whitespace.
-        // Use a broad check for "Graphic" characters. If any graphic char exists, we don't replace.
-        // \P{C} means "Not Control". \P{Z} means "Not Separator".
-        // Use negation: Is there any char that is NOT (Control OR Separator)?
-        // If yes, it's printable -> Show as is.
-        // If no, it's invisible/whitespace -> Replace with code.
-        const isReplaceable = !/[^\p{C}\p{Z}]/u.test(
-          primaryThreat.offendingText,
-        );
+        const { hoverMessage } = createHoverMessageAndLabel(diagnostic);
 
         const decoration: vscode.DecorationOptions = {
-          range: new vscode.Range(start, end),
+          range: diagnostic.range,
           hoverMessage,
         };
 
-        if (isReplaceable) {
-          // Invisible/Whitespace -> Replace with Label "In Place"
-
-          // 1. Determine Label
-          const threatWithPayload =
-            rangeThreats.find((t) => t.decodedPayload) || primaryThreat;
-          let label = "";
-
-          if (threatWithPayload.decodedPayload) {
-            label = `[${threatWithPayload.decodedPayload}]`;
-          } else {
-            // Hex codes
-            const hexCodes = Array.from(primaryThreat.offendingText)
-              .map(
-                (c) =>
-                  `U+${c.codePointAt(0)?.toString(16).toUpperCase().padStart(4, "0")}`,
-              )
-              .join(" ");
-            label = `[${hexCodes}]`;
-          }
-
-          // 2. Determine Background Color for Label
-          let backgroundColorName = "promptshield.lowThreatBackground";
-          if (maxSeverity === "CRITICAL") {
-            backgroundColorName = "promptshield.criticalThreatBackground";
-          } else if (maxSeverity === "HIGH") {
-            backgroundColorName = "promptshield.highThreatBackground";
-          } else if (maxSeverity === "MEDIUM") {
-            backgroundColorName = "promptshield.mediumThreatBackground";
-          }
-
-          // 3. Create Hidden Decoration with Styled Label
-          hiddenDecorations.push({
+        let replacementDecoration: vscode.DecorationOptions | undefined;
+        if (this.isXRayEnabled && primaryThreat?.readableLabel) {
+          replacementDecoration = {
             range: new vscode.Range(start, end),
             renderOptions: {
-              before: {
-                contentText: label,
-                backgroundColor: new vscode.ThemeColor(backgroundColorName),
-                color: new vscode.ThemeColor(
-                  "promptshield.ghostTextForeground",
-                ),
-                margin: "0 4px 0 0",
-                fontStyle: "normal",
-                fontWeight: "bold",
-              },
+              before: { contentText: primaryThreat.readableLabel },
             },
-          });
+            hoverMessage,
+          };
         }
-        // Else: Visible -> No label, no hiding.
 
         // Apply background color via the correct bucket
-        if (maxSeverity === "CRITICAL") {
-          criticalDecorations.push(decoration);
-        } else if (maxSeverity === "HIGH") {
-          highDecorations.push(decoration);
-        } else if (maxSeverity === "MEDIUM") {
-          mediumDecorations.push(decoration);
-        } else {
-          lowDecorations.push(decoration);
+        switch (diagnostic.severity) {
+          case vscode.DiagnosticSeverity.Error:
+            criticalDecorations.push(decoration);
+            if (replacementDecoration)
+              criticalReplacementDecorations.push(replacementDecoration);
+            break;
+          case vscode.DiagnosticSeverity.Warning:
+            highDecorations.push(decoration);
+            if (replacementDecoration)
+              highReplacementDecorations.push(replacementDecoration);
+            break;
+          case vscode.DiagnosticSeverity.Information:
+            mediumDecorations.push(decoration);
+            if (replacementDecoration)
+              mediumReplacementDecorations.push(replacementDecoration);
+            break;
+          case vscode.DiagnosticSeverity.Hint:
+            lowDecorations.push(decoration);
+            if (replacementDecoration)
+              lowReplacementDecorations.push(replacementDecoration);
+            break;
         }
       }
 
       // Group by line for EOL decorations
-      const threatsByLine = new Map<number, ThreatReport[]>();
-      for (const t of threats) {
-        const line = t.loc.line - 1;
-        if (!threatsByLine.has(line)) {
-          threatsByLine.set(line, []);
+      const groupsByLine = new Map<number, ThreatReport[][]>();
+      for (const diagnostic of diagnostics) {
+        const g = (diagnostic as unknown as { data: ThreatReport[] }).data;
+        if (!g || g.length === 0) continue;
+        const line = diagnostic.range.start.line;
+        if (!groupsByLine.has(line)) {
+          groupsByLine.set(line, []);
         }
-        threatsByLine.get(line)?.push(t);
+        groupsByLine.get(line)?.push(g);
       }
 
       // Create EOL Decorations
-      for (const [line, lineThreats] of threatsByLine) {
+      for (const [line, lineGroups] of groupsByLine) {
         // Summarize
-        const categories = new Set(lineThreats.map((t) => t.category));
+        const categories = new Set(
+          lineGroups.flatMap((g) => g.map((t) => t.category)),
+        );
         const summary = Array.from(categories).join(", ");
+        const threatCount = lineGroups.length;
 
         eolDecorations.push({
           range: new vscode.Range(line, 0, line, 0),
           renderOptions: {
             after: {
-              contentText: `🛡️ ${lineThreats.length} threat(s) [${summary}]`,
+              contentText: `🛡️ ${threatCount} threat(s) [${summary}]`,
             },
           },
         });
@@ -340,7 +311,22 @@ export class DecorationManager {
       editor.setDecorations(this.highDecorationType, highDecorations);
       editor.setDecorations(this.mediumDecorationType, mediumDecorations);
       editor.setDecorations(this.lowDecorationType, lowDecorations);
-      editor.setDecorations(this.hiddenTextDecorationType, hiddenDecorations);
+      editor.setDecorations(
+        this.criticalReplacementDecorationType,
+        criticalReplacementDecorations,
+      );
+      editor.setDecorations(
+        this.highReplacementDecorationType,
+        highReplacementDecorations,
+      );
+      editor.setDecorations(
+        this.mediumReplacementDecorationType,
+        mediumReplacementDecorations,
+      );
+      editor.setDecorations(
+        this.lowReplacementDecorationType,
+        lowReplacementDecorations,
+      );
       editor.setDecorations(this.eolDecorationType, eolDecorations);
     }
 
@@ -348,7 +334,11 @@ export class DecorationManager {
       vscode.window.activeTextEditor &&
       vscode.window.activeTextEditor.document.uri.toString() === uri.toString()
     ) {
-      this._onThreatsChanged.fire(threats.length);
+      this._onThreatsChanged.fire({
+        count: diagnostics.length,
+      });
+    } else if (!vscode.window.activeTextEditor) {
+      this._onThreatsChanged.fire({ count: 0 });
     }
   }
 }

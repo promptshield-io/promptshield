@@ -3,12 +3,16 @@ import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { scan, type ThreatReport } from "@promptshield/core";
 import { filterThreats } from "@promptshield/ignore";
-import { resolveFiles } from "@promptshield/workspace";
-import type { Connection, TextDocuments } from "vscode-languageserver";
-import type { TextDocument } from "vscode-languageserver-textdocument";
+import {
+  PROMPT_SHIELD_REPORT_FILE,
+  resolveFiles,
+} from "@promptshield/workspace";
+import type { Connection } from "vscode-languageserver";
 import { CacheManager } from "./cache";
 import { convertReportsToDiagnostics } from "./diagnostics";
 import type { LspConfig } from "./types";
+
+export const NOTIFY_SCAN_COMPLETED = "promptshield/scanCompleted";
 
 let cacheManager: CacheManager | null = null;
 
@@ -17,7 +21,6 @@ let cacheManager: CacheManager | null = null;
  */
 export const scanWorkspace = async (
   connection: Connection,
-  documents: TextDocuments<TextDocument>,
   workspaceRoot: string,
   options: LspConfig & { force?: boolean },
 ): Promise<void> => {
@@ -115,19 +118,20 @@ export const scanWorkspace = async (
 
     if (finalThreats.length > 0 || threats?.length > 0) {
       const uri = pathToFileURL(filePath).toString();
-      const openDoc = documents.get(uri);
-      const diagnostics = convertReportsToDiagnostics(finalThreats, openDoc);
+      const diagnostics = convertReportsToDiagnostics(finalThreats);
       connection.sendDiagnostics({ uri, diagnostics });
     }
   }
 
   progressReporter.done();
 
+  connection.sendNotification(NOTIFY_SCAN_COMPLETED);
+
   // Generate Report
   if (allThreats.length > 0) {
     try {
       // rootPath is already defined at top of function
-      const reportPath = path.join(rootPath, "promptshield.report.md");
+      const reportPath = path.join(rootPath, PROMPT_SHIELD_REPORT_FILE);
 
       let md = `# 🛡️ PromptShield Workspace Report\n\n`;
       md += `**Date:** ${new Date().toLocaleString()}\n`;

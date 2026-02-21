@@ -151,6 +151,8 @@ export const scanSmuggling = (
           readableLabel: `[Hidden]: ${decoded.slice(0, 50)}...`,
           suggestion:
             "Invisible-character encoding detected. Inspect hidden content.",
+          referenceUrl:
+            "https://promptshield.js.org/docs/detectors/smuggling#PSS001",
         });
 
         if (options.stopOnFirstThreat) return threats;
@@ -185,6 +187,8 @@ export const scanSmuggling = (
       decodedPayload: decoded,
       readableLabel: `[Base64]: ${decoded.slice(0, 50)}...`,
       suggestion: "Decoded Base64 contains readable text. Inspect payload.",
+      referenceUrl:
+        "https://promptshield.js.org/docs/detectors/smuggling#PSS002",
     });
 
     if (options.stopOnFirstThreat) return threats;
@@ -210,6 +214,8 @@ export const scanSmuggling = (
       readableLabel: "[Hidden Comment]",
       suggestion:
         "Comments are not visible in rendered Markdown but can carry instructions.",
+      referenceUrl:
+        "https://promptshield.js.org/docs/detectors/smuggling#PSS003",
     });
 
     if (options.stopOnFirstThreat) return threats;
@@ -232,6 +238,8 @@ export const scanSmuggling = (
       offendingText: match[0],
       readableLabel: "[Empty Link]",
       suggestion: "Empty links can be used to hide URLs or data.",
+      referenceUrl:
+        "https://promptshield.js.org/docs/detectors/smuggling#PSS004",
     });
 
     if (options.stopOnFirstThreat) return threats;

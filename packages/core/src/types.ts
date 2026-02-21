@@ -153,7 +153,7 @@ export interface ThreatReport {
    * Example:
    * https://promptshield.js.org/docs/detectors/invisible-chars#PSU001
    */
-  referenceUrl?: string;
+  referenceUrl: string;
 
   /**
    * Indicates whether this threat was suppressed

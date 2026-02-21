@@ -38,6 +38,9 @@ export const TEXT_LANGUAGES = [
   "cpp",
 ] as const;
 
+export const PROMPT_SHIELD_REPORT_FILE = "promptshield-report.md";
+export const PROMPT_SHIELD_CACHE_FILE = ".promptshield-cache.json";
+
 /**
  * Loads ignore rules for PromptShield workspace scanning.
  *
@@ -72,7 +75,7 @@ const loadIgnore = async (root: string) => {
   };
 
   // Default ignores
-  ig.add([".promptshield-cache.json", "promptshield.report.md"]);
+  ig.add([PROMPT_SHIELD_CACHE_FILE, PROMPT_SHIELD_REPORT_FILE]);
 
   for (const file of IGNORE_FILES) {
     await tryLoad(file);

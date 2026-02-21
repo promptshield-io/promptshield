@@ -129,6 +129,7 @@ export const scanInjectionPatterns = (
           readableLabel: "[Injection]",
           suggestion:
             "Remove instruction-override language from prompts or user content.",
+          referenceUrl: `https://promptshield.js.org/docs/detectors/injection-patterns#${rule.id}`,
         });
 
         if (options.stopOnFirstThreat) return threats;
@@ -149,6 +150,7 @@ export const scanInjectionPatterns = (
           readableLabel: "[Injection]",
           suggestion:
             "Obfuscated instruction detected. Inspect and remove malicious content.",
+          referenceUrl: `https://promptshield.js.org/docs/detectors/injection-patterns#${rule.id}`,
         });
 
         if (options.stopOnFirstThreat) return threats;

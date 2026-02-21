@@ -23,7 +23,7 @@ export const validateDocument = async (
 
   const result = scan(text);
   const { threats } = filterThreats(text, result.threats, { noIgnore });
-  const diagnostics = convertReportsToDiagnostics(threats, document);
+  const diagnostics = convertReportsToDiagnostics(threats);
 
   connection.sendDiagnostics({ uri: document.uri, diagnostics });
 };

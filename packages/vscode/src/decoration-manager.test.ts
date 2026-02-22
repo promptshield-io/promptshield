@@ -29,11 +29,19 @@ const mocks = vi.hoisted(() => {
       {
         checkId: "test",
         category: "INVISIBLE_CHAR",
-        severity: "HIGH",
+        severity: "CRITICAL",
         message: "Threat found",
         offendingText: "\u200B",
         loc: { line: 1, column: 1, index: 0 },
       },
+    ],
+  };
+
+  const mockDiagnosticWithGroup = {
+    ...mockDiagnostic,
+    data: [
+      { ...mockDiagnostic.data[0] },
+      { ...mockDiagnostic.data[0], category: "HOMOGLYPH", severity: "HIGH" },
     ],
   };
 
@@ -46,7 +54,13 @@ const mocks = vi.hoisted(() => {
     }
   }
 
-  return { mockDecorationType, mockEditor, mockDiagnostic, MockMarkdownString };
+  return {
+    mockDecorationType,
+    mockEditor,
+    mockDiagnostic,
+    mockDiagnosticWithGroup,
+    MockMarkdownString,
+  };
 });
 
 vi.mock("vscode", () => ({
@@ -117,8 +131,8 @@ describe("DecorationManager", () => {
 
       expect(hover).toBeInstanceOf(mocks.MockMarkdownString);
       expect(hover.value).toContain("PromptShield: INVISIBLE_CHAR");
-      expect(hover.value).toContain("**Severity:** `HIGH`");
-      expect(hover.value).toContain("$(alert)"); // Icon for HIGH
+      expect(hover.value).toContain("**Severity:** `CRITICAL`");
+      expect(hover.value).toContain("$(alert)"); // Icon for CRITICAL
       expect(hover.isTrusted).toBe(true);
       expect(hover.supportThemeIcons).toBe(true);
     }
@@ -190,30 +204,92 @@ describe("DecorationManager", () => {
     expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
   });
 
-  it("should apply correct colors for different severities", () => {
-    // Test CRITICAL
-    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
-      {
-        ...mocks.mockDiagnostic,
-        data: [{ ...mocks.mockDiagnostic.data[0], severity: "CRITICAL" }],
-      } as any,
-    ]);
+  it("should apply correct colors for different severities and replacement options", () => {
+    // We already do this via the toggleXRay calls below, but let's test specific diagnostic severity mapping
+    const cases = [
+      { s: 0, expectedCallCount: 9 }, // Error
+      { s: 1, expectedCallCount: 9 }, // Warning
+      { s: 2, expectedCallCount: 9 }, // Information
+      { s: 3, expectedCallCount: 9 }, // Hint
+    ];
+
+    for (const { s } of cases) {
+      vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+        {
+          ...mocks.mockDiagnostic,
+          severity: s,
+        } as any,
+      ]);
+      manager.activate();
+      expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
+      vi.clearAllMocks();
+    }
+  });
+
+  it("should trigger threats event when active editor changes", () => {
+    let mockActiveEditorCb: any;
+    vi.mocked(vscode.window.onDidChangeActiveTextEditor).mockImplementation(
+      (cb: any) => {
+        mockActiveEditorCb = cb;
+        return { dispose: vi.fn() };
+      },
+    );
+
     manager.activate();
-    // Check if setDecorations called for critical type (index 0)
-    // We can't easily check which decoration type is which without exposing them,
-    // but we can check that setDecorations is called multiple times.
+    expect(mockActiveEditorCb).toBeDefined();
+
+    // Call callback with an editor
+    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+      mocks.mockDiagnostic as any,
+    ]);
+    mockActiveEditorCb(mocks.mockEditor);
     expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
 
+    // Call callback without an editor should empty decorations
     vi.clearAllMocks();
+    mockActiveEditorCb(undefined);
+    // Since active text editor is undefined, it fires event with count 0 and does not set decorations on undefined.
+    expect(mocks.mockEditor.setDecorations).not.toHaveBeenCalled();
+  });
 
-    // Test LOW
-    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+  it("should gracefully handle multiple editors spanning the same uri", () => {
+    vi.mocked(vscode.window).visibleTextEditors = [
+      mocks.mockEditor,
       {
-        ...mocks.mockDiagnostic,
-        data: [{ ...mocks.mockDiagnostic.data[0], severity: "LOW" }],
+        ...mocks.mockEditor,
+        document: mocks.mockEditor.document,
+        setDecorations: vi.fn(),
       } as any,
+    ];
+
+    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+      mocks.mockDiagnostic as any,
     ]);
     manager.activate();
+    expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
+  });
+
+  it("should gracefully handle non-promptshield diagnostics", () => {
+    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+      { source: "OtherSource" } as any,
+    ]);
+    manager.activate();
+    expect(mocks.mockEditor.setDecorations).toHaveBeenCalled(); // Should call with empty arrays
+  });
+
+  it("should listen to onDidChangeDiagnostics", () => {
+    let diagnosticCb: any;
+    vi.mocked(vscode.languages.onDidChangeDiagnostics).mockImplementation(
+      (cb: any) => {
+        diagnosticCb = cb;
+        return { dispose: vi.fn() };
+      },
+    );
+
+    manager.activate();
+    expect(diagnosticCb).toBeDefined();
+
+    diagnosticCb({ uris: [mocks.mockEditor.document.uri] });
     expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
   });
 });

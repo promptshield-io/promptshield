@@ -54,5 +54,10 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/vscode": "^1.96.0"
+    }
   }
 }

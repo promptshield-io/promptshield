@@ -168,6 +168,9 @@ const publishAliases = async () => {
 
       // Helper to normalize export keys
       for (const key in originalExports) {
+        if (key === "package.json") {
+          continue;
+        }
         // We only care about the key structure to mirror it.
         // value is irrelevant as we just re-export from canonical.
 

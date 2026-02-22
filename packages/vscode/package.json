@@ -140,15 +140,15 @@
     "test": "pnpm build && tsx test/runTest.ts"
   },
   "devDependencies": {
-    "@types/glob": "^9.0.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "latest",
-    "@types/vscode": "^1.96.0",
-    "@vscode/test-electron": "^2.5.2",
     "@promptshield/core": "workspace:*",
     "@promptshield/lsp": "workspace:*",
     "@promptshield/workspace": "workspace:*",
-    "glob": "^13.0.3",
+    "@types/glob": "^9.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "latest",
+    "@types/vscode": "^1.109.0",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^13.0.6",
     "mocha": "^11.7.5",
     "tsup": "latest",
     "typescript": "latest",
@@ -179,7 +179,7 @@
     "text normalization",
     "developer tools",
     "secure coding",
-    "@promptshield/vscode",
+    "PromptShield",
     "turbo-forge"
   ]
 }

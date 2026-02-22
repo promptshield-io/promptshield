@@ -19,7 +19,7 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/workspace" />
 </p>
 
-![PromptShield Banner](../../banner.jpg)
+![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
 
 > @promptshield/workspace: Helper functions for loading workspace files. Shared by CLI and LSP.
 

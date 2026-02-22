@@ -57,3 +57,25 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
+      - name: Publish VSCode Extension
+        run: |
+          cd packages/vscode
+          # Fetch local version
+          LOCAL_VERSION=$(node -p "require('./package.json').version")
+          # Fetch remote version from VS Code Marketplace
+          REMOTE_VERSION=$(pnpm exec vsce show mayank1513.promptshield --json | jq -r 'if .versions then .versions[0].version else "none" end' 2>/dev/null || echo "none")
+          
+          echo "Local VSCode Extension Version: $LOCAL_VERSION"
+          echo "Marketplace VSCode Extension Version: $REMOTE_VERSION"
+          
+          if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+            echo "Publishing new extension version to VS Code Marketplace..."
+            pnpm exec vsce publish --no-dependencies
+            echo "Publishing new extension version to Open VSX Marketplace..."
+            pnpm exec ovsx publish --no-dependencies
+          else
+            echo "Version $LOCAL_VERSION is already published. Skipping."
+          fi
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

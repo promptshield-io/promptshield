@@ -18,6 +18,7 @@ const createThreat = (
     column: col,
     index: 0, // Mocked, needs real offset logic if used
   },
+  referenceUrl: "",
 });
 
 const mockDoc = TextDocument.create(

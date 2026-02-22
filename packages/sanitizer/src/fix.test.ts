@@ -16,6 +16,7 @@ const createThreat = (
   loc: { line: 1, column: index + 1, index },
   offendingText,
   readableLabel,
+  referenceUrl: "",
 });
 
 describe("applyFixes", () => {

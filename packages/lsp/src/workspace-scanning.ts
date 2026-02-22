@@ -9,10 +9,9 @@ import {
 } from "@promptshield/workspace";
 import type { Connection } from "vscode-languageserver";
 import { CacheManager } from "./cache";
+import { NOTIFY_SCAN_COMPLETED } from "./constants";
 import { convertReportsToDiagnostics } from "./diagnostics";
 import type { LspConfig } from "./types";
-
-export const NOTIFY_SCAN_COMPLETED = "promptshield/scanCompleted";
 
 let cacheManager: CacheManager | null = null;
 

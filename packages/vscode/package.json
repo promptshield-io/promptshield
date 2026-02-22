@@ -1,7 +1,7 @@
 {
   "name": "promptshield",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
-  "private": false,
+  "private": true,
   "version": "0.0.0",
   "publisher": "mayank1513",
   "logo": "./promptshield.jpg",
@@ -124,19 +124,6 @@
       }
     }
   },
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./package.json": "./package.json"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/promptshield-io/promptshield",
@@ -145,9 +132,6 @@
   "bugs": "https://github.com/promptshield-io/promptshield/issues",
   "homepage": "https://github.com/promptshield-io/promptshield/blob/main/packages/vscode/README.md",
   "sideEffects": false,
-  "files": [
-    "dist/**"
-  ],
   "scripts": {
     "build": "tsup && gzip -c dist/extension.js | wc -c",
     "clean": "rm -rf dist",
@@ -159,12 +143,16 @@
     "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "latest",
-    "@types/vscode": "^1.109.0",
+    "@types/vscode": "^1.96.0",
     "@vscode/test-electron": "^2.5.2",
+    "@promptshield/core": "workspace:*",
+    "@promptshield/lsp": "workspace:*",
+    "@promptshield/workspace": "workspace:*",
     "glob": "^13.0.3",
     "mocha": "^11.7.5",
     "tsup": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vscode-languageclient": "^9.0.1"
   },
   "forge": {
     "aliases": [],
@@ -181,12 +169,17 @@
     }
   ],
   "keywords": [
+    "security",
+    "unicode",
+    "invisible characters",
+    "homoglyph",
+    "prompt injection",
+    "ai security",
+    "llm security",
+    "text normalization",
+    "developer tools",
+    "secure coding",
     "@promptshield/vscode",
     "turbo-forge"
-  ],
-  "dependencies": {
-    "@promptshield/core": "workspace:*",
-    "@promptshield/lsp": "workspace:*",
-    "vscode-languageclient": "^9.0.1"
-  }
+  ]
 }

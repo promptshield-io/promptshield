@@ -1,14 +1,16 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: test file */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as vscode from "vscode";
+import { CMD_SCAN_WORKSPACE } from "./extension";
 
 // Mocks
 const mocks = vi.hoisted(() => {
   return {
     LanguageClient: {
-      start: vi.fn(),
+      start: vi.fn(() => Promise.resolve()),
       stop: vi.fn(),
       sendRequest: vi.fn(),
+      onNotification: vi.fn(),
     },
     DecorationManager: {
       activate: vi.fn(),
@@ -30,6 +32,7 @@ vi.mock("vscode", () => ({
   window: {
     showInformationMessage: vi.fn(),
     showErrorMessage: vi.fn(),
+    showWarningMessage: vi.fn(),
     showQuickPick: vi.fn(),
     activeTextEditor: {
       document: {
@@ -65,6 +68,18 @@ vi.mock("vscode", () => ({
   },
 }));
 
+vi.mock("@promptshield/lsp", () => ({
+  CMD_SERVER_SCAN_WORKSPACE: "promptshield.server.scanWorkspace",
+  SOURCE: "PromptShield",
+  NOTIFY_SCAN_COMPLETED: "promptshield/scanCompleted",
+}));
+
+vi.mock("@promptshield/workspace", () => ({
+  IGNORE_FILES: [".promptshieldignore", ".psignore", ".gitignore"],
+  PROMPT_SHIELD_REPORT_FILE: "promptshield-report.md",
+  PROMPT_SHIELD_CACHE_FILE: ".promptshield-cache.json",
+}));
+
 vi.mock("./decoration-manager", () => ({
   DecorationManager: class {
     activate = mocks.DecorationManager.activate;
@@ -74,10 +89,22 @@ vi.mock("./decoration-manager", () => ({
 
 vi.mock("./status-bar", () => ({
   PromptShieldStatusBar: mocks.PromptShieldStatusBar,
+  CMD_SHOW_MENU: "promptshield.showMenu",
 }));
 
 vi.mock("path", () => ({
   join: vi.fn(),
+}));
+
+vi.mock("vscode-languageclient/node", () => ({
+  LanguageClient: class {
+    start = mocks.LanguageClient.start;
+    stop = mocks.LanguageClient.stop;
+    sendRequest = mocks.LanguageClient.sendRequest;
+    onNotification = mocks.LanguageClient.onNotification;
+  },
+  ExecuteCommandRequest: { type: "type" },
+  TransportKind: { ipc: 1 },
 }));
 
 describe("VSCode Extension", () => {
@@ -87,19 +114,7 @@ describe("VSCode Extension", () => {
   } as any;
 
   beforeEach(() => {
-    vi.resetModules(); // Reset modules to ensure fresh import
     vi.clearAllMocks();
-
-    // Setup doMock
-    vi.doMock("vscode-languageclient/node", () => ({
-      LanguageClient: class {
-        start = mocks.LanguageClient.start;
-        stop = mocks.LanguageClient.stop;
-        sendRequest = mocks.LanguageClient.sendRequest;
-      },
-      ExecuteCommandRequest: { type: "type" },
-      TransportKind: { ipc: 1 },
-    }));
   });
 
   it("should activate extension", async () => {
@@ -123,16 +138,14 @@ describe("VSCode Extension", () => {
     activate(context);
     // Find handler
     const calls = vi.mocked(vscode.commands.registerCommand).mock.calls;
-    const handler = calls.find(
-      (c) => c[0] === "promptshield.scanWorkspace",
-    )?.[1];
+    const handler = calls.find((c) => c[0] === CMD_SCAN_WORKSPACE)?.[1];
 
     if (handler) {
       await handler();
       expect(mocks.LanguageClient.sendRequest).toHaveBeenCalledWith(
         "type",
         expect.objectContaining({
-          command: "promptshield.scanWorkspace",
+          command: "promptshield.server.scanWorkspace",
         }),
       );
     } else {
@@ -201,8 +214,10 @@ describe("VSCode Extension", () => {
       loc: { line: 1, column: 1, index: 0 },
       message: "Test threat",
     };
-    // @ts-expect-error -- ok for test
-    mocks.DecorationManager.getAllThreats.mockReturnValue([threat]);
+
+    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
+      { source: "PromptShield", data: [threat] } as any,
+    ]);
 
     // Mock QuickPick selection
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ threat } as any);
@@ -219,5 +234,13 @@ describe("VSCode Extension", () => {
       expect(vscode.window.showQuickPick).toHaveBeenCalled();
       expect(revealRange).toHaveBeenCalled();
     }
+  });
+
+  it("should return early from deactivate if client is undefined", async () => {
+    // Force a fresh import so activate is never called in this context
+    vi.resetModules();
+    const { deactivate } = await import("./extension");
+    const result = deactivate();
+    expect(result).toBeUndefined();
   });
 });

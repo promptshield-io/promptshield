@@ -12,7 +12,6 @@ describe("PromptShield Core Engine", () => {
       const zwspThreat = result.threats.find(
         (t) => t.offendingText === "\u200B",
       );
-      console.log(zwspThreat);
       expect(zwspThreat).toBeDefined();
       expect(zwspThreat?.category).toBe(ThreatCategory.Invisible);
       expect(zwspThreat?.readableLabel).toBe("[ZWSP]");

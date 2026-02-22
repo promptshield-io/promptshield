@@ -1,11 +1,14 @@
 import * as path from "node:path";
 import type { ThreatReport } from "@promptshield/core";
-import { CMD_SERVER_SCAN_WORKSPACE, SOURCE } from "@promptshield/lsp";
+import {
+  CMD_SERVER_SCAN_WORKSPACE,
+  NOTIFY_SCAN_COMPLETED,
+  SOURCE,
+} from "@promptshield/lsp";
 import {
   IGNORE_FILES,
   PROMPT_SHIELD_REPORT_FILE,
 } from "@promptshield/workspace";
-import { NOTIFY_SCAN_COMPLETED } from "packages/lsp/src/workspace-scanning";
 import * as vscode from "vscode";
 import {
   ExecuteCommandRequest,

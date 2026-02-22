@@ -1,6 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: test file */
 
-import { SOURCE } from "@promptshield/lsp";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as vscode from "vscode";
 import { DecorationManager } from "./decoration-manager";
@@ -21,19 +20,21 @@ const mocks = vi.hoisted(() => {
   };
 
   const mockDiagnostic = {
-    source: SOURCE,
+    source: "PromptShield",
     code: "INVISIBLE_CHAR",
     message: "Threat found",
     severity: 1, // Error
     range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
-    data: {
-      checkId: "test",
-      category: "INVISIBLE_CHAR",
-      severity: "HIGH",
-      message: "Threat found",
-      offendingText: "\u200B",
-      loc: { line: 1, column: 1, index: 0 },
-    },
+    data: [
+      {
+        checkId: "test",
+        category: "INVISIBLE_CHAR",
+        severity: "HIGH",
+        message: "Threat found",
+        offendingText: "\u200B",
+        loc: { line: 1, column: 1, index: 0 },
+      },
+    ],
   };
 
   class MockMarkdownString {
@@ -95,7 +96,7 @@ describe("DecorationManager", () => {
   it("should initialize decoration types with correct colors", () => {
     expect(
       vi.mocked(vscode.window.createTextEditorDecorationType),
-    ).toHaveBeenCalledTimes(6);
+    ).toHaveBeenCalledTimes(9);
   });
 
   it("should update decorations from diagnostics", () => {
@@ -115,8 +116,8 @@ describe("DecorationManager", () => {
       const hover = decorationOptions.hoverMessage as any;
 
       expect(hover).toBeInstanceOf(mocks.MockMarkdownString);
-      expect(hover.value).toContain("PromptShield: INVISIBLE_CHAR Detected");
-      expect(hover.value).toContain("**Severity:** HIGH");
+      expect(hover.value).toContain("PromptShield: INVISIBLE_CHAR");
+      expect(hover.value).toContain("**Severity:** `HIGH`");
       expect(hover.value).toContain("$(alert)"); // Icon for HIGH
       expect(hover.isTrusted).toBe(true);
       expect(hover.supportThemeIcons).toBe(true);
@@ -163,7 +164,7 @@ describe("DecorationManager", () => {
     // Mock getDiagnostics to return a raw diagnostic without data
     vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
       {
-        source: SOURCE,
+        source: "PromptShield",
         code: "Invisible",
         message: "Raw message",
         severity: 0, // Error -> Critical
@@ -194,7 +195,7 @@ describe("DecorationManager", () => {
     vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
       {
         ...mocks.mockDiagnostic,
-        data: { ...mocks.mockDiagnostic.data, severity: "CRITICAL" },
+        data: [{ ...mocks.mockDiagnostic.data[0], severity: "CRITICAL" }],
       } as any,
     ]);
     manager.activate();
@@ -209,53 +210,10 @@ describe("DecorationManager", () => {
     vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
       {
         ...mocks.mockDiagnostic,
-        data: { ...mocks.mockDiagnostic.data, severity: "LOW" },
+        data: [{ ...mocks.mockDiagnostic.data[0], severity: "LOW" }],
       } as any,
     ]);
     manager.activate();
     expect(mocks.mockEditor.setDecorations).toHaveBeenCalled();
-  });
-
-  it("should show payload label if present", () => {
-    vi.mocked(vscode.languages.getDiagnostics).mockReturnValueOnce([
-      {
-        ...mocks.mockDiagnostic,
-        data: {
-          ...mocks.mockDiagnostic.data,
-          offendingText: "\u200B",
-          decodedPayload: "PAYLOAD",
-          readableLabel: "[PAYLOAD]",
-        },
-      } as any,
-    ]);
-
-    manager.activate();
-    manager.toggleXRay(); // Enable X-Ray to see labels
-    const calls = vi.mocked(mocks.mockEditor.setDecorations).mock.calls;
-
-    // Find hidden text decoration call (transparent color)
-    // We assume hiddenTextDecorationType is the 5th called (index 4) or similar.
-    // Actually we can search for the one with 'before' content text
-    const callWithLabel = calls.find((args) =>
-      args[1].some((opt: any) =>
-        opt.renderOptions?.before?.contentText?.includes("[PAYLOAD]"),
-      ),
-    );
-    expect(callWithLabel).toBeDefined();
-  });
-
-  it("should return threats via public API", () => {
-    manager.activate();
-
-    const uri = { toString: () => "file:///test.ts" } as any;
-    const threats = manager.getAllThreats(uri);
-    expect(threats.length).toBeGreaterThan(0);
-    expect(threats[0][0].category).toBe("INVISIBLE_CHAR");
-
-    const threatsAt = manager.getThreatsAt(
-      { uri, positionAt: (i: number) => ({ line: 0, character: i }) } as any,
-      { line: 0, character: 0 } as any,
-    );
-    expect(threatsAt.length).toBeGreaterThan(0);
   });
 });

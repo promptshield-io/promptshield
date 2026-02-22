@@ -6,6 +6,7 @@ import { scanWorkspace } from "./workspace-scanning";
 // Mocks
 const mockConnection = {
   sendDiagnostics: vi.fn(),
+  sendNotification: vi.fn(),
   window: {
     showInformationMessage: vi.fn(),
     createWorkDoneProgress: vi.fn().mockResolvedValue({
@@ -15,10 +16,6 @@ const mockConnection = {
       token: { isCancellationRequested: false },
     }),
   },
-};
-
-const mockDocuments = {
-  get: vi.fn(),
 };
 
 vi.mock("node:url", () => ({
@@ -39,6 +36,7 @@ vi.mock("@promptshield/ignore", () => ({
 }));
 vi.mock("@promptshield/workspace", () => ({
   resolveFiles: vi.fn(),
+  PROMPT_SHIELD_REPORT_FILE: "promptshield-report.md",
 }));
 
 import { scan } from "@promptshield/core";
@@ -58,11 +56,10 @@ describe("Workspace Scanning", () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFileSync).mockReturnValue("content");
 
-    await scanWorkspace(
-      mockConnection as any,
-      mockDocuments as any,
-      "file:///workspace",
-    );
+    await scanWorkspace(mockConnection as any, "file:///workspace", {
+      force: false,
+      noIgnore: false,
+    } as any);
 
     expect(resolveFiles).toHaveBeenCalledWith([], "/workspace");
     expect(scan).toHaveBeenCalledTimes(2); // file1 and file2
@@ -85,11 +82,10 @@ describe("Workspace Scanning", () => {
       ],
     } as any);
 
-    await scanWorkspace(
-      mockConnection as any,
-      mockDocuments as any,
-      "file:///workspace",
-    );
+    await scanWorkspace(mockConnection as any, "file:///workspace", {
+      force: false,
+      noIgnore: false,
+    } as any);
 
     expect(mockConnection.sendDiagnostics).toHaveBeenCalled();
   });

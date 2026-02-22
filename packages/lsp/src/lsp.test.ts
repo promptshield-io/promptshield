@@ -147,7 +147,7 @@ describe("LSP Server", () => {
       { uri: "file:///workspace" },
     ]);
 
-    await handler({ command: "promptshield.scanWorkspace" });
+    await handler({ command: "promptshield.server.scanWorkspace" });
 
     expect(workspaceScanning.scanWorkspace).toHaveBeenCalled();
   });
@@ -253,12 +253,5 @@ describe("LSP Server", () => {
       textDocument: { uri: "file:///test.txt" },
       position: { line: 0, character: 0 },
     });
-
-    // getHover is mocked or imported, checking integration call
-    // Since we didn't mock getHover explicitly in this file, it might call real one or fail if dependencies missing
-    // But getHover uses 'scan' which is not mocked globally here yet beyond validation
-    // For this unit test of lsp.ts, validatin that handler is called and delegates is enough
-    // But wait, getHover is imported. We should verify it returns something or at least runs.
-    // mocks.mockdocuments.get returns a document.
   });
 });

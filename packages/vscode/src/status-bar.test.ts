@@ -30,7 +30,7 @@ vi.mock("vscode", () => ({
 describe("PromptShieldStatusBar", () => {
   let statusBar: PromptShieldStatusBar;
   let mockDecorationManager: any;
-  let threatCallback: (count: number) => void;
+  let threatCallback: (e: { count: number }) => void;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,7 +61,7 @@ describe("PromptShieldStatusBar", () => {
 
   it("should show check shield when no threats", () => {
     // Trigger update via callback
-    if (threatCallback) threatCallback(0);
+    if (threatCallback) threatCallback({ count: 0 });
 
     expect(mockStatusBarItem.text).toContain("$(shield)");
     expect(mockStatusBarItem.text).toContain("PromptShield"); // Standard text
@@ -69,7 +69,7 @@ describe("PromptShieldStatusBar", () => {
   });
 
   it("should show threat count and error color when threats detected", () => {
-    if (threatCallback) threatCallback(5);
+    if (threatCallback) threatCallback({ count: 5 });
 
     expect(mockStatusBarItem.text).toContain("5");
     expect(mockStatusBarItem.backgroundColor).toBeDefined();
@@ -79,10 +79,20 @@ describe("PromptShieldStatusBar", () => {
     statusBar.setLoading(true);
     expect(mockStatusBarItem.text).toContain("$(sync~spin)");
 
-    if (threatCallback) threatCallback(2);
+    if (threatCallback) threatCallback({ count: 2 });
     statusBar.setLoading(false);
 
     expect(mockStatusBarItem.text).not.toContain("$(sync~spin)");
     expect(mockStatusBarItem.text).toContain("2");
+  });
+
+  it("should update workspace threats using setWorkspaceThreatCount", () => {
+    if (threatCallback) threatCallback({ count: 1 }); // 1 file threat
+    statusBar.setWorkspaceThreatCount(5);
+
+    expect(mockStatusBarItem.text).toContain("1 | 5");
+    expect(mockStatusBarItem.tooltip).toContain(
+      "1 threats in file, 5 in workspace",
+    );
   });
 });

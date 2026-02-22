@@ -242,17 +242,16 @@ importers:
         version: 5.9.3
 
   packages/vscode:
-    dependencies:
+    devDependencies:
       '@promptshield/core':
         specifier: workspace:*
         version: link:../core
       '@promptshield/lsp':
         specifier: workspace:*
         version: link:../lsp
-      vscode-languageclient:
-        specifier: ^9.0.1
-        version: 9.0.1
-    devDependencies:
+      '@promptshield/workspace':
+        specifier: workspace:*
+        version: link:../workspace
       '@types/glob':
         specifier: ^9.0.0
         version: 9.0.0
@@ -263,7 +262,7 @@ importers:
         specifier: latest
         version: 25.3.0
       '@types/vscode':
-        specifier: ^1.109.0
+        specifier: ^1.96.0
         version: 1.109.0
       '@vscode/test-electron':
         specifier: ^2.5.2
@@ -280,6 +279,9 @@ importers:
       typescript:
         specifier: latest
         version: 5.9.3
+      vscode-languageclient:
+        specifier: ^9.0.1
+        version: 9.0.1
 
   packages/workspace:
     dependencies:

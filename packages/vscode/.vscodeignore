@@ -1,0 +1,23 @@
+# Ignore everything by default
+**
+
+# Allow required runtime files
+!dist/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!promptshield.jpg
+
+# Always exclude development artifacts
+node_modules/**
+src/**
+.turbo/**
+tsup.config.ts
+vitest.config.ts
+tsconfig*.json
+*.ts
+*.map
+*.log
+coverage/**
+.vscode/**

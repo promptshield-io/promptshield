@@ -8,11 +8,12 @@
 
 > **runPromptShield**(`options`): `Promise`\<`void`\>
 
-Defined in: [main.ts:81](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L81)
+Defined in: [main.ts:122](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L122)
 
-Executes PromptShield CLI workflow.
+Executes the PromptShield CLI workflow.
 
 Processing flow:
+---------------
 
 sanitize:
   file → sanitize → write/preview
@@ -24,8 +25,7 @@ fix:
   file → scan → filter ignores → applyFixes → write/preview
 
 check mode:
-  stop scanning immediately after first detected threat
-  and exit with non-zero status.
+  scanning stops immediately after the first detected threat.
 
 ## Parameters
 

@@ -6,15 +6,13 @@
 
 # Function: filterThreats()
 
-> **filterThreats**(`text`, `threats`): `object`
+> **filterThreats**(`text`, `threats`, `options?`): [`FilterThreatsResult`](../interfaces/FilterThreatsResult.md)
 
-Defined in: [ignore.ts:76](https://github.com/promptshield-io/promptshield/blob/main/packages/ignore/src/ignore.ts#L76)
+Defined in: [ignore.ts:81](https://github.com/promptshield-io/promptshield/blob/main/packages/ignore/src/ignore.ts#L81)
 
 Filters threats using PromptShield ignore directives.
 
-Returns:
-- filtered threats
-- unused ignore ranges (for IDE warnings)
+Additionally tracks ignored threats for reporting.
 
 ## Parameters
 
@@ -26,14 +24,12 @@ Returns:
 
 `ThreatReport`[]
 
+### options?
+
+#### noIgnore?
+
+`boolean`
+
 ## Returns
 
-`object`
-
-### threats
-
-> **threats**: `ThreatReport`[]
-
-### unusedIgnores
-
-> **unusedIgnores**: `Omit`\<`IgnoreRange`, `"used"`\>[]
+[`FilterThreatsResult`](../interfaces/FilterThreatsResult.md)

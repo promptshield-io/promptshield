@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.0.0",
   "publisher": "mayank1513",
-  "logo": "./promptshield.jpg",
+  "icon": "./promptshield.jpg",
   "description": "Real-time visual security for prompt engineering. Detects and visualizes hidden &quot;ghost&quot; characters, directional overrides, and malicious Unicode within the VS Code editor.",
   "license": "MIT",
   "main": "./dist/extension.js",

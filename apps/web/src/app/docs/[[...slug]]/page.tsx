@@ -21,7 +21,6 @@ const GIT_CONFIG = {
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  console.log(params.slug);
   if (!page) {
     if (!params.slug?.length) {
       redirect(`/docs/README`);
@@ -36,6 +35,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
   const MDX = page.data.body;
 
+  const markdownUrl = `/llms.mdx${page.url}.mdx`;
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
@@ -43,9 +43,9 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         {page.data.description}
       </DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pb-6">
-        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <LLMCopyButton {...{ markdownUrl }} />
         <ViewOptions
-          markdownUrl={`${page.url}.mdx`}
+          {...{ markdownUrl }}
           // update it to match your repo
           githubUrl={
             page.data.editURL ||

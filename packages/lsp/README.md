@@ -1,6 +1,6 @@
 # @promptshield/lsp <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
+<img alt="PromptShield Banner" src="https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif" />
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -48,6 +48,9 @@ $ pnpm add @promptshield/lsp
 
 ## 🏗️ internal Architecture
 
+<details>
+<summary>View internal architecture and integration details</summary>
+
 The server is built on `vscode-languageserver` and orchestrates:
 
 1.  **Document Lifecycle**: Tracks open files and changes via `TextDocuments`.
@@ -73,6 +76,10 @@ startLspServer();
 ```
 
 Or connect via IPC/Socket depending on your host environment.
+
+</details>
+
+> 📚 **Deep Dives**: To understand exactly how "Fix with AI" or full Workspace Scanning operates inside the LSP Server, see the [Documentation section](https://promptshield.js.org/docs/lsp).
 
 ---
 

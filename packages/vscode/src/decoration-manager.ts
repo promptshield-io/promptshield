@@ -1,5 +1,5 @@
 import type { ThreatReport } from "@promptshield/core";
-import { SOURCE } from "@promptshield/lsp";
+import { SOURCE, UNUSED_DIRECTIVE_CODE } from "@promptshield/lsp";
 import * as vscode from "vscode";
 import { createHoverMessageAndLabel } from "./decoration-helper";
 
@@ -226,14 +226,22 @@ export class DecorationManager implements vscode.Disposable {
       for (const diagnostic of diagnostics) {
         const rangeThreats = (diagnostic as unknown as { data: ThreatReport[] })
           .data;
-        if (!rangeThreats || rangeThreats.length === 0) continue;
 
-        const primaryThreat = rangeThreats[0];
+        const isUnusedIgnore = diagnostic.code === UNUSED_DIRECTIVE_CODE;
+
+        if (!isUnusedIgnore && !rangeThreats?.length) {
+          continue;
+        }
+
+        const primaryThreat = rangeThreats?.[0];
 
         const start = diagnostic.range.start;
         const end = diagnostic.range.end;
 
-        const { hoverMessage } = createHoverMessageAndLabel(diagnostic);
+        const { hoverMessage } = createHoverMessageAndLabel(
+          diagnostic,
+          isUnusedIgnore,
+        );
 
         const decoration: vscode.DecorationOptions = {
           range: diagnostic.range,

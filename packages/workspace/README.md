@@ -19,17 +19,27 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/workspace" />
 </p>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
+<img alt="PromptShield Banner" src="https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif" />
 
-> @promptshield/workspace: Helper functions for loading workspace files. Shared by CLI and LSP.
+> High-performance workspace scanning engine for PromptShield.
+> Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshieldignore, .psignore), concurrency, and caching while delegating detection to @promptshield/core and inline directive processing to @promptshield/ignore.
 
 ---
 
-## ✨ Why @promptshield/workspace?
+## ✨ What This Package Does
 
-- **Centralized Ignore Logic**: Respects `.gitignore`, `.promptshieldignore`, and `.psignore`.
-- **Safe Defaults**: Automatically ignores `.promptshield-cache.json` and `promptshield-report.md`.
-- **Fast**: Uses `fast-glob` for efficient file discovery. 
+`@promptshield/workspace` is responsible for:
+
+- Workspace file resolution
+- Binary detection
+- Concurrent file scanning
+- Cache orchestration
+- Severity filtering
+- Markdown report generation
+
+It does **not** implement detection logic — that lives in `@promptshield/core`.
+
+It does **not** implement Inline ignore processing (Delegated to @promptshield/ignore)
 
 ---
 
@@ -51,11 +61,208 @@ $ npm install @promptshield/workspace
 $ yarn add @promptshield/workspace
 ```
 
+---
 
-## License
+## Basic Workspace Scan
 
-This library is licensed under the MIT open-source license.
+```ts
+import { scanWorkspace } from "@promptshield/workspace";
 
-<hr />
+const root = process.cwd();
+const patterns = ["**/*.ts", "**/*.js"];
 
-<p align="center">with 💖 by <a href="https://mayankchaudhari.com" target="_blank">Mayank Kumar Chaudhari</a></p>
+for await (const { path, result, progress } of scanWorkspace(patterns, root)) {
+  console.log(
+    `[${progress}%] ${path} → ${result.threats.length} active threats`
+  );
+}
+```
+
+Streaming. Concurrency-bounded. Memory safe.
+
+---
+
+## 🧠 How Scanning Works
+
+## Execution Model
+
+- Files are resolved using layered ignore rules.
+- Scanning runs concurrently (default: 4 files).
+- Results are yielded progressively via Async Generator.
+- Output order matches task creation order.
+
+---
+
+## ⚙️ Configuration
+
+<details>
+<summary>View configuration options and detailed cache engine semantics</summary>
+
+```ts
+scanWorkspace(patterns, root, {
+  minSeverity: "MEDIUM",
+  noInlineIgnore: false,
+  concurrency: 8,
+  cacheMode: "auto",
+  forceFullScan: false,
+});
+```
+
+---
+
+## Configuration Reference
+
+### `minSeverity`
+
+Minimum severity to report.
+
+When caching is enabled:
+
+- Baseline scan always runs with `"LOW"`
+- Severity filtering is applied _after_ cache retrieval
+
+Default: `"LOW"`
+
+---
+
+### `noInlineIgnore`
+
+Disables `promptshield-ignore` inline directives.
+
+Does NOT affect:
+
+- `.gitignore`
+- `.promptshieldignore`
+- `.psignore`
+
+Default: `false`
+
+---
+
+### `concurrency`
+
+Maximum files processed in parallel.
+
+Default: `4`
+
+---
+
+### `cacheMode`
+
+- `"none"` → no persistent cache
+- `"single"` → one cache file
+- `"split"` → per-file hashed cache
+- `"auto"` → strategy selected based on repo size
+
+Default: `"auto"`
+
+---
+
+### `forceFullScan`
+
+Clears cache and rescans everything.
+
+Default: `false`
+
+---
+
+## 💾 Cache Semantics (Important)
+
+When caching is enabled:
+
+- Baseline scan always uses:
+
+  - `minSeverity: "LOW"`
+  - Inline ignore enabled
+
+- Results are cached post-filtering
+- Presentation-level filtering happens after retrieval
+
+Cache writes are intentionally fire-and-forget.
+
+Persistence must never block scan throughput.
+
+</details>
+
+> 📚 **Deep Dives**: For advanced explanations of how memory is managed during streaming, and exactly how caching locks and migration work, see the [Documentation section](https://promptshield.js.org/docs/workspace).
+
+---
+
+## 📄 Generate Workspace Report
+
+```ts
+import { generateWorkspaceReport } from "@promptshield/workspace";
+
+await generateWorkspaceReport(rootPath, allThreats, totalThreatCount);
+```
+
+Generates:
+
+```
+<workspaceRoot>/.promptshield/workspace-report.md
+```
+
+Report includes:
+
+- Timestamp
+- Total threat count
+- Affected files
+- Grouped threats by line
+- Editor-compatible `file://` links
+
+Report is generated only if threats exist.
+
+---
+
+## 🔍 Binary File Handling
+
+Binary files are automatically skipped using:
+
+- NULL-byte detection
+- Suspicious byte ratio heuristic
+
+Prevents false positives in:
+
+- Images
+- PDFs
+- Archives
+- Office documents
+
+---
+
+## 🏗 Architecture Role
+
+Used by:
+
+- `@promptshield/cli`
+- `@promptshield/lsp`
+
+Ensures identical scanning semantics across environments.
+
+---
+
+## 🧩 Design Principles
+
+- Deterministic output
+- Streaming-first
+- Cache-aware
+- Editor-friendly
+- Fail-safe behavior
+
+---
+
+## 📚 Documentation
+
+- API reference: auto-generated
+- Conceptual guides: `/docs/workspace`
+- Recommended: `/docs/workspace/quick-start`
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+<p align="center">Built with 💖 by <a href="https://mayankchaudhari.com" target="_blank">Mayank Kumar Chaudhari</a></p>

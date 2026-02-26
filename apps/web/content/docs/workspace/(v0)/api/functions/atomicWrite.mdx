@@ -1,0 +1,53 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / atomicWrite
+
+# Function: atomicWrite()
+
+> **atomicWrite**(`path`, `data`): `Promise`\<`void`\>
+
+Defined in: [utils.ts:171](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/utils.ts#L171)
+
+Atomically writes a file using a temporary file + rename strategy.
+
+Strategy:
+1. Write contents to a uniquely named temporary file
+   in the same directory as the target.
+2. Atomically rename the temporary file to the target path.
+
+Why this matters:
+- Prevents partially written files.
+- Ensures readers never observe truncated JSON.
+- Safe under concurrent writers (last-writer-wins).
+
+Concurrency Model:
+- Each invocation uses a `randomUUID()` temp filename
+  to avoid cross-process collisions.
+- Rename is atomic on the same filesystem.
+- No locking is performed here.
+
+Limitations:
+- Does not prevent logical race conditions.
+- If two processes write simultaneously, the last rename wins.
+- Both temp and target must reside on the same filesystem
+  for atomic guarantees.
+
+## Parameters
+
+### path
+
+`string`
+
+Absolute target file path.
+
+### data
+
+`string`
+
+UTF-8 string content to persist.
+
+## Returns
+
+`Promise`\<`void`\>

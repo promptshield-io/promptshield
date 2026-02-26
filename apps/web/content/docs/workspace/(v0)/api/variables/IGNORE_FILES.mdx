@@ -1,0 +1,26 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / IGNORE\_FILES
+
+# Variable: IGNORE\_FILES
+
+> `const` **IGNORE\_FILES**: readonly \[`".gitignore"`, `".promptshieldignore"`, `".psignore"`\]
+
+Defined in: [constants.ts:17](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/constants.ts#L17)
+
+Default ignore file names recognized by PromptShield.
+
+Resolution Order:
+- Project-specific ignore files override generic ones.
+
+Supported:
+- `.gitignore` → fallback compatibility
+- `.promptshieldignore` → primary configuration file
+- `.psignore` → short alias
+
+Notes:
+- These files are resolved relative to workspace root.
+- First match does not stop resolution; merging behavior
+  is implementation-defined.

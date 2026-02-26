@@ -7,48 +7,82 @@ const limit = pLimit(4);
 
 const PACKAGES_DIR = "packages";
 const DOCS_ROOT = "apps/web/content/docs";
+const MAIN_PACKAGE_DIR = "core";
 
-/* ---------------------------------- */
-/* 1. Generate docs (SEQUENTIAL)      */
-/* ---------------------------------- */
+/**
+ * Safely renames a file or directory.
+ * - Skips if source does not exist
+ * - Removes target if already exists
+ *
+ * Prevents common Windows EPERM failures due to leftover folders.
+ */
+const safeRename = async (from: string, to: string) => {
+  try {
+    await fs.access(from);
+  } catch {
+    return;
+  }
 
-const packageDirs = (await fs.readdir(PACKAGES_DIR, { withFileTypes: true }))
+  try {
+    await fs.access(to);
+    await fs.rm(to, { recursive: true, force: true });
+  } catch {
+    // target does not exist
+  }
+
+  await fs.rename(from, to);
+};
+
+const PKG_DOC_DIRS = (await fs.readdir(PACKAGES_DIR, { withFileTypes: true }))
   .filter((d) => d.isDirectory())
-  .map((d) => d.name);
+  .map((d) => [d.name, d.name === MAIN_PACKAGE_DIR ? `(${d.name})` : d.name]);
 
-for (const pkgName_ of packageDirs) {
-  const pkgPath = path.join(PACKAGES_DIR, pkgName_);
+await Promise.all(
+  PKG_DOC_DIRS.map(([, docsDir]) =>
+    limit(async () => {
+      try {
+        await fs.access(path.join(DOCS_ROOT, docsDir));
+      } catch {
+        return;
+      }
+      for (const versionDir of await fs.readdir(
+        path.join(DOCS_ROOT, docsDir),
+      )) {
+        if (/^\(v\d+\)$/.test(versionDir)) {
+          await safeRename(
+            path.join(DOCS_ROOT, docsDir, versionDir),
+            path.join(DOCS_ROOT, docsDir, versionDir.replace(/^\(|\)$/g, "")),
+          );
+        }
+      }
+    }),
+  ),
+);
+
+execSync(
+  `git add ${DOCS_ROOT} && git commit -m "chore(docs): remove brackets for proper git diff"`,
+);
+
+console.log("dirs------------", PKG_DOC_DIRS);
+
+// Generate new docs
+for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
+  const pkgPath = path.join(PACKAGES_DIR, pkgDir);
   const pkgJsonPath = path.join(pkgPath, "package.json");
   const entry = path.join(pkgPath, "src/index.ts").replaceAll("\\", "/");
-
-  const pkgName = pkgName_ === "core" ? "(core)" : pkgName_;
-
   try {
     await fs.access(pkgJsonPath);
     await fs.access(entry);
   } catch {
     continue;
   }
-
-  try {
-    for (const versionDir of await fs.readdir(path.join(DOCS_ROOT, pkgName))) {
-      if (/^\(.*\)$/.test(versionDir)) {
-        await fs.rename(
-          path.join(DOCS_ROOT, pkgName, versionDir),
-          path.join(DOCS_ROOT, pkgName, versionDir.replace(/^\(|\)$/g, "")),
-        );
-      }
-    }
-    execSync(
-      `git add ${DOCS_ROOT} && git commit -m "chore(docs): remove brackets for proper git diff"`,
-    );
-  } catch {
-    // ignore
-  }
-
   const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, "utf8"));
   const major = pkgJson.version.split(".")[0];
-  const outDir = path.join(DOCS_ROOT, pkgName, `v${major}`, "api");
+  const outDir = path.join(DOCS_ROOT, docsDir, `v${major}`, "api");
+
+  console.log(
+    `Generating docs for ${pkgJson.name}@${pkgJson.version} in ${outDir}`,
+  );
 
   execSync(
     [
@@ -63,17 +97,22 @@ for (const pkgName_ of packageDirs) {
 
   await fs.copyFile(
     path.join(pkgPath, "README.md"),
-    path.join(outDir, "..", "README.mdx"),
+    path.join(outDir, "..", "overview.mdx"),
   );
 
   // Copy reference docs
-  if (pkgName_ === "core") {
-    await fs.cp(path.join(pkgPath, "docs"), path.resolve(outDir, ".."), {
-      recursive: true,
-    });
+  try {
+    const cutomDocsDir = path.join(pkgPath, "docs");
+    if ((await fs.stat(cutomDocsDir)).isDirectory()) {
+      await fs.cp(path.join(pkgPath, "docs"), path.resolve(outDir, ".."), {
+        recursive: true,
+      });
+    }
+  } catch {
+    // Ignore
   }
 
-  const rootMetaFilePath = path.join(DOCS_ROOT, pkgName, "meta.json");
+  const rootMetaFilePath = path.join(DOCS_ROOT, docsDir, "meta.json");
   try {
     await fs.access(rootMetaFilePath);
   } catch {
@@ -93,24 +132,17 @@ for (const pkgName_ of packageDirs) {
       ),
     );
   }
-
-  const versionDirs = (await fs.readdir(path.join(DOCS_ROOT, pkgName))).filter(
-    (dir) => /^v\d+$/.test(dir),
-  );
-  const maxVersion = Math.max(
-    ...versionDirs.map((v) => Number(v.replace("v", ""))),
-  );
-  await fs.rename(
-    path.join(DOCS_ROOT, pkgName, `v${maxVersion}`),
-    path.join(DOCS_ROOT, pkgName, `(v${maxVersion})`),
-  );
 }
 
 // copy banner image
-await fs.copyFile(
-  path.join(process.cwd(), "banner.jpg"),
-  path.join(DOCS_ROOT, "banner.jpg"),
-);
+try {
+  await fs.copyFile(
+    path.join(process.cwd(), "banner.gif"),
+    path.join(DOCS_ROOT, "banner.gif"),
+  );
+} catch {
+  // ignore
+}
 
 /* ---------------------------------- */
 /* 2. Rename .md to .mdx (ASYNC)       */
@@ -135,7 +167,7 @@ const walk = async (
 
 await walk(DOCS_ROOT, async (file) => {
   if (file.endsWith(".md")) {
-    await fs.rename(file, file.replace(/.md$/, ".mdx"));
+    await safeRename(file, file.replace(/.md$/, ".mdx"));
   }
 });
 
@@ -171,8 +203,8 @@ const createMeta = async (file: string) => {
   // Extract title safely
   const title = file.endsWith("api/index.mdx")
     ? "API Docs"
-    : file.endsWith("README.mdx")
-      ? "README"
+    : file.endsWith("overview.mdx")
+      ? "Overview"
       : (src
           .match(/^#\s+(.+)$/m)?.[1]
           ?.replace(/^(Function|Interface|Type alias|Variable):\s*/i, "")
@@ -203,3 +235,27 @@ const createMeta = async (file: string) => {
 await Promise.all(
   changedDocs.map((f) => limit(() => createMeta(f).catch(() => {}))),
 );
+
+await Promise.all(
+  PKG_DOC_DIRS.map(([, docsDir]) =>
+    limit(async () => {
+      try {
+        await fs.access(path.join(DOCS_ROOT, docsDir));
+      } catch {
+        return;
+      }
+      const versionDirs = (
+        await fs.readdir(path.join(DOCS_ROOT, docsDir))
+      ).filter((dir) => /^v\d+$/.test(dir));
+      const maxVersion = Math.max(
+        ...versionDirs.map((v) => Number(v.replace("v", ""))),
+      );
+      await safeRename(
+        path.join(DOCS_ROOT, docsDir, `v${maxVersion}`),
+        path.join(DOCS_ROOT, docsDir, `(v${maxVersion})`),
+      );
+    }),
+  ),
+);
+
+execSync("git reset HEAD~1", { stdio: "inherit" });

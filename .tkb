@@ -18,7 +18,7 @@
     },
     "5vS1JNXoMhDl5IBljwh2v": {
       "id": "5vS1JNXoMhDl5IBljwh2v",
-      "description": "Set up GitHub pages to deploy docs\n  - Go to [repo settings](https://github.com/react18-tools/turbo-forge/settings/pages) -> pages (On the left panel); Select deploy from a branch; Then Select `main` and `/docs`",
+      "description": "Set up GitHub pages to deploy docs\n  - Go to [repo settings](https://github.com/promptshield-io/promptshield/settings/pages) -> pages (On the left panel); Select deploy from a branch; Then Select `main` and `/docs`",
       "columnId": "column-todo"
     },
     "55DAZwduwTvlaxaJC8hlX": {

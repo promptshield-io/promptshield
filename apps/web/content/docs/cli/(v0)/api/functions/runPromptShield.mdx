@@ -8,24 +8,47 @@
 
 > **runPromptShield**(`options`): `Promise`\<`void`\>
 
-Defined in: [main.ts:81](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L81)
+Defined in: [main.ts:304](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L304)
 
-Executes PromptShield CLI workflow.
+Execute the PromptShield CLI workflow.
 
-Processing flow:
+Execution Model
+---------------
 
-sanitize:
-  file → sanitize → write/preview
+1. Merge configuration layers
+2. Initialize logger
+3. If `check` mode:
+     - Resolve files
+     - Skip binary files
+     - Run core scan
+     - Apply inline ignore filtering
+     - Exit early on first threat
+4. Otherwise:
+     - Route to sanitize OR
+     - Stream workspace scan/fix
+5. Aggregate and format results
+6. Optionally emit JSON or Markdown report
 
-scan:
-  file → scan → filter ignores → report
+Key Behaviors
+-------------
+- Streaming execution for scalability
+- Concurrency based on available CPU cores
+- Workspace-level caching (delegated)
+- Inline ignore evaluation via @promptshield/ignore
+- Detection performed via @promptshield/core
 
-fix:
-  file → scan → filter ignores → applyFixes → write/preview
+This function does NOT:
+- Implement detection rules
+- Implement ignore parsing
+- Implement caching mechanics
+- Perform direct file traversal logic
 
-check mode:
-  stop scanning immediately after first detected threat
-  and exit with non-zero status.
+Those responsibilities are delegated to:
+- @promptshield/core
+- @promptshield/ignore
+- @promptshield/workspace
+
+This layer remains strictly orchestration and output formatting.
 
 ## Parameters
 

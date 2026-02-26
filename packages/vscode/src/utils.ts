@@ -1,16 +1,10 @@
 import type { ThreatReport } from "@promptshield/core";
-import {
-  PROMPT_SHIELD_CACHE_FILE,
-  PROMPT_SHIELD_REPORT_FILE,
-} from "@promptshield/workspace";
+import { PROMPTSHIELD_ARTIFACTS_DIR } from "@promptshield/workspace";
+
 import type { Uri } from "vscode";
 
-export const PROMPT_SHIELD_ARTIFACTS_REGEXP = new RegExp(
-  `(${PROMPT_SHIELD_CACHE_FILE}|${PROMPT_SHIELD_REPORT_FILE})$`,
-);
-
 export const isPromptShieldArtifact = (uri: Uri) => {
-  return PROMPT_SHIELD_ARTIFACTS_REGEXP.test(uri.toString());
+  return uri.toString().split(/\/|\\/).includes(PROMPTSHIELD_ARTIFACTS_DIR);
 };
 
 export const getPrimaryThreat = (threats: ThreatReport[]) => {

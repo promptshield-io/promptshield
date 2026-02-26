@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.0.0",
   "publisher": "mayank1513",
-  "logo": "./promptshield.jpg",
+  "icon": "./promptshield.jpg",
   "description": "Real-time visual security for prompt engineering. Detects and visualizes hidden &quot;ghost&quot; characters, directional overrides, and malicious Unicode within the VS Code editor.",
   "license": "MIT",
   "main": "./dist/extension.js",
@@ -19,6 +19,10 @@
       {
         "command": "promptshield.scanWorkspace",
         "title": "PromptShield: Scan Workspace"
+      },
+      {
+        "command": "promptshield.scanAndFixWorkspace",
+        "title": "PromptShield: Scan and Fix Workspace"
       },
       {
         "command": "promptshield.toggleXRay",
@@ -111,12 +115,29 @@
     "configuration": {
       "title": "PromptShield",
       "properties": {
-        "promptshield.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable PromptShield scanning."
+        "promptshield.minSeverity": {
+          "type": "string",
+          "default": "LOW",
+          "description": "Minimum severity to report.",
+          "enum": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
         },
-        "promptshield.noIgnore": {
+        "promptshield.cacheMode": {
+          "type": "string",
+          "default": "auto",
+          "description": "Cache mode for scan results.",
+          "enum": [
+            "single",
+            "split",
+            "auto",
+            "none"
+          ]
+        },
+        "promptshield.noInlineIgnore": {
           "type": "boolean",
           "default": false,
           "description": "Disable inline ignore rules in comments (e.g., // promptshield-ignore)."

@@ -1,0 +1,254 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / CacheManager
+
+# Class: CacheManager
+
+Defined in: [cache.ts:191](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L191)
+
+Persistent workspace-level scan cache.
+
+Guarantees:
+- Atomic writes
+- Version-aware invalidation
+- Crash-safe single-mode locking (TTL recovery)
+- Per-file isolation in split mode
+
+Non-goals:
+- Distributed locking
+- Cryptographic integrity guarantees
+
+## Constructors
+
+### Constructor
+
+> **new CacheManager**(`options`): `CacheManager`
+
+Defined in: [cache.ts:238](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L238)
+
+Creates a new CacheManager instance.
+
+Initialization Principles:
+- Constructor is synchronous.
+- No async side-effects are performed.
+- No cache migration occurs here.
+
+Workspace Mode Contract:
+- Cache mode is persisted in `.promptshield/state.json`.
+- The workspace state is authoritative once created.
+- All runtimes (CLI, extension, etc.) must respect it.
+
+Resolution Order:
+
+1. If `mode !== "auto"` → use explicitly provided mode.
+2. Else if state file exists → use stored mode.
+3. Else → compute via `recommendMode(fileCount)`.
+4. Persist resolved mode if no state existed.
+
+Rationale:
+- Prevents CLI/extension mode conflicts.
+- Avoids split/single flip-flopping.
+- Keeps cache storage deterministic per workspace.
+
+Note:
+- Cache rebuild occurs lazily during `set()` operations.
+- State file is lightweight and atomic.
+
+#### Parameters
+
+##### options
+
+[`CacheManagerOptions`](../interfaces/CacheManagerOptions.md)
+
+#### Returns
+
+`CacheManager`
+
+## Methods
+
+### clear()
+
+> **clear**(): `Promise`\<`void`\>
+
+Defined in: [cache.ts:419](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L419)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### get()
+
+> **get**(`relPath`): `Promise`\<`FilteredThreatsResult` \| `null`\>
+
+Defined in: [cache.ts:354](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L354)
+
+#### Parameters
+
+##### relPath
+
+`string`
+
+#### Returns
+
+`Promise`\<`FilteredThreatsResult` \| `null`\>
+
+***
+
+### mergeSplitToSingle()
+
+> **mergeSplitToSingle**(): `Promise`\<`void`\>
+
+Defined in: [cache.ts:522](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L522)
+
+Merges all split-mode cache entries into a single `cache.json`.
+
+Purpose:
+- Converts per-file hashed cache artifacts into a unified
+  single-file cache representation.
+- Typically used during storage strategy migration.
+
+Behavior:
+- No-op unless current mode is `"split"`.
+- Reads all files inside `cacheDir`.
+- Validates each entry against `CACHE_SCHEMA_VERSION`.
+- Reconstructs the single-mode structure keyed by `relPath`.
+- Writes the merged result atomically to `cache.json`.
+
+Concurrency:
+- File reads are processed using a bounded concurrency limiter.
+- Prevents unbounded parallel I/O on large repositories.
+
+Validation:
+- Entries with mismatched or missing schema versions are skipped.
+- Invalid entries are not migrated.
+
+Guarantees:
+- Atomic write prevents partial or corrupted `cache.json`.
+- Resulting file is compatible with single-mode loading logic.
+
+Non-Goals:
+- Does not delete split artifacts.
+- Does not mutate current mode.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### set()
+
+> **set**(`relPath`, `results`, `fileCount?`): `Promise`\<`void`\>
+
+Defined in: [cache.ts:376](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L376)
+
+#### Parameters
+
+##### relPath
+
+`string`
+
+##### results
+
+`FilteredThreatsResult`
+
+##### fileCount?
+
+`number`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### shouldRecommendModeSwitch()
+
+> **shouldRecommendModeSwitch**(`fileCount?`, `acceptableDeviation?`, `cacheSplitThreshold?`): `false` \| `"single"` \| `"split"`
+
+Defined in: [cache.ts:472](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L472)
+
+Determines whether the current cache strategy should be reconsidered
+based on repository size drift.
+
+Heuristic:
+- Computes the recommended mode using `recommendMode(fileCount)`.
+- Compares the current mode against the recommended one.
+- Suppresses recommendations if the file count deviation from
+  `SPLIT_FILE_COUNT_BOUNDARY` is within `ACCEPTABLE_DEVIATION`.
+
+Rationale:
+- Prevents noisy flip-flopping near the boundary threshold.
+- Provides stable behavior when repository size fluctuates slightly.
+
+Returns:
+- `"single"` or `"split"` → when a strategy switch is advisable.
+- `false` → when current mode remains appropriate.
+
+Notes:
+- Does not mutate internal state.
+- Intended for advisory use (CLI warnings, IDE notifications).
+
+#### Parameters
+
+##### fileCount?
+
+`number`
+
+##### acceptableDeviation?
+
+`number` = `ACCEPTABLE_DEVIATION`
+
+##### cacheSplitThreshold?
+
+`number` = `CACHE_SPLIT_THRESHOLD`
+
+#### Returns
+
+`false` \| `"single"` \| `"split"`
+
+***
+
+### splitSingleToSplit()
+
+> **splitSingleToSplit**(): `Promise`\<`void`\>
+
+Defined in: [cache.ts:590](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L590)
+
+Splits a single `cache.json` into per-file hashed cache entries.
+
+Purpose:
+- Converts single-mode cache into split-mode storage.
+- Enables better scalability for large repositories.
+
+Behavior:
+- No-op unless current mode is `"single"`.
+- Loads in-memory single cache.
+- Creates `cacheDir` if missing.
+- Writes one JSON file per entry using `sha256(relPath)` as filename.
+
+Storage Format:
+- Each split file includes:
+  - `version` (schema guard)
+  - `relPath` (for reverse reconstruction)
+  - file metadata and scan results
+
+Concurrency:
+- Writes are executed using bounded parallelism
+  to avoid filesystem saturation.
+
+Guarantees:
+- Atomic writes prevent partial entry corruption.
+- Resulting split entries are fully reconstructable.
+
+Non-Goals:
+- Does not remove the original `cache.json`.
+- Does not change current cache mode.
+
+#### Returns
+
+`Promise`\<`void`\>

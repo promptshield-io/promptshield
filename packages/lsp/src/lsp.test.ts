@@ -71,7 +71,7 @@ vi.mock("./validation", () => ({
 }));
 
 vi.mock("./workspace-scanning", () => ({
-  scanWorkspace: vi.fn(),
+  handleWorkspaceScan: vi.fn(),
 }));
 
 vi.mock("@promptshield/core", () => ({
@@ -149,7 +149,7 @@ describe("LSP Server", () => {
 
     await handler({ command: "promptshield.server.scanWorkspace" });
 
-    expect(workspaceScanning.scanWorkspace).toHaveBeenCalled();
+    expect(workspaceScanning.handleWorkspaceScan).toHaveBeenCalled();
   });
 
   it("should provide code actions intersecting range", () => {
@@ -184,6 +184,7 @@ describe("LSP Server", () => {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 1 },
       },
+      context: { diagnostics: [] },
     });
 
     // Debug
@@ -231,6 +232,7 @@ describe("LSP Server", () => {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
       },
+      context: { diagnostics: [] },
     });
 
     const aiFixes = result.filter((a: any) => a.title === "✨ Fix with AI");

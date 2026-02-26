@@ -1,22 +1,6 @@
-import type { Severity, ThreatReport } from "@promptshield/core";
-import { type Diagnostic, DiagnosticSeverity } from "vscode-languageserver";
+import { SEVERITY_MAP, type ThreatReport } from "@promptshield/core";
+import type { Diagnostic, DiagnosticSeverity } from "vscode-languageserver";
 import { SOURCE } from "./constants";
-
-/**
- * Maps PromptShield severity levels to LSP DiagnosticSeverity.
- *
- * This mapping controls how editors visually present findings:
- * - CRITICAL → Error
- * - HIGH → Warning
- * - MEDIUM → Information
- * - LOW → Hint
- */
-export const SEVERITY_MAP: Record<Severity, DiagnosticSeverity> = {
-  CRITICAL: DiagnosticSeverity.Error,
-  HIGH: DiagnosticSeverity.Warning,
-  MEDIUM: DiagnosticSeverity.Information,
-  LOW: DiagnosticSeverity.Hint,
-};
 
 /**
  * Converts ThreatReports into LSP Diagnostics.
@@ -63,7 +47,7 @@ export const convertReportsToDiagnostics = (
       },
     };
     diagnostics.push({
-      severity: SEVERITY_MAP[primaryReport.severity],
+      severity: SEVERITY_MAP[primaryReport.severity] as DiagnosticSeverity,
       range,
       message,
       source: SOURCE,

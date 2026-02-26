@@ -1,189 +1,181 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
+import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { scan, type ThreatReport } from "@promptshield/core";
-import { filterThreats } from "@promptshield/ignore";
+import type { ThreatReport } from "@promptshield/core";
 import {
-  PROMPT_SHIELD_REPORT_FILE,
-  resolveFiles,
+  generateWorkspaceReport,
+  scanAndFixWorkspace,
+  scanWorkspace,
 } from "@promptshield/workspace";
 import type { Connection } from "vscode-languageserver";
-import { CacheManager } from "./cache";
-import { NOTIFY_SCAN_COMPLETED } from "./constants";
+import { DiagnosticSeverity, DiagnosticTag } from "vscode-languageserver";
+import {
+  NOTIFY_SCAN_COMPLETED,
+  SOURCE,
+  UNUSED_DIRECTIVE_CODE,
+} from "./constants";
 import { convertReportsToDiagnostics } from "./diagnostics";
 import type { LspConfig } from "./types";
 
-let cacheManager: CacheManager | null = null;
-
 /**
- * Scan workspace folders and publish diagnostics.
+ * Scans the entire workspace and publishes LSP diagnostics.
+ *
+ * Responsibilities:
+ * - Delegates scanning to `@promptshield/workspace`
+ * - Streams progress updates to the client
+ * - Publishes diagnostics per file
+ * - Generates a workspace-level Markdown report
+ * - Notifies client when scanning completes
+ *
+ * Architectural boundary:
+ * - Workspace package handles file resolution, caching, concurrency, and filtering.
+ * - LSP layer is strictly responsible for editor integration.
+ *
+ * @param connection Active LSP connection.
+ * @param workspaceRoot Workspace root URI (file://).
+ * @param options Scan configuration derived from user settings.
+ *
+ * @remarks
+ * - Respects `minSeverity`, `noInlineIgnore`, and `cacheMode`.
+ * - Supports forced full scan via `force`.
+ * - Cancellation is honored via work-done progress token.
  */
-export const scanWorkspace = async (
+export const handleWorkspaceScan = async (
   connection: Connection,
   workspaceRoot: string,
   options: LspConfig & { force?: boolean },
 ): Promise<void> => {
   if (!workspaceRoot) return;
 
-  const { force = false, ...config } = options;
-  const noIgnore = config.noIgnore ?? false;
-
   const rootPath = fileURLToPath(workspaceRoot);
+  const { force = false, minSeverity, noInlineIgnore, cacheMode } = options;
 
-  if (!cacheManager) {
-    try {
-      cacheManager = new CacheManager(rootPath);
-      await cacheManager.load();
-    } catch {
-      // Ignore invalid URL
-    }
-  }
-
-  if (force && cacheManager) {
-    await cacheManager.clear();
-  }
-
-  let totalFiles = 0;
-  let scannedFiles = 0;
   let threatsFound = 0;
+  let scannedFiles = 0;
 
-  const allFiles = await resolveFiles([], rootPath);
-  const allThreats: { uri: string; threats: ThreatReport[] }[] = [];
+  const progress = await connection.window.createWorkDoneProgress();
 
-  totalFiles = allFiles.length;
-
-  // Report progress
-  const progressReporter = await connection.window.createWorkDoneProgress();
-  progressReporter.begin(
+  progress.begin(
     "PromptShield: Scanning Workspace",
     0,
     "Initializing...",
     true,
   );
 
-  for (const filePath of allFiles) {
-    if (progressReporter.token.isCancellationRequested) {
-      break;
-    }
+  const allThreats: {
+    uri: string;
+    threats: ThreatReport[];
+  }[] = [];
 
-    const cacheKey = path.relative(rootPath, filePath).replace(/\\/g, "/");
+  for await (const event of scanWorkspace([], rootPath, {
+    forceFullScan: force,
+    minSeverity,
+    noInlineIgnore,
+    cacheMode,
+  })) {
+    if (progress.token.isCancellationRequested) break;
 
     scannedFiles++;
-    const percentage = Math.round((scannedFiles / totalFiles) * 100);
-    progressReporter.report(percentage, `Scanning ${path.basename(filePath)}`);
+    progress.report(event.progress, `Scanning ${event.name}`);
 
-    let threats: ThreatReport[] | null = null;
+    const filePath = path.join(rootPath, event.path);
+    const uri = pathToFileURL(filePath).toString();
 
-    // Check cache
-    if (cacheManager && !force) {
-      threats = await cacheManager.get(cacheKey);
-    }
+    const diagnostics = convertReportsToDiagnostics(event.result.threats);
 
-    // If not in cache, scan
-    if (threats === null) {
-      try {
-        const text = fs.readFileSync(filePath, "utf-8");
-        const result = scan(text);
+    const unusedIgnoreDiagnostics =
+      event.result.unusedIgnores?.map((range) => ({
+        range: range.definedAt,
+        severity: DiagnosticSeverity.Warning,
+        tags: [DiagnosticTag.Unnecessary],
+        message: "Unused promptshield-ignore directive",
+        code: UNUSED_DIRECTIVE_CODE,
+        source: SOURCE,
+      })) || [];
 
-        threats = result.threats;
-        if (cacheManager) {
-          await cacheManager.set(cacheKey, threats);
-        }
-      } catch (e) {
-        console.error(`Failed to scan file ${filePath}:`, e);
-        continue;
-      }
-    }
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: [...diagnostics, ...unusedIgnoreDiagnostics],
+    });
 
-    let finalThreats: ThreatReport[] = [];
-    if (threats.length > 0) {
-      try {
-        const text = fs.readFileSync(filePath, "utf-8");
-        const filterResult = filterThreats(text, threats, { noIgnore });
-        finalThreats = filterResult.threats;
-      } catch {
-        // File might be deleted mid-scan
-        finalThreats = [];
-      }
-    }
+    if (event.result.threats.length > 0) {
+      threatsFound += event.result.threats.length;
 
-    if (finalThreats.length > 0) {
-      threatsFound += finalThreats.length;
       allThreats.push({
-        uri: cacheKey,
-        threats: finalThreats,
+        uri: event.path,
+        threats: event.result.threats,
       });
-    }
-
-    if (finalThreats.length > 0 || threats?.length > 0) {
-      const uri = pathToFileURL(filePath).toString();
-      const diagnostics = convertReportsToDiagnostics(finalThreats);
-      connection.sendDiagnostics({ uri, diagnostics });
     }
   }
 
-  progressReporter.done();
+  progress.done();
 
   connection.sendNotification(NOTIFY_SCAN_COMPLETED);
 
-  // Generate Report
-  if (allThreats.length > 0) {
-    try {
-      // rootPath is already defined at top of function
-      const reportPath = path.join(rootPath, PROMPT_SHIELD_REPORT_FILE);
-
-      let md = `# 🛡️ PromptShield Workspace Report\n\n`;
-      md += `**Date:** ${new Date().toLocaleString()}\n`;
-      md += `**Total Threats:** ${threatsFound}\n`;
-      md += `**Files Affected:** ${allThreats.length}\n\n`;
-      md += `---\n\n`;
-
-      for (const ft of allThreats) {
-        const fileUri = pathToFileURL(path.join(rootPath, ft.uri)).toString();
-        md += `## 📄 [${ft.uri}](${fileUri})\n\n`;
-
-        // Group by line
-        const threatsByLine = new Map<number, ThreatReport[]>();
-        for (const t of ft.threats) {
-          if (!threatsByLine.has(t.loc.line)) {
-            threatsByLine.set(t.loc.line, []);
-          }
-          threatsByLine.get(t.loc.line)?.push(t);
-        }
-
-        for (const [line, threats] of threatsByLine) {
-          md += `- **Line ${line}:**\n`;
-          for (const t of threats) {
-            const icon =
-              t.severity === "CRITICAL"
-                ? "🔴"
-                : t.severity === "HIGH"
-                  ? "🟠"
-                  : "🟡";
-            md += `  - ${icon} **${t.category}** (${t.severity}): ${t.message}`;
-            if (t.readableLabel) {
-              md += ` (Hidden: \`${t.readableLabel}\`)`;
-            }
-            md += `\n`;
-          }
-        }
-        md += `\n`;
-      }
-
-      fs.writeFileSync(reportPath, md, "utf-8");
-
-      connection.window.showInformationMessage(
-        `PromptShield: Report generated at ${reportPath}`,
-      );
-
-      // Ask client to open it?
-      // We can send a request or notification ideally, but showInformationMessage is basic feedback.
-    } catch (e) {
-      console.error("Failed to generate report:", e);
-    }
-  }
+  await generateWorkspaceReport(rootPath, allThreats, threatsFound);
 
   connection.window.showInformationMessage(
     `PromptShield: Scan complete. ${threatsFound} threats found in ${scannedFiles} files.`,
+  );
+};
+
+/**
+ * Scans the entire workspace and automatically applies fixes to files.
+ */
+export const handleWorkspaceFix = async (
+  connection: Connection,
+  workspaceRoot: string,
+  options: LspConfig & { force?: boolean },
+): Promise<void> => {
+  if (!workspaceRoot) return;
+
+  const rootPath = fileURLToPath(workspaceRoot);
+  const { force = false, minSeverity, noInlineIgnore, cacheMode } = options;
+
+  let threatsFound = 0;
+  let threatsFixed = 0;
+  let scannedFiles = 0;
+
+  const progress = await connection.window.createWorkDoneProgress();
+
+  progress.begin("PromptShield: Fixing Workspace", 0, "Initializing...", true);
+
+  const allThreats: {
+    uri: string;
+    threats: ThreatReport[];
+  }[] = [];
+
+  for await (const event of scanAndFixWorkspace([], rootPath, {
+    forceFullScan: force,
+    minSeverity,
+    noInlineIgnore,
+    cacheMode,
+    write: true,
+  })) {
+    if (progress.token.isCancellationRequested) break;
+
+    scannedFiles++;
+    progress.report(event.progress, `Fixing ${event.name}`);
+
+    if (event.result.threats.length > 0) {
+      threatsFound += event.result.threats.length;
+      allThreats.push({
+        uri: event.path,
+        threats: event.result.threats,
+      });
+    }
+
+    if (event.result.fixed?.length) {
+      threatsFixed += event.result.fixed.length;
+    }
+  }
+
+  progress.done();
+
+  connection.sendNotification(NOTIFY_SCAN_COMPLETED);
+
+  await generateWorkspaceReport(rootPath, allThreats, threatsFound);
+
+  connection.window.showInformationMessage(
+    `PromptShield: Fix complete. Fixed ${threatsFixed} of ${threatsFound} threats in ${scannedFiles} files.`,
   );
 };

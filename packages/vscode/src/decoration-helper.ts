@@ -5,10 +5,25 @@ import * as vscode from "vscode";
  * Creates a rich hover message for a diagnostic's threats.
  * Optimizes specifically for the primary threat while summarizing others.
  */
-export function createHoverMessageAndLabel(diagnostic: vscode.Diagnostic): {
+export function createHoverMessageAndLabel(
+  diagnostic: vscode.Diagnostic,
+  isUnusedIgnore: boolean,
+): {
   label: string;
   hoverMessage: vscode.MarkdownString;
 } {
+  if (isUnusedIgnore) {
+    const md = new vscode.MarkdownString();
+    md.isTrusted = true;
+    md.supportThemeIcons = true;
+    md.appendMarkdown(
+      `### $(warning) PromptShield: Unused Ignore Directive\n\nThis \`promptshield-ignore\` directive is not suppressing any threats and can be safely removed.\n\n**Warning:** Leaving unused ignore directives in your code may accidentally suppress future threats that are introduced nearby.\n\n`,
+    );
+    return {
+      label: "Unused `promptshield-ignore` directive",
+      hoverMessage: md,
+    };
+  }
   const threats =
     (diagnostic as unknown as { data: ThreatReport[] }).data || [];
 

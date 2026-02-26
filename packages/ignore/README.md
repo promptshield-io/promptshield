@@ -1,6 +1,6 @@
 # @promptshield/ignore <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
+<img alt="PromptShield Banner" src="https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif" />
 
 <p className="flex gap-2">
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
@@ -42,6 +42,9 @@ $ pnpm add @promptshield/ignore
 ---
 
 ## 🚀 Usage
+
+<details>
+<summary>Usage examples for inline and file-level ignores</summary>
 
 ### In your PROMPTS (or code)
 
@@ -86,6 +89,10 @@ dist
 **/*.min.js
 legacy-prompts/*.txt
 ```
+
+</details>
+
+> 📚 **Deep Dives**: For advanced ignore semantics (like targeting specific rules e.g., `PSI001`) and reading about **Unused Ignore tracking**, see the [Documentation section](https://promptshield.js.org/docs/ignore).
 
 ---
 

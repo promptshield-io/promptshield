@@ -6,15 +6,21 @@
 
 # Function: filterThreats()
 
-> **filterThreats**(`text`, `threats`): `object`
+> **filterThreats**(`text`, `threats`, `options?`): [`FilteredThreatsResult`](../interfaces/FilteredThreatsResult.md)
 
-Defined in: [ignore.ts:76](https://github.com/promptshield-io/promptshield/blob/main/packages/ignore/src/ignore.ts#L76)
+Defined in: [ignore.ts:165](https://github.com/promptshield-io/promptshield/blob/main/packages/ignore/src/ignore.ts#L165)
 
-Filters threats using PromptShield ignore directives.
+Applies inline ignore directives to a list of detected threats.
 
-Returns:
-- filtered threats
-- unused ignore ranges (for IDE warnings)
+Responsibilities:
+- Filters threats covered by ignore ranges.
+- Tracks ignored threats separately.
+- Tracks unused ignore directives.
+- Aggregates ignored threats by severity.
+
+Complexity:
+- O(n log n) due to threat sorting
+- O(n + m) filtering via two-pointer traversal
 
 ## Parameters
 
@@ -22,18 +28,22 @@ Returns:
 
 `string`
 
+Raw document text.
+
 ### threats
 
 `ThreatReport`[]
 
+Threats detected by core scan.
+
+### options?
+
+Optional filtering flags.
+
+#### noInlineIgnore?
+
+`boolean`
+
 ## Returns
 
-`object`
-
-### threats
-
-> **threats**: `ThreatReport`[]
-
-### unusedIgnores
-
-> **unusedIgnores**: `Omit`\<`IgnoreRange`, `"used"`\>[]
+[`FilteredThreatsResult`](../interfaces/FilteredThreatsResult.md)

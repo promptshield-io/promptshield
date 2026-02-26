@@ -50,6 +50,14 @@ describe("PromptShield Core Engine", () => {
       const result = scan(input, { minSeverity: "CRITICAL" });
       expect(result.threats).toHaveLength(0);
     });
+
+    it("should process disjoint invisible spans appropriately without stopping", () => {
+      // Test the fallthrough logic for line 215-216.
+      // Emulating finding disjoint spans
+      const input = "\u200B \u200B";
+      const result = scan(input, { stopOnFirstThreat: false });
+      expect(result.threats.length).toBeGreaterThan(1);
+    });
   });
 
   describe("Homoglyph Detection", () => {

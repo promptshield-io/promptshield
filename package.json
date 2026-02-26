@@ -30,7 +30,7 @@
     "@commitlint/config-conventional": "^20.4.2",
     "@tool/tsconfig": "workspace:*",
     "@types/envinfo": "^7.8.4",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.2",
     "@vitest/coverage-v8": "^4.0.18",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
@@ -41,7 +41,7 @@
     "p-limit": "^7.3.0",
     "plop": "^4.0.5",
     "tsx": "^4.21.0",
-    "turbo": "^2.8.10",
+    "turbo": "^2.8.11",
     "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
     "vite-tsconfig-paths": "^6.1.1",
@@ -57,7 +57,10 @@
   },
   "pnpm": {
     "overrides": {
-      "@types/vscode": "^1.96.0"
+      "@types/vscode": "^1.96.0",
+      "tmp@<=0.2.3": ">=0.2.4",
+      "lodash@>=4.0.0 <=4.17.22": ">=4.17.23",
+      "diff@>=6.0.0 <8.0.3": ">=8.0.3"
     }
   }
 }

@@ -5,6 +5,6 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: "Turbo Forge",
     },
-    githubUrl: "https://github.com/react18-tools/turbo-forge",
+    githubUrl: "https://github.com/promptshield-io/promptshield",
   };
 }

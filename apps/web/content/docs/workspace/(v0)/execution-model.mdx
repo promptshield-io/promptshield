@@ -1,0 +1,50 @@
+---
+title: Execution Model
+description: How PromptShield orchestrates workspace scanning.
+---
+
+# Execution Model
+
+The `@promptshield/workspace` package bridges the fast, synchronous `@promptshield/core` engine with the realities of large disk footprints. It provides high-concurrency, streaming disk orchestration suitable for both CLIs and LSP servers.
+
+---
+
+## Streaming Architecture
+
+PromptShield does **not** load the entire workspace into memory at once. It uses Async Generators to yield file-scan events continuously as files are read and processed. 
+
+This model ensures:
+
+1. **Constant Memory Footprint**: Bounded by the concurrency limit, never by repository size.
+2. **Instant Feedback**: The CLI (and LSP) receive threat events immediately while background scanning continues, powering real-time UI progress bars without blocking.
+
+```ts
+import { scanWorkspace } from "@promptshield/workspace";
+
+// Events are yielded in task-creation order
+for await (const event of scanWorkspace(["**/*.js", "**/*.md"], rootDir)) {
+  console.log(`[${event.progress}%] Scanned: ${event.path}`);
+  if (event.result.threats.length > 0) {
+    // Process threat...
+  }
+}
+```
+
+---
+
+## Controlled Concurrency
+
+To avoid exhausting OS file descriptors (`EMFILE`) or saturating disk I/O, `workspace` uses an internal bounded concurrency limiter.
+
+- **Default Concurrency**: 4 simultaneous file operations.
+- **Configurability**: Adjustable via `concurrency` in configuration.
+
+This protects the host environment, especially inside IDE constraints where language servers must remain polite citizens of system resources.
+
+---
+
+## Binary File Skipping
+
+PromptShield aggressively skips non-text files to save cycles. The workspace engine reads the first few bytes of a resolved file to detect null bytes or non-printable blocks. 
+
+If a binary is detected, it is immediately yielded as a clean scan with an empty result without ever passing to the regex engines.

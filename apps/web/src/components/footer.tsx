@@ -9,7 +9,18 @@ export function Footer() {
             PromptShield
           </p>
           <p>MIT License &copy; {new Date().getFullYear()}</p>
-          <p>Built with Turbo and PNPM.</p>
+          <p>
+            Built with{" "}
+            <a
+              href="https://github.com/react18-tools/turbo-forge/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-fd-foreground"
+            >
+              TurboForge
+            </a>
+            .
+          </p>
         </div>
 
         <div className="flex items-center gap-1.5">

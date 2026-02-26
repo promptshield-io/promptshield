@@ -26,7 +26,7 @@ Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshie
 
 ---
 
-# ✨ What This Package Does
+## ✨ What This Package Does
 
 `@promptshield/workspace` is responsible for:
 
@@ -84,7 +84,7 @@ Streaming. Concurrency-bounded. Memory safe.
 
 ---
 
-# 🧠 How Scanning Works
+## 🧠 How Scanning Works
 
 ## Execution Model
 
@@ -95,7 +95,7 @@ Streaming. Concurrency-bounded. Memory safe.
 
 ---
 
-# ⚙️ Configuration
+## ⚙️ Configuration
 
 <details>
 <summary>View configuration options and detailed cache engine semantics</summary>
@@ -168,7 +168,7 @@ Default: `false`
 
 ---
 
-# 💾 Cache Semantics (Important)
+## 💾 Cache Semantics (Important)
 
 When caching is enabled:
 
@@ -189,7 +189,7 @@ Persistence must never block scan throughput.
 
 ---
 
-# 📄 Generate Workspace Report
+## 📄 Generate Workspace Report
 
 ```ts
 import { generateWorkspaceReport } from "@promptshield/workspace";
@@ -219,7 +219,7 @@ Report is generated only if threats exist.
 
 ---
 
-# 🔍 Binary File Handling
+## 🔍 Binary File Handling
 
 Binary files are automatically skipped using:
 
@@ -235,7 +235,7 @@ Prevents false positives in:
 
 ---
 
-# 🏗 Architecture Role
+## 🏗 Architecture Role
 
 Used by:
 
@@ -246,7 +246,7 @@ Ensures identical scanning semantics across environments.
 
 ---
 
-# 🧩 Design Principles
+## 🧩 Design Principles
 
 * Deterministic output
 * Streaming-first
@@ -256,18 +256,15 @@ Ensures identical scanning semantics across environments.
 
 ---
 
-# 📚 Documentation
+## 📚 Documentation
 
 * API reference: auto-generated
 * Conceptual guides: `/docs/workspace`
 * Recommended: `/docs/workspace/quick-start`
 
-README = quick entry
-Docs = deeper concepts (cache modes, severity filtering, architecture)
-
 ---
 
-# 📄 License
+## 📄 License
 
 MIT
 

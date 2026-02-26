@@ -1,0 +1,23 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / ACCEPTABLE\_DEVIATION
+
+# Variable: ACCEPTABLE\_DEVIATION
+
+> `const` **ACCEPTABLE\_DEVIATION**: `0.2` = `0.2`
+
+Defined in: [constants.ts:108](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/constants.ts#L108)
+
+Hysteresis ratio applied when recommending cache strategy changes.
+
+Purpose:
+- Prevents rapid mode switching near threshold boundary.
+
+Example:
+- With threshold 1500 and ratio 0.2:
+  - Switching to split requires > 1800 files.
+  - Switching back requires < 1200 files.
+
+Expressed as a fractional deviation (0.2 = 20%).

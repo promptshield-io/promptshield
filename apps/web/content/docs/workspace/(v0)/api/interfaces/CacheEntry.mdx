@@ -1,0 +1,88 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / CacheEntry
+
+# Interface: CacheEntry
+
+Defined in: [cache.ts:99](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L99)
+
+Persistent cache entry representing scan results for a single file.
+
+Design Principles:
+- Cache must remain configuration-agnostic.
+- Scan results MUST be generated using `minSeverity: "LOW"`.
+- Any severity filtering MUST occur after cache retrieval.
+
+Validation:
+- Entries are considered valid only if file metadata
+  (mtime, size, etc.) matches the current filesystem state.
+
+Mode Differences:
+- In `single` mode, entries are stored inside one `cache.json`
+  keyed by `relPath`.
+- In `split` mode, entries are stored as individual files and
+  MUST include `version` and `relPath` for safe reconstruction.
+
+Forward Compatibility:
+- `version` enables per-entry invalidation when schema changes.
+- Missing or mismatched version SHOULD invalidate the entry.
+
+## Properties
+
+### mtime
+
+> **mtime**: `number`
+
+Defined in: [cache.ts:119](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L119)
+
+File modification timestamp (mtimeMs).
+
+***
+
+### relPath?
+
+> `optional` **relPath**: `string`
+
+Defined in: [cache.ts:116](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L116)
+
+File path relative to workspace root.
+
+Required in split mode to:
+- Reconstruct single-mode cache
+- Preserve human readability
+- Avoid irreversible hash-only storage
+
+***
+
+### results
+
+> **results**: `FilteredThreatsResult`
+
+Defined in: [cache.ts:125](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L125)
+
+Ignore-filtered scan results (minSeverity: "LOW").
+
+***
+
+### size
+
+> **size**: `number`
+
+Defined in: [cache.ts:122](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L122)
+
+File size in bytes.
+
+***
+
+### version?
+
+> `optional` **version**: `number`
+
+Defined in: [cache.ts:106](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L106)
+
+Schema version of this entry.
+
+Required in split mode.
+Optional in single mode (version tracked at container level).

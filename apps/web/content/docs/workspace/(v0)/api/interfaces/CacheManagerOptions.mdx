@@ -1,0 +1,66 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / CacheManagerOptions
+
+# Interface: CacheManagerOptions
+
+Defined in: [cache.ts:155](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L155)
+
+Configuration options for initializing CacheManager.
+
+## Properties
+
+### artifactsDir
+
+> **artifactsDir**: `string`
+
+Defined in: [cache.ts:157](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L157)
+
+Directory (relative to workspace root)
+                        used to persist cache artifacts.
+
+***
+
+### debug?
+
+> `optional` **debug**: (`msg`) => `void` \| `null`
+
+Defined in: [cache.ts:160](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L160)
+
+Optional debug logger hook.
+
+The cache manager assumes:
+- `workspaceRoot` remains stable during runtime.
+- All `relPath` values are resolved relative to this root.
+
+***
+
+### fileCount
+
+> **fileCount**: `number`
+
+Defined in: [cache.ts:159](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L159)
+
+Current repository file count (used for auto mode).
+
+***
+
+### mode
+
+> **mode**: [`CacheMode`](../type-aliases/CacheMode.md)
+
+Defined in: [cache.ts:158](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L158)
+
+Cache storage strategy.
+
+***
+
+### workspaceRoot
+
+> **workspaceRoot**: `string`
+
+Defined in: [cache.ts:156](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/cache.ts#L156)
+
+Absolute root of the project workspace.

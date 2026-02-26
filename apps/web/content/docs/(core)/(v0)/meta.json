@@ -1,6 +1,6 @@
 {
   "pages": [
-    "README",
+    "overview",
     "threat-model",
     "scanning-pipeline",
     "ignore-directives",

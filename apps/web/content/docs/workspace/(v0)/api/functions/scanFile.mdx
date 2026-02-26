@@ -1,0 +1,69 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / scanFile
+
+# Function: scanFile()
+
+> **scanFile**(`filePath`, `root`, `options`): `Promise`\<\{ `relPath`: `string`; `result`: [`FileScanResult`](../type-aliases/FileScanResult.md); \}\>
+
+Defined in: [workspace.ts:184](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L184)
+
+Scans a single file with optional caching and presentation filtering.
+
+Invariants:
+- Binary files are skipped and return an empty result.
+- When caching is enabled, baseline scan always runs with
+  `minSeverity: "LOW"` and inline ignores enabled.
+- Presentation filtering is applied after cache retrieval.
+- Cache writes are fire-and-forget and never block execution.
+Returns `null` if file is binary or scan fails.
+
+Fix Semantics:
+- When `shouldApplyFixes` is enabled, fixes are applied
+  immediately after scanning and cache is updated.
+
+## Parameters
+
+### filePath
+
+`string`
+
+### root
+
+`string`
+
+### options
+
+#### baselineMinSeverity
+
+`Severity`
+
+#### cache
+
+[`CacheManager`](../classes/CacheManager.md) \| `null`
+
+#### fileCount?
+
+`number`
+
+#### minSeverity
+
+`Severity`
+
+#### noInlineIgnore
+
+`boolean`
+
+#### shouldApplyFixes?
+
+`boolean`
+
+#### write?
+
+`boolean`
+
+## Returns
+
+`Promise`\<\{ `relPath`: `string`; `result`: [`FileScanResult`](../type-aliases/FileScanResult.md); \}\>

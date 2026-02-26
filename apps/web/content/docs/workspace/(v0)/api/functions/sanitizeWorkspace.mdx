@@ -1,0 +1,53 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / sanitizeWorkspace
+
+# Function: sanitizeWorkspace()
+
+> **sanitizeWorkspace**(`patterns`, `root`, `config?`): `AsyncGenerator`\<[`SanitizeEvent`](../interfaces/SanitizeEvent.md)\>
+
+Defined in: [workspace.ts:533](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L533)
+
+Sanitize files in a workspace using glob patterns.
+
+Responsibilities:
+- Resolve file patterns
+- Apply sanitizer (strict or standard)
+- Optionally persist changes
+- Emit progress events per file
+
+Execution Model:
+- Files are processed concurrently (bounded by `concurrency`).
+- Results are yielded in task-creation order.
+
+Invariants:
+- Files are read using UTF-8 encoding.
+- Writes occur only when `write === true`
+  and sanitized output differs from original content.
+- Progress is deterministic and capped at 100.
+
+## Parameters
+
+### patterns
+
+`string`[]
+
+Glob patterns resolved relative to `root`.
+
+### root
+
+`string`
+
+Absolute workspace root directory.
+
+### config?
+
+[`SanitizeWorkspaceConfig`](../interfaces/SanitizeWorkspaceConfig.md) = `{}`
+
+Sanitization behavior configuration.
+
+## Returns
+
+`AsyncGenerator`\<[`SanitizeEvent`](../interfaces/SanitizeEvent.md)\>

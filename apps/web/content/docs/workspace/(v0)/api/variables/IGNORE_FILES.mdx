@@ -8,7 +8,19 @@
 
 > `const` **IGNORE\_FILES**: readonly \[`".gitignore"`, `".promptshieldignore"`, `".psignore"`\]
 
-Defined in: [workspace.ts:10](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L10)
+Defined in: [constants.ts:17](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/constants.ts#L17)
 
-To Do:
-- support sub-directory level ignores similar to default git behavior
+Default ignore file names recognized by PromptShield.
+
+Resolution Order:
+- Project-specific ignore files override generic ones.
+
+Supported:
+- `.gitignore` → fallback compatibility
+- `.promptshieldignore` → primary configuration file
+- `.psignore` → short alias
+
+Notes:
+- These files are resolved relative to workspace root.
+- First match does not stop resolution; merging behavior
+  is implementation-defined.

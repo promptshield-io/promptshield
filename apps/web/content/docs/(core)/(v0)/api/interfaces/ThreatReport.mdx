@@ -6,7 +6,7 @@
 
 # Interface: ThreatReport
 
-Defined in: [types.ts:93](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L93)
+Defined in: [types.ts:113](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L113)
 
 Report describing a detected threat span.
 
@@ -20,7 +20,7 @@ Adjacent suspicious characters should be grouped into one report.
 
 > **category**: [`ThreatCategory`](../enumerations/ThreatCategory.md)
 
-Defined in: [types.ts:103](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L103)
+Defined in: [types.ts:123](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L123)
 
 Threat classification
 
@@ -30,7 +30,7 @@ Threat classification
 
 > `optional` **decodedPayload**: `string`
 
-Defined in: [types.ts:148](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L148)
+Defined in: [types.ts:168](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L168)
 
 Optional decoded payload extracted from concealed content.
 
@@ -43,7 +43,7 @@ Example:
 
 > **loc**: [`ThreatLoc`](ThreatLoc.md)
 
-Defined in: [types.ts:117](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L117)
+Defined in: [types.ts:137](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L137)
 
 Location of the threat start
 
@@ -53,7 +53,7 @@ Location of the threat start
 
 > **message**: `string`
 
-Defined in: [types.ts:114](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L114)
+Defined in: [types.ts:134](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L134)
 
 Human-readable diagnostic message.
 
@@ -66,7 +66,7 @@ This should not include remediation steps.
 
 > **offendingText**: `string`
 
-Defined in: [types.ts:125](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L125)
+Defined in: [types.ts:145](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L145)
 
 The substring responsible for the detection.
 
@@ -79,7 +79,7 @@ represents a sequence.
 
 > `optional` **readableLabel**: `string`
 
-Defined in: [types.ts:133](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L133)
+Defined in: [types.ts:153](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L153)
 
 Optional readable label for UI rendering.
 
@@ -92,7 +92,7 @@ Example:
 
 > **referenceUrl**: `string`
 
-Defined in: [types.ts:156](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L156)
+Defined in: [types.ts:176](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L176)
 
 Reference documentation explaining the risk.
 
@@ -105,7 +105,7 @@ https://promptshield.js.org/docs/detectors/invisible-chars#PSU001
 
 > **ruleId**: `string`
 
-Defined in: [types.ts:100](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L100)
+Defined in: [types.ts:120](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L120)
 
 Stable rule identifier.
 
@@ -118,7 +118,7 @@ Example:
 
 > **severity**: [`Severity`](../type-aliases/Severity.md)
 
-Defined in: [types.ts:106](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L106)
+Defined in: [types.ts:126](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L126)
 
 Risk severity
 
@@ -128,7 +128,7 @@ Risk severity
 
 > `optional` **suggestion**: `string`
 
-Defined in: [types.ts:140](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L140)
+Defined in: [types.ts:160](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L160)
 
 Suggested remediation guidance.
 
@@ -140,7 +140,7 @@ This is optional and may vary by environment (editor, CI, UI).
 
 > `optional` **suppressed**: `boolean`
 
-Defined in: [types.ts:162](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L162)
+Defined in: [types.ts:182](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L182)
 
 Indicates whether this threat was suppressed
 by an ignore directive.

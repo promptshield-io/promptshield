@@ -1,0 +1,33 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / scanAndFixWorkspace
+
+# Function: scanAndFixWorkspace()
+
+> **scanAndFixWorkspace**(`patterns`, `root`, `config?`): `AsyncGenerator`\<[`ScanEvent`](../interfaces/ScanEvent.md)\>
+
+Defined in: [workspace.ts:425](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L425)
+
+Scan a workspace and apply available fixes.
+
+This is a convenience wrapper over the core scan pipeline.
+
+## Parameters
+
+### patterns
+
+`string`[]
+
+### root
+
+`string`
+
+### config?
+
+`Omit`\<[`WorkspaceScanConfig`](../interfaces/WorkspaceScanConfig.md), `"shouldApplyFixes"`\> = `{}`
+
+## Returns
+
+`AsyncGenerator`\<[`ScanEvent`](../interfaces/ScanEvent.md)\>

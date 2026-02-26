@@ -8,16 +8,15 @@
 
 > **resolveFiles**(`patterns`, `root`): `Promise`\<`string`[]\>
 
-Defined in: [workspace.ts:101](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L101)
+Defined in: [resolve-files.ts:110](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/resolve-files.ts#L110)
 
-Resolves workspace files matching the provided glob patterns
-while respecting PromptShield and gitignore rules.
+Resolves workspace files using glob patterns while respecting
+hierarchical ignore rules.
 
 Behavior:
-- Uses fast-glob for file discovery
-- Applies ignore filtering using gitignore semantics
-- Returns absolute file paths
-- Falls back to a default pattern when none provided
+- Uses `fast-glob` for discovery.
+- Applies ignore matcher after resolution.
+- Returns absolute file paths.
 
 ## Parameters
 
@@ -25,16 +24,16 @@ Behavior:
 
 `string`[]
 
-Glob patterns relative to the workspace root.
+Glob patterns relative to workspace root.
 
 ### root
 
 `string`
 
-Absolute workspace root directory.
+Absolute workspace root.
 
 ## Returns
 
 `Promise`\<`string`[]\>
 
-List of absolute file paths eligible for scanning.
+Absolute file paths eligible for scanning.

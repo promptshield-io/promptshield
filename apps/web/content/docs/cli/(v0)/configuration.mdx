@@ -1,0 +1,92 @@
+---
+title: Configuration
+description: Configuring PromptShield CLI behavior.
+---
+
+# Configuration
+
+The PromptShield CLI can be configured globally using a configuration file, reducing the need for long command-line arguments.
+
+---
+
+## Configuration File
+
+The CLI automatically looks for a configuration file in your workspace root. Supported file names:
+
+- `promptshield.config.json`
+
+*(Note: File resolution is powered by @turbo-forge/cli-kit's configuration locators).*
+
+### Example `promptshield.config.json`
+
+```json
+{
+  "minSeverity": "HIGH",
+  "noInlineIgnore": false,
+  "concurrency": 8,
+  "cacheMode": "auto",
+  "write": false,
+  "strict": false
+}
+```
+
+---
+
+## Configuration Merging 
+
+Configuration options are merged in the following priority order (highest to lowest):
+
+1. **CLI Flags**: Arguments passed directly to the command (e.g., `--min-severity CRITICAL`).
+2. **Configuration File**: Values defined in `promptshield.config.json`.
+3. **Defaults**: The CLI's internal default values.
+
+---
+
+## Option Reference
+
+These options correspond directly to the flags available on the CLI commands.
+
+### `minSeverity`
+- **Type**: `"LOW" | "MEDIUM" | "HIGH" | "CRITICAL"`
+- **Default**: `"LOW"`
+- **Commands**: `scan`, `fix`
+
+Filters the output to only show threats that meet or exceed this severity level. When running in a CI/CD environment, setting this to `HIGH` or `CRITICAL` prevents minor formatting issues from breaking the build.
+
+### `noInlineIgnore`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Commands**: `scan`, `fix`
+
+If `true`, the scanner will completely ignore `// promptshield-ignore` directives in source code files. This is useful for security auditing to ensure no threats are being masked by developers.
+
+### `concurrency`
+- **Type**: `number`
+- **Default**: `4`
+- **Commands**: `scan`, `fix`, `sanitize`
+
+The maximum number of files to read and process simultaneously. Increasing this on machines with fast I/O can speed up large workspace scans.
+
+### `cacheMode`
+- **Type**: `"auto" | "single" | "split" | "none"`
+- **Default**: `"auto"`
+- **Commands**: `scan`, `fix`
+
+* `<auto>`: Automatically selects `"single"` for small repositories and `"split"` for large ones.
+* `<single>`: Stores a single `cache.json` file.
+* `<split>`: Stores individual split cache entries (ideal for massive monorepos).
+* `<none>`: Disables caching entirely.
+
+### `write`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Commands**: `fix`, `sanitize`
+
+If `true`, modifications made by the `fix` or `sanitize` commands will be saved continuously to the disk. By default, these commands run in a dry-run mode and only output what *would* be changed.
+
+### `strict`
+- **Type**: `boolean`
+- **Default**: `false`
+- **Commands**: `sanitize`
+
+If `true`, the `sanitize` command applies full NFKC Unicode normalization. This is a destructive operation that may alter semantic characters, mathematical symbols, or intentional typography.

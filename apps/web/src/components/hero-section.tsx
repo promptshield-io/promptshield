@@ -23,7 +23,7 @@ export function HeroSection() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-[var(--animate-fade-in-up)] [animation-delay:400ms] opacity-0">
           <Link
-            href="/docs/README"
+            href="/docs/overview"
             className="flex items-center gap-2 bg-[var(--color-ps-accent)] hover:bg-blue-600 text-[var(--color-ps-accent-fg)] px-8 py-3 rounded-full font-medium transition-colors"
           >
             Quick Start

@@ -1,0 +1,37 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / ensureDir
+
+# Function: ensureDir()
+
+> **ensureDir**(`dir`): `Promise`\<`void`\>
+
+Defined in: [utils.ts:139](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/utils.ts#L139)
+
+Ensures that a directory exists.
+
+Behavior:
+- Creates the directory recursively if it does not exist.
+- No-op if the directory already exists.
+
+Guarantees:
+- Idempotent.
+- Safe to call concurrently.
+
+Typical Usage:
+- Preparing artifact directories.
+- Ensuring cache or output paths exist before writing.
+
+## Parameters
+
+### dir
+
+`string`
+
+Absolute or relative directory path.
+
+## Returns
+
+`Promise`\<`void`\>

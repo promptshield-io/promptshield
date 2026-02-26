@@ -1,0 +1,23 @@
+[**@promptshield/core**](../index.md)
+
+***
+
+[@promptshield/core](../index.md) / SEVERITY\_MAP
+
+# Variable: SEVERITY\_MAP
+
+> `const` **SEVERITY\_MAP**: `Record`\<[`Severity`](../type-aliases/Severity.md), `number`\>
+
+Defined in: [types.ts:25](https://github.com/promptshield-io/promptshield/blob/main/packages/core/src/types.ts#L25)
+
+Numeric severity ranking map.
+
+Lower numbers represent higher severity.
+
+Used for:
+- Severity threshold comparisons
+- Sorting threats by priority
+- Efficient numeric filtering
+
+Example:
+  SEVERITY_MAP["CRITICAL"] < SEVERITY_MAP["LOW"] // true

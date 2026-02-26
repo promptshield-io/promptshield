@@ -3,6 +3,13 @@ import { readFile } from "node:fs/promises";
 import fg from "fast-glob";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveFiles } from "./resolve-files";
+import {
+  generateWorkspaceReport,
+  sanitizeWorkspace,
+  scanAndFixWorkspace,
+  scanFile,
+  scanWorkspace,
+} from "./workspace";
 
 // Mock dependencies
 vi.mock("node:fs/promises");
@@ -120,10 +127,9 @@ describe("resolveFiles", () => {
 
 import * as core from "@promptshield/core";
 import * as ignore from "@promptshield/ignore";
-import { applyFixes } from "@promptshield/sanitizer";
+import { applyFixes, sanitize, sanitizeStrict } from "@promptshield/sanitizer";
 import type { CacheManager } from "./cache";
 import * as utils from "./utils";
-import { generateWorkspaceReport, scanFile, scanWorkspace } from "./workspace";
 
 vi.mock("@promptshield/core", () => ({
   scan: vi.fn(),
@@ -142,6 +148,8 @@ vi.mock("./utils", () => ({
 
 vi.mock("@promptshield/sanitizer", () => ({
   applyFixes: vi.fn(),
+  sanitize: vi.fn(),
+  sanitizeStrict: vi.fn(),
 }));
 
 describe("workspace", () => {
@@ -377,6 +385,115 @@ describe("workspace", () => {
       }
       expect(events.length).toBe(1);
     });
+    it("should handle progress correctly", async () => {
+      vi.mocked(fg).mockImplementation(async () => [
+        "/test/workspace/f1.ts",
+        "/test/workspace/f2.ts",
+      ]);
+      vi.mocked(utils.isBinary).mockResolvedValue(true); // skip so it's fast
+      const events = [];
+      for await (const event of scanWorkspace(["*"], "/test/workspace", {
+        concurrency: 1,
+      })) {
+        events.push(event);
+      }
+      expect(events[0].progress).toBe(50);
+      expect(events[1].progress).toBe(100);
+    });
+  });
+
+  describe("scanAndFixWorkspace", () => {
+    it("should automatically set shouldApplyFixes to true", async () => {
+      vi.mocked(fg).mockImplementation(async () => ["/test/workspace/test.ts"]);
+      vi.mocked(utils.isBinary).mockResolvedValue(false);
+      vi.mocked(readFile).mockResolvedValue("test content");
+      vi.mocked(applyFixes).mockResolvedValue({
+        text: "fixed content",
+        fixed: [{ ruleId: "R1", loc: { index: 0 } } as any],
+        skipped: [],
+      });
+      vi.mocked(core.scan).mockReturnValue({
+        threats: [{ severity: "HIGH", ruleId: "R1", loc: { index: 0 } } as any],
+      } as any);
+      vi.mocked(ignore.filterThreats).mockReturnValue({
+        threats: [{ severity: "HIGH", ruleId: "R1", loc: { index: 0 } } as any],
+        ignoredThreats: [],
+        unusedIgnores: [],
+        ignoredBySeverity: { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 },
+      } as any);
+
+      const events = [];
+      for await (const event of scanAndFixWorkspace(["*"], "/test", {
+        write: true,
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBe(1);
+      expect(events[0].result.fixed?.length).toBe(1);
+      expect(utils.atomicWrite).toHaveBeenCalled();
+    });
+  });
+
+  describe("sanitizeWorkspace", () => {
+    it("should silently return if no files resolved", async () => {
+      vi.mocked(fg).mockImplementation(async () => []);
+      const events = [];
+      for await (const event of sanitizeWorkspace(["*"], "/test")) {
+        events.push(event);
+      }
+      expect(events.length).toBe(0);
+    });
+
+    it("should process and optionally write files", async () => {
+      vi.mocked(fg).mockImplementation(async () => [
+        "/test/test.ts",
+        "/test/test2.ts",
+      ]);
+      vi.mocked(readFile).mockImplementation(async (f) =>
+        (f as string).includes("test2") ? "clean" : "dirty",
+      );
+
+      const mockSanitize = vi.fn((c) => (c === "dirty" ? "cleaned" : c));
+      vi.mocked(sanitize).mockImplementation(mockSanitize);
+
+      const events = [];
+      for await (const event of sanitizeWorkspace(["*"], "/test", {
+        write: true,
+        concurrency: 1,
+      })) {
+        events.push(event);
+      }
+
+      expect(events.length).toBe(2);
+      expect(events[0].changed).toBe(true);
+      expect(events[0].sanitized).toBe("cleaned");
+      expect(utils.atomicWrite).toHaveBeenCalledWith(
+        expect.stringContaining("test.ts"),
+        "cleaned",
+      );
+
+      expect(events[1].changed).toBe(false);
+      expect(utils.atomicWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it("should use strict sanitizer when specified", async () => {
+      vi.mocked(fg).mockImplementation(async () => ["/test/test.ts"]);
+      vi.mocked(readFile).mockResolvedValue("dirty");
+
+      const mockSanitizeStrict = vi.fn().mockReturnValue("strictly-cleaned");
+      vi.mocked(sanitizeStrict).mockImplementation(mockSanitizeStrict);
+
+      const events = [];
+      for await (const event of sanitizeWorkspace(["*"], "/test", {
+        strict: true,
+      })) {
+        events.push(event);
+      }
+
+      expect(mockSanitizeStrict).toHaveBeenCalledWith("dirty");
+      expect(events[0].sanitized).toBe("strictly-cleaned");
+    });
   });
 
   describe("generateWorkspaceReport", () => {
@@ -385,7 +502,7 @@ describe("workspace", () => {
       expect(utils.atomicWrite).not.toHaveBeenCalled();
     });
 
-    it("should format md report for threats", async () => {
+    it("should format md report for threats with readable labels and various severities", async () => {
       await generateWorkspaceReport(
         "/test/workspace",
         [
@@ -394,18 +511,41 @@ describe("workspace", () => {
             threats: [
               {
                 category: "TEST",
-                severity: "HIGH",
-                message: "msg block",
+                severity: "CRITICAL",
+                message: "crit msg",
                 loc: { line: 1 },
+                readableLabel: "RL",
+              } as any,
+              {
+                category: "TEST",
+                severity: "HIGH",
+                message: "high msg",
+                loc: { line: 1 },
+              } as any,
+              {
+                category: "TEST",
+                severity: "MEDIUM",
+                message: "med msg",
+                loc: { line: 2 },
+              } as any,
+              {
+                category: "TEST",
+                severity: "LOW",
+                message: "low msg",
+                loc: { line: 3 },
               } as any,
             ],
           },
         ],
-        1,
+        4,
       );
       expect(utils.atomicWrite).toHaveBeenCalledWith(
         expect.stringContaining("workspace-report.md"),
-        expect.stringContaining("msg block"),
+        expect.stringContaining("crit msg"),
+      );
+      expect(utils.atomicWrite).toHaveBeenCalledWith(
+        expect.stringContaining("workspace-report.md"),
+        expect.stringContaining("RL"),
       );
     });
   });

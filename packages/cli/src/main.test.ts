@@ -26,6 +26,8 @@ vi.mock("@promptshield/workspace", () => ({
   sanitizeWorkspace: vi.fn(),
   runWorkspaceScan: vi.fn(),
   generateWorkspaceReport: vi.fn(),
+  PROMPTSHIELD_ARTIFACTS_DIR: ".promptshield",
+  PROMPTSHIELD_REPORT_FILE: "workspace-report.md",
 }));
 vi.mock("@turbo-forge/cli-kit", () => ({
   createLogger: vi.fn(() => ({

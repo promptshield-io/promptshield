@@ -81,7 +81,7 @@ vi.mock("@promptshield/lsp", () => ({
 
 vi.mock("@promptshield/workspace", () => ({
   IGNORE_FILES: [".promptshieldignore", ".psignore", ".gitignore"],
-  PROMPT_SHIELD_REPORT_FILE: "promptshield-report.md",
+  PROMPTSHIELD_REPORT_FILE: "workspace-report.md",
   PROMPT_SHIELD_CACHE_FILE: ".promptshield-cache.json",
   PROMPTSHIELD_ARTIFACTS_DIR: ".promptshield",
 }));

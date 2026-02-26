@@ -19,10 +19,10 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/workspace" />
 </p>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
+![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif)
 
 > High-performance workspace scanning engine for PromptShield.
-Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshieldignore, .psignore), concurrency, and caching while delegating detection to @promptshield/core and inline directive processing to @promptshield/ignore.
+> Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshieldignore, .psignore), concurrency, and caching while delegating detection to @promptshield/core and inline directive processing to @promptshield/ignore.
 
 ---
 
@@ -30,20 +30,18 @@ Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshie
 
 `@promptshield/workspace` is responsible for:
 
-* Workspace file resolution
-* Binary detection
-* Concurrent file scanning
-* Cache orchestration
-* Severity filtering
-* Markdown report generation
+- Workspace file resolution
+- Binary detection
+- Concurrent file scanning
+- Cache orchestration
+- Severity filtering
+- Markdown report generation
 
 It does **not** implement detection logic — that lives in `@promptshield/core`.
 
 It does **not** implement Inline ignore processing (Delegated to @promptshield/ignore)
 
-
 ---
-
 
 ## 📦 Installation
 
@@ -88,10 +86,10 @@ Streaming. Concurrency-bounded. Memory safe.
 
 ## Execution Model
 
-* Files are resolved using layered ignore rules.
-* Scanning runs concurrently (default: 4 files).
-* Results are yielded progressively via Async Generator.
-* Output order matches task creation order.
+- Files are resolved using layered ignore rules.
+- Scanning runs concurrently (default: 4 files).
+- Results are yielded progressively via Async Generator.
+- Output order matches task creation order.
 
 ---
 
@@ -120,8 +118,8 @@ Minimum severity to report.
 
 When caching is enabled:
 
-* Baseline scan always runs with `"LOW"`
-* Severity filtering is applied *after* cache retrieval
+- Baseline scan always runs with `"LOW"`
+- Severity filtering is applied _after_ cache retrieval
 
 Default: `"LOW"`
 
@@ -133,9 +131,9 @@ Disables `promptshield-ignore` inline directives.
 
 Does NOT affect:
 
-* `.gitignore`
-* `.promptshieldignore`
-* `.psignore`
+- `.gitignore`
+- `.promptshieldignore`
+- `.psignore`
 
 Default: `false`
 
@@ -151,10 +149,10 @@ Default: `4`
 
 ### `cacheMode`
 
-* `"none"` → no persistent cache
-* `"single"` → one cache file
-* `"split"` → per-file hashed cache
-* `"auto"` → strategy selected based on repo size
+- `"none"` → no persistent cache
+- `"single"` → one cache file
+- `"split"` → per-file hashed cache
+- `"auto"` → strategy selected based on repo size
 
 Default: `"auto"`
 
@@ -172,12 +170,13 @@ Default: `false`
 
 When caching is enabled:
 
-* Baseline scan always uses:
+- Baseline scan always uses:
 
-  * `minSeverity: "LOW"`
-  * Inline ignore enabled
-* Results are cached post-filtering
-* Presentation-level filtering happens after retrieval
+  - `minSeverity: "LOW"`
+  - Inline ignore enabled
+
+- Results are cached post-filtering
+- Presentation-level filtering happens after retrieval
 
 Cache writes are intentionally fire-and-forget.
 
@@ -194,11 +193,7 @@ Persistence must never block scan throughput.
 ```ts
 import { generateWorkspaceReport } from "@promptshield/workspace";
 
-await generateWorkspaceReport(
-  rootPath,
-  allThreats,
-  totalThreatCount
-);
+await generateWorkspaceReport(rootPath, allThreats, totalThreatCount);
 ```
 
 Generates:
@@ -209,11 +204,11 @@ Generates:
 
 Report includes:
 
-* Timestamp
-* Total threat count
-* Affected files
-* Grouped threats by line
-* Editor-compatible `file://` links
+- Timestamp
+- Total threat count
+- Affected files
+- Grouped threats by line
+- Editor-compatible `file://` links
 
 Report is generated only if threats exist.
 
@@ -223,15 +218,15 @@ Report is generated only if threats exist.
 
 Binary files are automatically skipped using:
 
-* NULL-byte detection
-* Suspicious byte ratio heuristic
+- NULL-byte detection
+- Suspicious byte ratio heuristic
 
 Prevents false positives in:
 
-* Images
-* PDFs
-* Archives
-* Office documents
+- Images
+- PDFs
+- Archives
+- Office documents
 
 ---
 
@@ -239,8 +234,8 @@ Prevents false positives in:
 
 Used by:
 
-* `@promptshield/cli`
-* `@promptshield/lsp`
+- `@promptshield/cli`
+- `@promptshield/lsp`
 
 Ensures identical scanning semantics across environments.
 
@@ -248,19 +243,19 @@ Ensures identical scanning semantics across environments.
 
 ## 🧩 Design Principles
 
-* Deterministic output
-* Streaming-first
-* Cache-aware
-* Editor-friendly
-* Fail-safe behavior
+- Deterministic output
+- Streaming-first
+- Cache-aware
+- Editor-friendly
+- Fail-safe behavior
 
 ---
 
 ## 📚 Documentation
 
-* API reference: auto-generated
-* Conceptual guides: `/docs/workspace`
-* Recommended: `/docs/workspace/quick-start`
+- API reference: auto-generated
+- Conceptual guides: `/docs/workspace`
+- Recommended: `/docs/workspace/quick-start`
 
 ---
 
@@ -271,4 +266,3 @@ MIT
 ---
 
 <p align="center">Built with 💖 by <a href="https://mayankchaudhari.com" target="_blank">Mayank Kumar Chaudhari</a></p>
-

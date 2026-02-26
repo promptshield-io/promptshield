@@ -137,8 +137,8 @@ for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
 // copy banner image
 try {
   await fs.copyFile(
-    path.join(process.cwd(), "banner.jpg"),
-    path.join(DOCS_ROOT, "banner.jpg"),
+    path.join(process.cwd(), "banner.gif"),
+    path.join(DOCS_ROOT, "banner.gif"),
   );
 } catch {
   // ignore

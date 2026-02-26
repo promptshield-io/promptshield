@@ -10,7 +10,7 @@
   <img alt="license" src="https://img.shields.io/github/license/promptshield-io/promptshield" />
 </p>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
+![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif)
 
 > **The "Clean Room" for AI inputs.** A comprehensive security ecosystem to detect, visualize, and sanitize invisible threats in LLM prompts.
 

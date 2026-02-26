@@ -29,7 +29,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Web App
-        run: pnpm build --filter @app/web && echo promptshield.js.org > ./apps/web/out/CNAME
+        run: pnpm build --filter @app/web
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

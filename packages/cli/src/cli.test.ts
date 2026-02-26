@@ -12,21 +12,17 @@ vi.mock("@turbo-forge/cli-kit");
 vi.mock("@promptshield/workspace");
 vi.mock("./main");
 
-import { resolveFiles } from "@promptshield/workspace";
-
 describe("cli.ts", () => {
   const mockReadFile = readFile as any;
   const mockWriteFile = writeFile as any;
   const mockFindRoot = findProjectRoot as any;
   const mockResolveConfig = resolveConfig as any;
   const mockRun = runPromptShield as any;
-  const mockResolveFiles = resolveFiles as any;
 
   beforeEach(() => {
     vi.resetAllMocks();
     mockFindRoot.mockReturnValue("/root");
-    mockResolveConfig.mockResolvedValue({ ...DEFAULT_CONFIG, files: [] });
-    mockResolveFiles.mockResolvedValue([]);
+    mockResolveConfig.mockResolvedValue({ ...DEFAULT_CONFIG, patterns: [] });
     mockReadFile.mockRejectedValue(new Error("ENOENT")); // Default no ignore files
   });
 
@@ -68,7 +64,7 @@ describe("cli.ts", () => {
 
     it("should parse positional files", () => {
       expect(parseArgs(["file1.txt", "file2.ts"])).toEqual({
-        files: ["file1.txt", "file2.ts"],
+        patterns: ["file1.txt", "file2.ts"],
       });
     });
 
@@ -76,7 +72,7 @@ describe("cli.ts", () => {
       expect(parseArgs(["scan", "--write", "file.ts"])).toEqual({
         command: "scan",
         write: true,
-        files: ["file.ts"],
+        patterns: ["file.ts"],
       });
     });
 
@@ -87,7 +83,7 @@ describe("cli.ts", () => {
         check: true,
         json: true,
         command: "scan",
-        files: ["src"],
+        patterns: ["src"],
       });
     });
   });
@@ -134,30 +130,26 @@ describe("cli.ts", () => {
       spy.mockRestore();
     });
 
-    it("should resolve files and run promptshield", async () => {
-      mockResolveFiles.mockResolvedValue(["/root/src/file.ts"]);
+    it("should resolve config and run promptshield", async () => {
       mockResolveConfig.mockResolvedValue({
         ...DEFAULT_CONFIG,
-        files: ["src"],
+        patterns: ["src"],
       });
 
       await main(["src"]);
 
       expect(mockFindRoot).toHaveBeenCalled();
       expect(mockResolveConfig).toHaveBeenCalled();
-      expect(mockResolveFiles).toHaveBeenCalledWith(["src"], "/root");
       expect(mockRun).toHaveBeenCalledWith(
         expect.objectContaining({
-          files: ["/root/src/file.ts"],
+          patterns: ["src"],
         }),
       );
     });
 
     it("should use default file patterns if no files provided", async () => {
-      mockResolveFiles.mockResolvedValue([]);
       await main([]); // No args
-
-      expect(mockResolveFiles).toHaveBeenCalledWith([], "/root");
+      expect(mockRun).toHaveBeenCalled();
     });
   });
 });

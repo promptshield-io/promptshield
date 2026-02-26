@@ -43,6 +43,9 @@ $ pnpm add @promptshield/ignore
 
 ## 🚀 Usage
 
+<details>
+<summary>Usage examples for inline and file-level ignores</summary>
+
 ### In your PROMPTS (or code)
 
 #### Ignore next line
@@ -86,6 +89,10 @@ dist
 **/*.min.js
 legacy-prompts/*.txt
 ```
+
+</details>
+
+> 📚 **Deep Dives**: For advanced ignore semantics (like targeting specific rules e.g., `PSI001`) and reading about **Unused Ignore tracking**, see the [Documentation section](https://promptshield.js.org/docs/ignore).
 
 ---
 

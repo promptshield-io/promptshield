@@ -15,15 +15,16 @@ import {
   getAiFixAction,
   getFixAllAction,
   getIgnoreAction,
+  getRemoveUnusedIgnoreActions,
   getThreatFixActions,
 } from "./code-actions";
-import { CMD_SERVER_SCAN_WORKSPACE } from "./constants";
-// import { getHover } from "./hover";
+import {
+  CMD_SERVER_FIX_WORKSPACE,
+  CMD_SERVER_SCAN_WORKSPACE,
+} from "./constants";
 import { DEFAULT_CONFIG, type LspConfig } from "./types";
 import { validateDocument } from "./validation";
-import { scanWorkspace } from "./workspace-scanning";
-
-export * from "./constants";
+import { handleWorkspaceFix, handleWorkspaceScan } from "./workspace-scanning";
 
 /**
  * PromptShield Language Server
@@ -71,7 +72,7 @@ export const startLspServer = () => {
    * Global LSP configuration.
    * Falls back to DEFAULT_CONFIG when client configuration is unavailable.
    */
-  const globalConfig: LspConfig = { ...DEFAULT_CONFIG };
+  let globalConfig: LspConfig = { ...DEFAULT_CONFIG };
 
   /**
    * Initialize LSP server capabilities.
@@ -89,7 +90,7 @@ export const startLspServer = () => {
         codeActionProvider: true,
         hoverProvider: true,
         executeCommandProvider: {
-          commands: [CMD_SERVER_SCAN_WORKSPACE],
+          commands: [CMD_SERVER_SCAN_WORKSPACE, CMD_SERVER_FIX_WORKSPACE],
         },
       },
     };
@@ -126,8 +127,7 @@ export const startLspServer = () => {
         const config =
           await connection.workspace.getConfiguration("promptshield");
         if (config) {
-          globalConfig.noIgnore = config.noIgnore ?? DEFAULT_CONFIG.noIgnore;
-          // Optionally map other config properties here if they get added
+          globalConfig = { ...DEFAULT_CONFIG, ...config };
         }
       } catch {
         // ignore
@@ -195,6 +195,12 @@ export const startLspServer = () => {
       actions.push(fixAll);
     }
 
+    const unusedIgnoreActions = getRemoveUnusedIgnoreActions(
+      document,
+      params.context.diagnostics,
+    );
+    actions.push(...unusedIgnoreActions);
+
     // Add single AI Fix action if any threats exist
     if (threats.length > 0) {
       const ignoreAction = getIgnoreAction(document, threats[0]);
@@ -220,7 +226,16 @@ export const startLspServer = () => {
       const force = params.arguments?.[0] === true;
       const folders = await connection.workspace.getWorkspaceFolders();
       if (folders && folders.length > 0) {
-        await scanWorkspace(connection, folders[0].uri, {
+        await handleWorkspaceScan(connection, folders[0].uri, {
+          force,
+          ...globalConfig,
+        });
+      }
+    } else if (params.command === CMD_SERVER_FIX_WORKSPACE) {
+      const force = params.arguments?.[0] === true;
+      const folders = await connection.workspace.getWorkspaceFolders();
+      if (folders && folders.length > 0) {
+        await handleWorkspaceFix(connection, folders[0].uri, {
           force,
           ...globalConfig,
         });

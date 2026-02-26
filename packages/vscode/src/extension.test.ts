@@ -76,12 +76,14 @@ vi.mock("@promptshield/lsp", () => ({
   CMD_SERVER_SCAN_WORKSPACE: "promptshield.server.scanWorkspace",
   SOURCE: "PromptShield",
   NOTIFY_SCAN_COMPLETED: "promptshield/scanCompleted",
+  UNUSED_DIRECTIVE_CODE: "PS-UnusedDirective",
 }));
 
 vi.mock("@promptshield/workspace", () => ({
   IGNORE_FILES: [".promptshieldignore", ".psignore", ".gitignore"],
   PROMPT_SHIELD_REPORT_FILE: "promptshield-report.md",
   PROMPT_SHIELD_CACHE_FILE: ".promptshield-cache.json",
+  PROMPTSHIELD_ARTIFACTS_DIR: ".promptshield",
 }));
 
 vi.mock("./decoration-manager", () => ({
@@ -129,7 +131,7 @@ describe("VSCode Extension", () => {
 
     expect(mocks.LanguageClient.start).toHaveBeenCalled();
     expect(mocks.DecorationManager.activate).toHaveBeenCalled();
-    expect(vscode.commands.registerCommand).toHaveBeenCalledTimes(6);
+    expect(vscode.commands.registerCommand).toHaveBeenCalledTimes(7);
   });
 
   it("should deactivate extension", async () => {

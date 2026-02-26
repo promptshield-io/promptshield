@@ -1,4 +1,4 @@
-# @promptshield/vscode <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
+# promptshield <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" style="height: 40px"/>
 
 ![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.jpg)
 
@@ -6,19 +6,15 @@
   <a href="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml" rel="noopener noreferrer">
     <img alt="CI" src="https://github.com/promptshield-io/promptshield/actions/workflows/ci.yml/badge.svg" />
   </a>
-  <a href="https://codecov.io/gh/promptshield-io/promptshield/tree/main/packages/@promptshield/vscode" rel="noopener noreferrer">
-    <img alt="codecov" src="https://codecov.io/gh/promptshield-io/promptshield/graph/badge.svg?flag=@promptshield/vscode" />
+  <a href="https://codecov.io/gh/promptshield-io/promptshield/tree/main/packages/promptshield" rel="noopener noreferrer">
+    <img alt="codecov" src="https://codecov.io/gh/promptshield-io/promptshield/graph/badge.svg?flag=promptshield" />
   </a> 
-  <a href="https://npmjs.com/package/@promptshield/vscode" rel="noopener noreferrer">
-    <img alt="npm version" src="https://img.shields.io/npm/v/@promptshield/vscode" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=mayank1513.promptshield" rel="noopener noreferrer">
+    <img alt="Visual Studio Marketplace Installs" src="https://img.shields.io/visual-studio-marketplace/i/mayank1513.promptshield">
   </a>
-  <a href="https://npmjs.com/package/@promptshield/vscode" rel="noopener noreferrer">
-    <img alt="npm downloads" src="https://img.shields.io/npm/d18m/@promptshield/vscode" />
+  <a href="https://open-vsx.org/extension/mayank1513/promptshield" rel="noopener noreferrer">
+    <img alt="Open VSX Downloads" src="https://img.shields.io/open-vsx/dt/mayank1513/promptshield?label=OVSX%20Downloads">
   </a>
-  <a href="https://npmjs.com/package/@promptshield/vscode" rel="noopener noreferrer">
-    <img alt="npm bundle size" src="https://img.shields.io/bundlephobia/minzip/@promptshield/vscode" />
-  </a>
-  <img alt="license" src="https://img.shields.io/npm/l/@promptshield/vscode" />
 </p>
 
 > **Real-time visual security** for prompt engineering. Detects and visualizes hidden "ghost" characters, directional overrides, and malicious Unicode within the VS Code editor.
@@ -44,13 +40,29 @@
 Install via the Visual Studio Code Marketplace:
 [**PromptShield on Marketplace**](https://marketplace.visualstudio.com/items?itemName=mayank1513.promptshield)
 
-### Commands
+or via Open VSX Registry:
+[**PromptShield on Open VSX**](https://open-vsx.org/extension/mayank1513/promptshield)
 
-| Command                              | Description                                                                 |
-| :----------------------------------- | :-------------------------------------------------------------------------- |
-| `PromptShield: Scan Workspace`       | Triggers a full audit of the current workspace.                             |
-| `PromptShield: Show Detailed Report` | Opens a quick-pick list of all threats in the active file.                  |
-| `PromptShield: Toggle X-Ray`         | (Currently always active) Toggles visual overlays for invisible characters. |
+### Overview of Commands and Actions
+
+The extension registers several commands accessible via the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
+
+- **`PromptShield: Scan Workspace`**
+  - Triggers a highly concurrent, streaming scan of your entire project directory, respecting `.gitignore` and `.promptshieldignore`.
+  - Automatically generates a detailed `workspace-report.md` in your `.promptshield` directory containing `file://` links to all discovered threats.
+- **`PromptShield: Show Detailed Report`**
+  - Opens a quick-pick list of all active threats in the currently focused file for rapid navigation.
+- **`PromptShield: Toggle X-Ray`**
+  - Toggles the inline ghost-text decorators that visually expose invisible characters like `[ZWSP]`.
+
+#### Code Actions & Quick Fixes
+
+When your cursor is over a highlighted threat, you can use the Quick Fix menu (`Cmd+.` / `Ctrl+.`) to access context-aware actions:
+
+1. **Fix this issue / Fix all issues**: Immediately and deterministically removes the dangerous characters from the document without breaking surrounding text block shapes.
+2. **Fix with AI (Copilot Integrated)**: For semantic threats (like encoded payloads or complex regex injections), this action bridges directly to GitHub Copilot (or your active Language Model) to intelligently rewrite the malicious prompt segment while preserving the original intent.
+3. **Ignore this line**: Automatically injects a language-appropriate comment (e.g. `// promptshield-ignore next`) to suppress the warning.
+4. **Remove unused ignore directive**: Keeps your codebase clean by offering to delete ignore comments that are no longer masking an active threat.
 
 ### Configuration
 

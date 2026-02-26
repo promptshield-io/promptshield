@@ -31,7 +31,7 @@ export function generateStaticParams() {
   return params.map((p) => {
     if (!p.slug?.length) return p;
     const newSlug = [...p.slug];
-    newSlug[newSlug.length - 1] = newSlug[newSlug.length - 1] + ".mdx";
+    newSlug[newSlug.length - 1] = `${newSlug[newSlug.length - 1]}.mdx`;
     return { ...p, slug: newSlug };
   });
 }

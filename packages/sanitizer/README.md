@@ -44,6 +44,9 @@ $ pnpm add @promptshield/sanitizer
 
 ## 🚀 Usage
 
+<details>
+<summary>View complete usage and exact removal rules</summary>
+
 ```ts
 import { sanitize, sanitizeStrict } from "@promptshield/sanitizer";
 
@@ -65,6 +68,10 @@ console.log(strict); // "Hello"
 3.  **Variation Selectors**: `\uFE00`-`\uFE0F` (often used to break tokenizers).
 4.  **Markdown Comments**: `<!-- hidden payload -->`.
 5.  **Empty Links**: `[](javascript:...)`.
+
+</details>
+
+> 📚 **Deep Dives**: For the exact execution order of the sanitization pipeline and understanding `applyFixes`, see the [Documentation section](https://promptshield.js.org/docs/sanitizer).
 
 ---
 

@@ -110,6 +110,9 @@ if (!result.isClean) {
 
 ## 🛡️ Supported Threat Detectors
 
+<details>
+<summary>View detailed detector list and severity map</summary>
+
 LLM inputs can be manipulated using techniques that are invisible to human reviewers but completely hijack machine tokenization. PromptShield runs a heavily optimized, fail-fast detection pipeline in the following priority order:
 
 | Detector                 | Threat Mitigated                                                                            | Default Severity | Reference                                     |
@@ -120,9 +123,16 @@ LLM inputs can be manipulated using techniques that are invisible to human revie
 | **Normalization Tricks** | Characters that aggressively change shape under NFKC normalization.                         | `MEDIUM`         | -                                             |
 | **Content Smuggling**    | Hidden Markdown comments, empty links, or Base64 payloads containing readable instructions. | `HIGH`           | -                                             |
 
+</details>
+
+> 📚 **Deep Dives**: For comprehensive rules, heuristics, and examples of each detector, see the [Documentation section](https://promptshield.js.org/docs/detectors).
+
 ---
 
 ## 🏗️ Architecture & API
+
+<details>
+<summary>API details and performance features</summary>
 
 PromptShield prioritizes **low false positives**, **determinism**, and **O(n) performance**. It is designed to scale from single API requests to real-time LSP (Language Server Protocol) keystroke analysis.
 
@@ -162,6 +172,8 @@ interface ScanContext {
   lineOffsets?: number[]; // Populated on first pass, reused by subsequent detectors
 }
 ```
+
+</details>
 
 ---
 

@@ -97,7 +97,7 @@ for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
 
   await fs.copyFile(
     path.join(pkgPath, "README.md"),
-    path.join(outDir, "..", "README.mdx"),
+    path.join(outDir, "..", "overview.mdx"),
   );
 
   // Copy reference docs
@@ -203,8 +203,8 @@ const createMeta = async (file: string) => {
   // Extract title safely
   const title = file.endsWith("api/index.mdx")
     ? "API Docs"
-    : file.endsWith("README.mdx")
-      ? "README"
+    : file.endsWith("overview.mdx")
+      ? "Overview"
       : (src
           .match(/^#\s+(.+)$/m)?.[1]
           ?.replace(/^(Function|Interface|Type alias|Variable):\s*/i, "")

@@ -1,13 +1,16 @@
 import * as path from "node:path";
 import type { ThreatReport } from "@promptshield/core";
 import {
+  CMD_SERVER_FIX_WORKSPACE,
   CMD_SERVER_SCAN_WORKSPACE,
   NOTIFY_SCAN_COMPLETED,
   SOURCE,
+  UNUSED_DIRECTIVE_CODE,
 } from "@promptshield/lsp";
 import {
   IGNORE_FILES,
-  PROMPT_SHIELD_REPORT_FILE,
+  PROMPTSHIELD_ARTIFACTS_DIR,
+  PROMPTSHIELD_REPORT_FILE,
 } from "@promptshield/workspace";
 import * as vscode from "vscode";
 import {
@@ -25,6 +28,7 @@ import { getPrimaryThreat, isPromptShieldArtifact } from "./utils";
  * Commands and Notifications Constants
  */
 export const CMD_SCAN_WORKSPACE = "promptshield.scanWorkspace";
+export const CMD_SCAN_AND_FIX_WORKSPACE = "promptshield.scanAndFixWorkspace";
 export const CMD_TOGGLE_XRAY = "promptshield.toggleXRay";
 export const CMD_SHOW_WORKSPACE_THREATS = "promptshield.showWorkspaceThreats";
 export const CMD_SHOW_DETAILED_REPORT = "promptshield.showDetailedReport";
@@ -96,6 +100,22 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
 
+    vscode.commands.registerCommand(
+      CMD_SCAN_AND_FIX_WORKSPACE,
+      async (force = true) => {
+        statusBar.setLoading(true);
+        try {
+          await client.sendRequest(ExecuteCommandRequest.type, {
+            command: CMD_SERVER_FIX_WORKSPACE,
+            arguments: [force],
+          });
+        } catch (e) {
+          console.error("Fix failed:", e);
+          vscode.window.showErrorMessage("Workspace fix failed.");
+        }
+      },
+    ),
+
     vscode.commands.registerCommand(CMD_TOGGLE_XRAY, () => {
       decorationManager.toggleXRay();
     }),
@@ -107,6 +127,11 @@ export function activate(context: vscode.ExtensionContext) {
             label: "$(refresh) Scan Workspace",
             description: "Force a fresh scan of the entire workspace",
             command: CMD_SCAN_WORKSPACE,
+          },
+          {
+            label: "$(wand) Scan and Fix Workspace",
+            description: "Automatically apply safe fixes across workspace",
+            command: CMD_SCAN_AND_FIX_WORKSPACE,
           },
           {
             label: "$(eye) Toggle X-Ray Mode",
@@ -138,7 +163,8 @@ export function activate(context: vscode.ExtensionContext) {
           if (workspaceFolders) {
             const reportUri = vscode.Uri.joinPath(
               workspaceFolders[0].uri,
-              PROMPT_SHIELD_REPORT_FILE,
+              PROMPTSHIELD_ARTIFACTS_DIR,
+              PROMPTSHIELD_REPORT_FILE,
             );
             try {
               const doc = await vscode.workspace.openTextDocument(reportUri);
@@ -174,6 +200,7 @@ export function activate(context: vscode.ExtensionContext) {
         ) as (vscode.Diagnostic & { data: ThreatReport[] })[];
 
         for (const d of psDiagnostics) {
+          if (d.code === UNUSED_DIRECTIVE_CODE) continue;
           const filename = path.basename(uri.fsPath);
           const group = d.data;
           const primary = getPrimaryThreat(group);
@@ -244,8 +271,9 @@ export function activate(context: vscode.ExtensionContext) {
 
       type ThreatItemType = vscode.QuickPickItem & { threat: ThreatReport };
 
-      const items: ThreatItemType[] = promptShieldDiagnostics.map(
-        (diagnostic) => {
+      const items: ThreatItemType[] = promptShieldDiagnostics
+        .map((diagnostic) => {
+          if (diagnostic.code === UNUSED_DIRECTIVE_CODE) return null;
           const group = (diagnostic as unknown as { data: ThreatReport[] })
             .data;
           const primary = getPrimaryThreat(group);
@@ -263,9 +291,9 @@ export function activate(context: vscode.ExtensionContext) {
                 ? `${group.length} threats at this location`
                 : primary.message,
             threat: primary,
-          };
-        },
-      );
+          } as ThreatItemType;
+        })
+        .filter((item): item is ThreatItemType => !!item);
 
       const selection = await vscode.window.showQuickPick<ThreatItemType>(
         items,

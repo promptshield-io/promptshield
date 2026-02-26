@@ -48,6 +48,9 @@ $ pnpm add @promptshield/lsp
 
 ## 🏗️ internal Architecture
 
+<details>
+<summary>View internal architecture and integration details</summary>
+
 The server is built on `vscode-languageserver` and orchestrates:
 
 1.  **Document Lifecycle**: Tracks open files and changes via `TextDocuments`.
@@ -73,6 +76,10 @@ startLspServer();
 ```
 
 Or connect via IPC/Socket depending on your host environment.
+
+</details>
+
+> 📚 **Deep Dives**: To understand exactly how "Fix with AI" or full Workspace Scanning operates inside the LSP Server, see the [Documentation section](https://promptshield.js.org/docs/lsp).
 
 ---
 

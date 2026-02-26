@@ -61,6 +61,11 @@
   ],
   "keywords": [
     "@promptshield/core",
+    "prompt injection",
+    "security",
+    "llm",
+    "unicode",
+    "smuggling",
     "turbo-forge"
   ]
 }

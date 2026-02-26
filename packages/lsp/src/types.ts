@@ -1,3 +1,6 @@
+import type { Severity } from "@promptshield/core";
+import type { CacheMode } from "@promptshield/workspace";
+
 /**
  * Configuration for the PromptShield language server.
  *
@@ -48,7 +51,21 @@ export interface LspConfig {
    *
    * @default false
    */
-  noIgnore?: boolean;
+  noInlineIgnore?: boolean;
+
+  /**
+   * Minimum severity to report.
+   *
+   * @default "LOW"
+   */
+  minSeverity?: Severity;
+
+  /**
+   * Cache mode for scan results.
+   *
+   * @default "auto"
+   */
+  cacheMode?: CacheMode | "none";
 }
 
 /**
@@ -66,5 +83,7 @@ export const DEFAULT_CONFIG: Required<LspConfig> = {
   validateOnChange: true,
   validateOnOpen: true,
   validateOnSave: true,
-  noIgnore: false,
+  noInlineIgnore: false,
+  minSeverity: "LOW",
+  cacheMode: "auto",
 };

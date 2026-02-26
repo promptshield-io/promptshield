@@ -23,9 +23,9 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const page = source.getPage(params.slug);
   if (!page) {
     if (!params.slug?.length) {
-      redirect(`/docs/README`);
+      redirect(`/docs/overview`);
     } else if (params.slug?.length === 1) {
-      redirect(`/docs/${params.slug[0]}/README`);
+      redirect(`/docs/${params.slug[0]}/overview`);
     } else {
       notFound();
     }

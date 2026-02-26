@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: test file */
-import * as fs from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { scanWorkspace } from "./workspace-scanning";
+import { handleWorkspaceScan } from "./workspace-scanning";
 
 // Mocks
 const mockConnection = {
@@ -27,62 +26,76 @@ vi.mock("node:url", () => ({
   }),
 }));
 
-vi.mock("node:fs");
-vi.mock("@promptshield/core", () => ({
-  scan: vi.fn(() => ({ threats: [] })),
-}));
-vi.mock("@promptshield/ignore", () => ({
-  filterThreats: vi.fn((_text, threats) => ({ threats })),
-}));
-vi.mock("@promptshield/workspace", () => ({
-  resolveFiles: vi.fn(),
-  PROMPT_SHIELD_REPORT_FILE: "promptshield-report.md",
+vi.mock("node:fs/promises", () => ({
+  writeFile: vi.fn(),
 }));
 
-import { scan } from "@promptshield/core";
-import { resolveFiles } from "@promptshield/workspace";
+vi.mock("@promptshield/workspace", () => ({
+  scanWorkspace: vi.fn(),
+  generateWorkspaceReport: vi.fn(),
+  PROMPTSHIELD_ARTIFACTS_DIR: ".promptshield",
+}));
+
+import { scanWorkspace as scanWorkspaceCore } from "@promptshield/workspace";
 
 describe("Workspace Scanning", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should scan files returned by resolveFiles", async () => {
-    vi.mocked(resolveFiles).mockResolvedValue([
-      "/workspace/file1.txt",
-      "/workspace/subdir/file2.js",
-    ]);
+  it("should scan files returned by scanWorkspaceCore", async () => {
+    // Generate an async iterator for the mock
+    async function* mockScan() {
+      yield {
+        progress: 50,
+        name: "file1.txt",
+        path: "file1.txt",
+        result: { threats: [] },
+      };
+      yield {
+        progress: 100,
+        name: "subdir/file2.js",
+        path: "subdir/file2.js",
+        result: { threats: [] },
+      };
+    }
+    vi.mocked(scanWorkspaceCore).mockReturnValue(mockScan() as any);
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue("content");
-
-    await scanWorkspace(mockConnection as any, "file:///workspace", {
+    await handleWorkspaceScan(mockConnection as any, "file:///workspace", {
       force: false,
       noIgnore: false,
     } as any);
 
-    expect(resolveFiles).toHaveBeenCalledWith([], "/workspace");
-    expect(scan).toHaveBeenCalledTimes(2); // file1 and file2
+    expect(scanWorkspaceCore).toHaveBeenCalledWith(
+      [],
+      "/workspace",
+      expect.any(Object),
+    );
     expect(mockConnection.window.showInformationMessage).toHaveBeenCalled();
   });
 
   it("should warn if threats are found", async () => {
-    vi.mocked(resolveFiles).mockResolvedValue(["/workspace/file.txt"]);
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-
-    vi.mocked(scan).mockReturnValue({
-      threats: [
-        {
-          category: "TEST",
-          severity: "HIGH",
-          message: "test",
-          offendingText: "test",
-          loc: { line: 1, column: 1, index: 0 },
+    async function* mockScan() {
+      yield {
+        progress: 100,
+        name: "file.txt",
+        path: "file.txt",
+        result: {
+          threats: [
+            {
+              category: "TEST",
+              severity: "HIGH",
+              message: "test",
+              offendingText: "test",
+              loc: { line: 1, column: 1, index: 0 },
+            },
+          ],
         },
-      ],
-    } as any);
+      };
+    }
+    vi.mocked(scanWorkspaceCore).mockReturnValue(mockScan() as any);
 
-    await scanWorkspace(mockConnection as any, "file:///workspace", {
+    await handleWorkspaceScan(mockConnection as any, "file:///workspace", {
       force: false,
       noIgnore: false,
     } as any);

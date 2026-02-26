@@ -38,6 +38,7 @@ PromptShield provides the tooling to detect these threats at every stage of your
 | [**@promptshield/lsp**](./packages/lsp)             | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp)             | **The Brain.** Language Server Protocol implementation for universal editor support.   |
 | [**@promptshield/sanitizer**](./packages/sanitizer) | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer) | **The Cure.** Deterministic logic to strip invisible threats safely.                   |
 | [**@promptshield/ignore**](./packages/ignore)       | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore)       | **The Filter.** Standardized syntax for suppressing false positives.                   |
+| [**@promptshield/workspace**](./packages/workspace) | [![npm](https://img.shields.io/npm/v/@promptshield/workspace)](https://www.npmjs.com/package/@promptshield/workspace) | **The Orchestrator.** High-performance filesystem and caching engine.                  |
 
 ---
 

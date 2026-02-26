@@ -8,12 +8,17 @@ const mockConnection = {
   sendDiagnostics: vi.fn(),
 } as unknown as Connection;
 
+vi.mock("vscode-languageserver", () => ({
+  DiagnosticSeverity: { Warning: 2 },
+  DiagnosticTag: { Unnecessary: 1 },
+}));
+
 vi.mock("@promptshield/core", () => ({
   scan: vi.fn(() => ({ threats: [] })),
 }));
 
 vi.mock("@promptshield/ignore", () => ({
-  filterThreats: vi.fn((_text, threats) => ({ threats })),
+  filterThreats: vi.fn((_text, threats) => ({ threats, unusedIgnores: [] })),
 }));
 
 vi.mock("./diagnostics", () => ({
@@ -41,7 +46,10 @@ describe("Validation", () => {
     await validateDocument(document, mockConnection, config);
 
     expect(scan).not.toHaveBeenCalled();
-    expect(mockConnection.sendDiagnostics).not.toHaveBeenCalled();
+    expect(mockConnection.sendDiagnostics).toHaveBeenCalledWith({
+      uri: "file:///test.txt",
+      diagnostics: [],
+    });
   });
 
   it("should validate and send diagnostics for valid files", async () => {
@@ -55,7 +63,7 @@ describe("Validation", () => {
 
     await validateDocument(document, mockConnection, config);
 
-    expect(scan).toHaveBeenCalledWith("ok");
+    expect(scan).toHaveBeenCalledWith("ok", expect.any(Object));
     expect(convertReportsToDiagnostics).toHaveBeenCalled();
     expect(mockConnection.sendDiagnostics).toHaveBeenCalledWith({
       uri: "file:///test.txt",

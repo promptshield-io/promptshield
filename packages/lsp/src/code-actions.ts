@@ -3,10 +3,12 @@ import { applyFixes } from "@promptshield/sanitizer";
 import {
   type CodeAction,
   CodeActionKind,
+  type Diagnostic,
   Range,
   TextEdit,
 } from "vscode-languageserver";
 import type { TextDocument } from "vscode-languageserver-textdocument";
+import { UNUSED_DIRECTIVE_CODE } from "./constants";
 
 /**
  * Create "Fix with AI" code action.
@@ -170,4 +172,45 @@ export const getThreatFixActions = (
 
     return actions;
   });
+};
+
+/**
+ * Create "Remove unused ignore directive" code actions.
+ */
+export const getRemoveUnusedIgnoreActions = (
+  document: TextDocument,
+  diagnostics: Diagnostic[],
+): CodeAction[] => {
+  return diagnostics
+    .filter((d) => d.code === UNUSED_DIRECTIVE_CODE)
+    .map((diagnostic) => {
+      const line = diagnostic.range.start.line;
+      const lineText = document.getText({
+        start: { line, character: 0 },
+        end: { line: line + 1, character: 0 },
+      });
+
+      let editRange = diagnostic.range;
+
+      const trimmed = lineText.trim();
+      if (
+        trimmed.startsWith("//") ||
+        trimmed.startsWith("#") ||
+        trimmed.startsWith("/*")
+      ) {
+        // If the line is just a comment, delete the whole line.
+        editRange = {
+          start: { line, character: 0 },
+          end: { line: line + 1, character: 0 },
+        };
+      }
+
+      const edit = TextEdit.replace(editRange, "");
+
+      return {
+        title: "PromptShield: Remove unused ignore directive",
+        kind: CodeActionKind.QuickFix,
+        edit: { changes: { [document.uri]: [edit] } },
+      };
+    });
 };

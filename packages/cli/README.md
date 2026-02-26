@@ -49,6 +49,9 @@ $ pnpm add -D @promptshield/cli
 
 ## 🚀 Usage
 
+<details>
+<summary>View complete usage guide and configurations</summary>
+
 ### Basic Scan
 
 Scan all files in the current directory (respects `.gitignore` and `.promptignore`).
@@ -113,6 +116,10 @@ Create a `promptshield.config.json` (or use `--init`):
   "exclude": ["**/node_modules/**", "**/*.min.js"]
 }
 ```
+
+</details>
+
+> 📚 **Deep Dives**: For comprehensive explanation of commands and config schemas, see the [Documentation section](https://promptshield.js.org/docs/cli).
 
 ---
 

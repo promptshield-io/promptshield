@@ -10,6 +10,26 @@
 export type Severity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 /**
+ * Numeric severity ranking map.
+ *
+ * Lower numbers represent higher severity.
+ *
+ * Used for:
+ * - Severity threshold comparisons
+ * - Sorting threats by priority
+ * - Efficient numeric filtering
+ *
+ * Example:
+ *   SEVERITY_MAP["CRITICAL"] < SEVERITY_MAP["LOW"] // true
+ */
+export const SEVERITY_MAP: Record<Severity, number> = {
+  CRITICAL: 1,
+  HIGH: 2,
+  MEDIUM: 3,
+  LOW: 4,
+};
+
+/**
  * Categories of threats detected by PromptShield.
  *
  * Categories describe the *type of attack vector* rather than
@@ -182,22 +202,40 @@ export interface ScanOptions {
    */
   minSeverity?: Severity;
 
-  /** Disable invisible-character detection */
+  /** Disable invisible-character detection
+   *
+   * @default false
+   */
   disableInvisible?: boolean;
 
-  /** Disable homoglyph detection */
+  /** Disable homoglyph detection
+   *
+   * @default false
+   */
   disableHomoglyphs?: boolean;
 
-  /** Disable smuggling detection */
+  /** Disable smuggling detection
+   *
+   * @default false
+   */
   disableSmuggling?: boolean;
 
-  /** Disable Trojan Source detection */
+  /** Disable Trojan Source detection
+   *
+   * @default false
+   */
   disableTrojan?: boolean;
 
-  /** Disable normalization detection */
+  /** Disable normalization detection
+   *
+   * @default false
+   */
   disableNormalization?: boolean;
 
-  /** Disable injection-pattern detection */
+  /** Disable injection-pattern detection
+   *
+   * @default false
+   */
   disableInjectionPatterns?: boolean;
 }
 

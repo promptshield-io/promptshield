@@ -82,4 +82,60 @@ describe("LSP Hover", () => {
     expect(value).toContain("![LOW](data:image/svg+xml;base64,");
     expect(value).toContain("LOW");
   });
+
+  it("should return null if position is outside the threat line or character bounds", () => {
+    const document = TextDocument.create(
+      "file:///test.txt",
+      "plaintext",
+      1,
+      "hello bad content", // "bad" is at index 6, length 3
+    );
+    vi.mocked(scan).mockReturnValue({
+      threats: [
+        {
+          category: "TEST",
+          severity: "HIGH",
+          message: "Danger",
+          offendingText: "bad",
+          loc: { line: 1, column: 7, index: 6 },
+        },
+      ],
+    } as any);
+
+    // Line before
+    expect(getHover(document, { line: -1, character: 6 })).toBeNull();
+    // Line after
+    expect(getHover(document, { line: 1, character: 6 })).toBeNull();
+    // Character before
+    expect(getHover(document, { line: 0, character: 5 })).toBeNull();
+    // Character after
+    expect(getHover(document, { line: 0, character: 9 })).toBeNull();
+    // Correct position
+    expect(getHover(document, { line: 0, character: 7 })).not.toBeNull();
+  });
+
+  it("should include suggestion block in hover markdown if present on threat", () => {
+    const document = TextDocument.create(
+      "file:///test.txt",
+      "plaintext",
+      1,
+      "bad content",
+    );
+    vi.mocked(scan).mockReturnValue({
+      threats: [
+        {
+          category: "TEST",
+          severity: "HIGH",
+          message: "Danger",
+          offendingText: "bad",
+          loc: { line: 1, column: 1, index: 0 },
+          suggestion: "Remove this.",
+        },
+      ],
+    } as any);
+
+    const hover = getHover(document, { line: 0, character: 1 });
+    const value = (hover?.contents as any).value;
+    expect(value).toContain("**Suggestion:** Remove this.");
+  });
 });

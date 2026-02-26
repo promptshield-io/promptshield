@@ -53,7 +53,7 @@ PromptShield provides the tooling to detect these threats at every stage of your
 
 ```bash
 # Scan your prompts directory and fail if threats are found
-npx promptshield-cli scan "prompts/**/*.txt" --check
+npx promptshield scan "prompts/**/*.txt" --check
 ```
 
 ### For Node.js Apps

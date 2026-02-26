@@ -1,5 +1,5 @@
 ---
-"promptshield-cli": minor
+"@promptshield/cli": minor
 "@promptshield/lsp": minor
 "promptshield-vscode": minor
 ---
@@ -28,6 +28,7 @@ Added new workspace commands:
 - `promptshield.fixWorkspace`
 
 These commands:
+
 - Trigger full workspace scan via `runWorkspaceScan`
 - Respect config (minSeverity, cacheMode, noInlineIgnore, etc.)
 - Stream results back to client
@@ -35,6 +36,7 @@ These commands:
 - Support fix preview and write modes
 
 Designed for:
+
 - IDE-level security auditing
 - Large repository support
 - Consistent behavior with CLI
@@ -47,6 +49,7 @@ Added command palette entries:
 - **PromptShield: Fix Workspace**
 
 Behavior:
+
 - Delegates to LSP commands
 - Shows progress notifications
 - Updates Problems panel

@@ -19,7 +19,7 @@
   <img alt="license" src="https://img.shields.io/npm/l/@promptshield/workspace" />
 </p>
 
-![PromptShield Banner](https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif)
+<img alt="PromptShield Banner" src="https://raw.githubusercontent.com/promptshield-io/promptshield/main/banner.gif" />
 
 > High-performance workspace scanning engine for PromptShield.
 > Manages filesystem traversal, layered ignore resolution (.gitignore, .promptshieldignore, .psignore), concurrency, and caching while delegating detection to @promptshield/core and inline directive processing to @promptshield/ignore.

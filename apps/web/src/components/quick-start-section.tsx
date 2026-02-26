@@ -12,13 +12,6 @@ interface Tab {
 
 const tabs: Tab[] = [
   {
-    id: "vscode",
-    label: "For Developers (VS Code)",
-    description:
-      "Install the PromptShield Extension. Open any file. Invisible characters and threats are instantly highlighted.",
-    code: "ext install promptshield.promptshield-vscode",
-  },
-  {
     id: "ci",
     label: "For CI/CD (CLI)",
     description:

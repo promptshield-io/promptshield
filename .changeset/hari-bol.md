@@ -1,7 +1,7 @@
 ---
 "@promptshield/cli": minor
 "@promptshield/lsp": minor
-"promptshield-vscode": minor
+"promptshield": minor
 ---
 
 feat(cli): add Markdown workspace report generation

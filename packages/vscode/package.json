@@ -2,7 +2,7 @@
   "name": "promptshield",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "publisher": "mayank1513",
   "icon": "./promptshield.jpg",
   "description": "Real-time visual security for prompt engineering. Detects and visualizes hidden &quot;ghost&quot; characters, directional overrides, and malicious Unicode within the VS Code editor.",

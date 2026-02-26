@@ -2,7 +2,7 @@
   "name": "@promptshield/workspace",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": false,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Helper functions for loading workspace files. Shared by CLI and LSP",
   "license": "MIT",
   "main": "./dist/index.js",

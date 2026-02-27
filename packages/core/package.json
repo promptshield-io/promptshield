@@ -2,7 +2,7 @@
   "name": "@promptshield/core",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The heart of the PromptShield ecosystem. A zero-dependency, isomorphic TypeScript engine for detecting invisible characters, BIDI overrides, and homoglyph attacks in AI prompts.",
   "license": "MIT",
   "main": "./dist/index.js",

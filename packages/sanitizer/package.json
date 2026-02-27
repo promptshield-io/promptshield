@@ -2,7 +2,7 @@
   "name": "@promptshield/sanitizer",
   "author": "Mayank Kumar Chaudhari <https://mayankchaudhari.com>",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "PromptShield sanitizer that applies safe, deterministic fixes to text based on detected prompt-injection threats such as invisible characters, markdown smuggling, and BOM artifacts.",
   "license": "MIT",
   "main": "./dist/index.js",

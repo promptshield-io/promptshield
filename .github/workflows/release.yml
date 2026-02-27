@@ -51,12 +51,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Aliases
-        if: steps.changesets.outputs.published == 'true'
-        run: pnpm tsx tooling/scripts/publish-aliases.ts --published-packages '${{ steps.changesets.outputs.publishedPackages }}'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-
       - name: Publish VSCode Extension
         run: |
           cd packages/vscode
@@ -79,3 +73,28 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Generate API docs
+        run: |
+          git config --global user.name "mayank1513"
+          git config --global user.email "${{ secrets.EMAIL_ADDRESS || 'info@mayankchaudhari.com' }}"
+          git fetch
+          git checkout $GITHUB_REF_NAME
+          git checkout -- .
+          git clean -fd
+          pnpm docs:api
+          git add apps/web/content/docs
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: updated documentation [skip ci]"
+            git pull --rebase origin $GITHUB_REF_NAME
+            git push origin $GITHUB_REF_NAME
+          else
+            echo "No documentation changes to commit"
+          fi
+
+      - name: Publish Aliases
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm tsx tooling/scripts/publish-aliases.ts --published-packages '${{ steps.changesets.outputs.publishedPackages }}'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+

@@ -61,12 +61,17 @@ await Promise.all(
   ),
 );
 
-execFileSync("git", ["add", DOCS_ROOT]);
-execFileSync("git", [
-  "commit",
-  "-m",
-  "chore(docs): remove brackets for proper git diff",
-]);
+let shouldReset = true;
+try {
+  execFileSync("git", ["add", DOCS_ROOT]);
+  execFileSync("git", [
+    "commit",
+    "-m",
+    "chore(docs): remove brackets for proper git diff",
+  ]);
+} catch {
+  shouldReset = false;
+}
 
 console.log("dirs------------", PKG_DOC_DIRS);
 
@@ -90,9 +95,9 @@ for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
   );
 
   execFileSync(
-    process.platform === "win32" ? "pnpm.cmd" : "pnpm",
+    process.execPath,
     [
-      "typedoc",
+      "node_modules/typedoc/bin/typedoc",
       "--options",
       "typedoc.base.config.ts",
       "--tsconfig",
@@ -270,4 +275,10 @@ await Promise.all(
   ),
 );
 
-execFileSync("git", ["reset", "HEAD~1"], { stdio: "inherit" });
+if (shouldReset) {
+  try {
+    execFileSync("git", ["reset", "HEAD~1"], { stdio: "inherit" });
+  } catch {
+    // Ignore if nothing to reset
+  }
+}

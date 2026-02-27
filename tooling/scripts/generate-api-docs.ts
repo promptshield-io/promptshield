@@ -9,6 +9,8 @@ const PACKAGES_DIR = "packages";
 const DOCS_ROOT = "apps/web/content/docs";
 const MAIN_PACKAGE_DIR = "core";
 
+await fs.mkdir(DOCS_ROOT, { recursive: true });
+
 /**
  * Safely renames a file or directory.
  * - Skips if source does not exist

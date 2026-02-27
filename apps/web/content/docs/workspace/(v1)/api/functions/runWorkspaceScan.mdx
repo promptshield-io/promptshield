@@ -1,0 +1,39 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / runWorkspaceScan
+
+# Function: runWorkspaceScan()
+
+> **runWorkspaceScan**(`patterns`, `root`, `config`): `AsyncGenerator`\<[`ScanEvent`](../interfaces/ScanEvent.md)\>
+
+Defined in: [workspace.ts:307](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L307)
+
+Internal workspace pipeline engine.
+
+Responsibilities:
+- Resolve file globs
+- Initialize cache strategy
+- Enforce bounded concurrency
+- Stream scan events
+
+Results are yielded in task creation order (not completion order).
+
+## Parameters
+
+### patterns
+
+`string`[]
+
+### root
+
+`string`
+
+### config
+
+[`WorkspaceScanConfig`](../interfaces/WorkspaceScanConfig.md)
+
+## Returns
+
+`AsyncGenerator`\<[`ScanEvent`](../interfaces/ScanEvent.md)\>

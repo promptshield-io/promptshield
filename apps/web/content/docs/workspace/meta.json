@@ -1,0 +1,8 @@
+{
+  "title": "@promptshield/workspace",
+  "description": "Helper functions for loading workspace files. Shared by CLI and LSP",
+  "lastModified": "2026-02-27T06:13:33.879Z",
+  "version": "1.0.0",
+  "root": true,
+  "icon": "Shield"
+}

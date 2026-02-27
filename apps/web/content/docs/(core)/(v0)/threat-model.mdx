@@ -1,0 +1,142 @@
+---
+title: Threat Model
+---
+
+# PromptShield Threat Model
+
+PromptShield focuses on detecting **prompt manipulation techniques**, not evaluating intent or content correctness.
+
+The goal is to identify when text has been **structurally altered or concealed** in ways that can influence LLM behavior without being obvious to developers or reviewers.
+
+---
+
+## What PromptShield protects against
+
+PromptShield detects techniques that attempt to:
+
+- hide instructions
+- manipulate prompt interpretation
+- bypass guardrails (Only deterministic and well known phrases)
+- obscure meaning using Unicode or encoding tricks
+- conceal instructions inside encoded payloads
+
+These are **text integrity risks**, not content policy violations.
+
+---
+
+## Detection categories
+
+PromptShield currently detects the following threat classes:
+
+### Invisible Unicode characters
+
+Hidden characters like Zero Width Space can conceal instructions.
+
+### Trojan Source (BIDI attacks)
+
+Bidirectional override characters can visually reorder text.
+
+Reference: [CVE-2021-42574](https://www.google.com/search?q=CVE-2021-42574)
+
+---
+
+### Unicode normalization inconsistencies
+
+Visually identical characters may differ at the code-point level.
+
+---
+
+### Homoglyph attacks
+
+Characters from different scripts may look identical but behave differently.
+
+Example:
+
+```
+
+раypal.com
+
+```
+
+---
+
+### Smuggling techniques
+
+Instructions may be hidden inside:
+
+- Base64 payloads
+- Markdown comments
+- invisible-character steganography
+
+---
+
+### Prompt injection patterns
+
+Known instruction-override phrases such as:
+
+```
+
+Ignore previous instructions
+Reveal system prompt
+Disable guardrails
+
+```
+
+These are detected deterministically using rule-based scanning.
+
+---
+
+## What PromptShield does NOT attempt
+
+PromptShield intentionally does not:
+
+- classify user intent
+- perform AI-based safety evaluation
+- detect persuasion or manipulation tone
+- evaluate correctness of prompts
+- analyze model outputs
+
+PromptShield is a **deterministic prompt security scanner**, not an AI safety engine.
+
+---
+
+## Design principles
+
+PromptShield detection is designed to be:
+
+- deterministic
+- explainable
+- fast
+- reproducible
+- editor-friendly
+- CI-safe
+
+Every detection must be traceable to a specific rule.
+
+---
+
+## Trust boundaries
+
+PromptShield assumes risk at these boundaries:
+
+- user-generated content
+- imported prompts
+- documentation copied from external sources
+- encoded or transformed text
+- LLM tool inputs
+- prompt templates
+
+These are the most common injection surfaces.
+
+---
+
+## Mental model
+
+PromptShield is similar to:
+
+- a secrets scanner
+- a Unicode safety linter
+- a prompt-security ESLint
+- a static analyzer for prompts
+
+It detects **how prompts are manipulated**, not **whether prompts are good**.

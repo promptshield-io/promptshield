@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "overview",
+    "threat-model",
+    "scanning-pipeline",
+    "ignore-directives",
+    "detectors",
+    "api"
+  ]
+}

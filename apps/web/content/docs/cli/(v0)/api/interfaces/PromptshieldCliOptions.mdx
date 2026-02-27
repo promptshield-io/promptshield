@@ -1,0 +1,271 @@
+[**@promptshield/cli**](../index.md)
+
+***
+
+[@promptshield/cli](../index.md) / PromptshieldCliOptions
+
+# Interface: PromptshieldCliOptions
+
+Defined in: [main.ts:84](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L84)
+
+CLI options for the PromptShield command-line interface.
+
+This interface represents the normalized, programmatic shape of
+user-provided CLI flags after argument parsing.
+
+Notes:
+- All properties are optional to allow layered configuration
+  (defaults → config file → CLI flags).
+- Final effective values are resolved by the CLI bootstrap layer.
+
+## Properties
+
+### cacheMode?
+
+> `optional` **cacheMode**: `CacheMode` \| `"none"`
+
+Defined in: [main.ts:215](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L215)
+
+Cache storage strategy.
+
+- `"none"`   → disable persistent cache
+- `"single"` → one `cache.json` file
+- `"split"`  → per-file hashed cache entries
+- `"auto"`   → strategy selected via repository size heuristic
+
+When enabled (`cacheMode !== "none"`), cache stores baseline
+filtered results computed using:
+- `minSeverity: "LOW"`
+- inline ignore directives enabled
+
+Severity filtering and `noInlineIgnore` are applied
+after cache retrieval.
+
+#### Default
+
+```ts
+"auto"
+```
+
+***
+
+### check?
+
+> `optional` **check**: `boolean`
+
+Defined in: [main.ts:184](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L184)
+
+CI enforcement mode.
+
+When enabled:
+- Process exits with non-zero status if threats are detected.
+- Designed for pipeline gating and automated checks.
+
+May implicitly adjust other defaults (e.g., disable inline ignores).
+
+#### Default
+
+```ts
+false
+```
+
+***
+
+### command?
+
+> `optional` **command**: `"scan"` \| `"fix"` \| `"sanitize"`
+
+Defined in: [main.ts:106](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L106)
+
+CLI command to execute.
+
+- `"scan"`     → analyze files and report threats.
+- `"fix"`      → scan and apply automatic fixes where possible.
+- `"sanitize"` → transform input defensively (may be stricter than fix).
+
+#### Default
+
+```ts
+"scan"
+```
+
+***
+
+### forceFullScan?
+
+> `optional` **forceFullScan**: `boolean`
+
+Defined in: [main.ts:224](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L224)
+
+Forces a full rescan of all files and refreshes cache entries.
+
+Ignored when `cacheMode === "none"`.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
+### json?
+
+> `optional` **json**: `boolean`
+
+Defined in: [main.ts:145](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L145)
+
+Emit structured JSON output instead of human-readable logs.
+
+Intended for:
+- CI pipelines
+- Machine consumption
+- Automated tooling integrations
+
+When enabled:
+- Console formatting is suppressed
+- Output is deterministic and parseable
+
+#### Default
+
+```ts
+false
+```
+
+***
+
+### logLevel?
+
+> `optional` **logLevel**: `LogLevel`
+
+Defined in: [main.ts:95](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L95)
+
+Logging verbosity level.
+
+Controls console output granularity.
+Higher verbosity provides additional diagnostic context.
+
+When `json` is enabled, log output is suppressed regardless of this value.
+
+#### Default
+
+```ts
+"info"
+```
+
+***
+
+### minSeverity?
+
+> `optional` **minSeverity**: `Severity`
+
+Defined in: [main.ts:119](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L119)
+
+Minimum severity threshold to report.
+
+Only threats with severity greater than or equal to this level
+are included in output.
+
+When caching is enabled, baseline scans may still run at a lower
+severity internally to preserve correctness.
+
+#### Default
+
+```ts
+"LOW"
+```
+
+***
+
+### noInlineIgnore?
+
+> `optional` **noInlineIgnore**: `boolean`
+
+Defined in: [main.ts:195](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L195)
+
+Disable inline ignore directives (e.g., `// promptshield-ignore`).
+
+When enabled:
+- All rules are evaluated without honoring in-source suppression.
+- Useful for CI audits or security reviews.
+
+#### Default
+
+```ts
+true if CI environment is detected
+```
+
+***
+
+### patterns?
+
+> `optional` **patterns**: `string`[]
+
+Defined in: [main.ts:129](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L129)
+
+Glob patterns specifying files to process.
+
+Patterns are resolved relative to the current working directory.
+
+If omitted, the CLI may fallback to a default pattern set
+(e.g., `["** /*"]` or project-configured values).
+
+***
+
+### report?
+
+> `optional` **report**: `boolean`
+
+Defined in: [main.ts:231](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L231)
+
+Generate a detailed Markdown workspace report describing found threats.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
+### strict?
+
+> `optional` **strict**: `boolean`
+
+Defined in: [main.ts:158](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L158)
+
+Enable strict sanitization mode.
+
+In strict mode:
+- Potentially unsafe constructs may be rejected rather than fixed.
+- Heuristics are minimized in favor of explicit safety guarantees.
+
+Intended for high-security or CI enforcement workflows.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
+### write?
+
+> `optional` **write**: `boolean`
+
+Defined in: [main.ts:171](https://github.com/promptshield-io/promptshield/blob/main/packages/cli/src/main.ts#L171)
+
+Persist modifications to disk.
+
+When enabled:
+- Fix or sanitize operations write changes to files.
+- When disabled, operations run in dry-run mode.
+
+Ignored for pure scan commands.
+
+#### Default
+
+```ts
+false
+```

@@ -1,0 +1,26 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / TEXT\_LANGUAGES
+
+# Variable: TEXT\_LANGUAGES
+
+> `const` **TEXT\_LANGUAGES**: readonly \[`"plaintext"`, `"markdown"`, `"javascript"`, `"typescript"`, `"javascriptreact"`, `"typescriptreact"`, `"json"`, `"jsonc"`, `"yaml"`, `"toml"`, `"xml"`, `"html"`, `"css"`, `"scss"`, `"less"`, `"shellscript"`, `"python"`, `"go"`, `"rust"`, `"java"`, `"c"`, `"cpp"`\]
+
+Defined in: [constants.ts:39](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/constants.ts#L39)
+
+Languages treated as text sources for scanning.
+
+Purpose:
+- Restricts analysis to textual formats.
+- Prevents binary file misclassification.
+
+Source:
+- Typically aligned with VSCode language identifiers.
+
+Notes:
+- This list is intentionally explicit.
+- Adding a language increases scan surface area.
+- Binary detection should still run independently.
+- Currently not used

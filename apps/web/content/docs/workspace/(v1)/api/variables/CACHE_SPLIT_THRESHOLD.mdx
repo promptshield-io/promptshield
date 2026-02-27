@@ -1,0 +1,22 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / CACHE\_SPLIT\_THRESHOLD
+
+# Variable: CACHE\_SPLIT\_THRESHOLD
+
+> `const` **CACHE\_SPLIT\_THRESHOLD**: `1500` = `1500`
+
+Defined in: [constants.ts:93](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/constants.ts#L93)
+
+File-count threshold for recommending split cache mode.
+
+If total repository file count exceeds this value,
+split-mode storage is preferred for scalability.
+
+Rationale:
+- Large repositories suffer from single-file rewrite overhead.
+- Split mode reduces contention and memory footprint.
+
+This is a heuristic boundary, not a hard limit.

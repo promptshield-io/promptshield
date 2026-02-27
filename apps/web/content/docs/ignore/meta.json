@@ -1,0 +1,8 @@
+{
+  "title": "@promptshield/ignore",
+  "description": "Ignore directive parser and threat filtering utilities for PromptShield. Provides file-level and line-level suppression logic for CLI and IDE integrations.",
+  "lastModified": "2026-02-27T06:13:01.362Z",
+  "version": "1.0.0",
+  "root": true,
+  "icon": "Shield"
+}

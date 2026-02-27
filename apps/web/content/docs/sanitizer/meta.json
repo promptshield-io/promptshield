@@ -1,0 +1,8 @@
+{
+  "title": "@promptshield/sanitizer",
+  "description": "PromptShield sanitizer that applies safe, deterministic fixes to text based on detected prompt-injection threats such as invisible characters, markdown smuggling, and BOM artifacts.",
+  "lastModified": "2026-02-27T06:13:22.721Z",
+  "version": "0.0.1",
+  "root": true,
+  "icon": "Shield"
+}

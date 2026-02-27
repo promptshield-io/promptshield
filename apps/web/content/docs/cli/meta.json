@@ -1,0 +1,8 @@
+{
+  "title": "@promptshield/cli",
+  "description": "Production-grade CLI for auditing AI prompts. Detects invisible characters, homoglyph attacks, and adversarial Unicode poisoning in your development workflow.",
+  "lastModified": "2026-02-27T06:12:46.113Z",
+  "version": "0.1.0",
+  "root": true,
+  "icon": "Shield"
+}

@@ -1,0 +1,66 @@
+[**@promptshield/workspace**](../index.md)
+
+***
+
+[@promptshield/workspace](../index.md) / SanitizeEvent
+
+# Interface: SanitizeEvent
+
+Defined in: [workspace.ts:478](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L478)
+
+Event emitted for each processed file during workspace sanitization.
+
+## Properties
+
+### changed
+
+> **changed**: `boolean`
+
+Defined in: [workspace.ts:495](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L495)
+
+Indicates whether the sanitizer modified the file content.
+
+In dry-run mode (`write: false`), this reflects whether
+changes would have occurred.
+
+***
+
+### name
+
+> **name**: `string`
+
+Defined in: [workspace.ts:487](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L487)
+
+Human-readable file name (without directories).
+
+***
+
+### path
+
+> **path**: `string`
+
+Defined in: [workspace.ts:482](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L482)
+
+Workspace-relative, POSIX-normalized file path.
+
+***
+
+### progress
+
+> **progress**: `number`
+
+Defined in: [workspace.ts:502](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L502)
+
+Overall progress percentage (0–100).
+
+Progress is monotonic and based on total resolved files.
+
+***
+
+### sanitized
+
+> **sanitized**: `string`
+
+Defined in: [workspace.ts:507](https://github.com/promptshield-io/promptshield/blob/main/packages/workspace/src/workspace.ts#L507)
+
+Sanitized text.

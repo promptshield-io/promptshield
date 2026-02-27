@@ -1,0 +1,34 @@
+[**@promptshield/sanitizer**](../index.md)
+
+***
+
+[@promptshield/sanitizer](../index.md) / sanitize
+
+# Function: sanitize()
+
+> **sanitize**(`text`): `string`
+
+Defined in: [sanitizer.ts:91](https://github.com/promptshield-io/promptshield/blob/main/packages/sanitizer/src/sanitizer.ts#L91)
+
+Applies safe, formatter-style sanitization.
+
+Transformation order is intentional:
+1. Normalize line endings
+2. Remove BOM
+3. Remove invisible characters
+4. Remove variation selectors
+5. Remove markdown comments
+6. Remove empty links
+7. Normalize compatibility characters
+
+This function is deterministic and idempotent.
+
+## Parameters
+
+### text
+
+`string`
+
+## Returns
+
+`string`

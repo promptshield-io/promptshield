@@ -1,5 +1,17 @@
 # @promptshield/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- [`6a7e063`](https://github.com/promptshield-io/promptshield/commit/6a7e063a15c4474964f1cdeeea39912996d19579) Thanks [@mayank1513](https://github.com/mayank1513)! - fix(cli): remove CommonJS runtime guard and use pure ESM entry detection
+
+  Replaced hybrid `require.main === module` logic with ESM-safe
+  `fileURLToPath(import.meta.url)` comparison.
+
+  Prevents `ReferenceError: module is not defined` in Node 22+
+  when running via `pnpx`.
+
 ## 0.1.0
 
 ### Minor Changes

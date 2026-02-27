@@ -16,14 +16,14 @@ const tabs: Tab[] = [
     label: "For CI/CD (CLI)",
     description:
       "Run PromptShield in your pipeline to block PRs containing adversarial inputs.",
-    code: "pnpx @promptshield/cli scan . --fail-on-threat",
+    code: "pnpx @promptshield/cli scan . --check",
   },
   {
     id: "node",
     label: "For Node.js Apps",
     description:
       "Integrate the core engine directly into your prompt handling logic.",
-    code: "npm install @promptshield/core\n\nimport { scanPrompt } from '@promptshield/core';\nconst report = scanPrompt(userInput);",
+    code: "npm install @promptshield/core\n\nimport { scan } from '@promptshield/core';\nconst report = scan(userInput);",
   },
 ];
 

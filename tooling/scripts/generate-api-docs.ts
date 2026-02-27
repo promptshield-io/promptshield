@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import pLimit from "p-limit";
@@ -61,9 +61,12 @@ await Promise.all(
   ),
 );
 
-execSync(
-  `git add ${DOCS_ROOT} && git commit -m "chore(docs): remove brackets for proper git diff"`,
-);
+execFileSync("git", ["add", DOCS_ROOT]);
+execFileSync("git", [
+  "commit",
+  "-m",
+  "chore(docs): remove brackets for proper git diff",
+]);
 
 console.log("dirs------------", PKG_DOC_DIRS);
 
@@ -86,14 +89,19 @@ for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
     `Generating docs for ${pkgJson.name}@${pkgJson.version} in ${outDir}`,
   );
 
-  execSync(
+  execFileSync(
+    process.platform === "win32" ? "pnpm.cmd" : "pnpm",
     [
-      "pnpm typedoc",
-      "--options typedoc.base.config.ts",
-      "--tsconfig tsconfig.docs.json",
-      `--entryPoints ${entry}`,
-      `--out ${outDir}`,
-    ].join(" "),
+      "typedoc",
+      "--options",
+      "typedoc.base.config.ts",
+      "--tsconfig",
+      "tsconfig.docs.json",
+      "--entryPoints",
+      entry,
+      "--out",
+      outDir,
+    ],
     { stdio: "inherit" },
   );
 
@@ -177,12 +185,14 @@ await walk(DOCS_ROOT, async (file) => {
 /* 3. Inject frontmatter (ASYNC)       */
 /* ---------------------------------- */
 
-const commitHash = execSync("git rev-parse HEAD", {
+const commitHash = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
 
-const changedDocs = execSync(
-  `git add ${DOCS_ROOT} && git status --porcelain -- ${DOCS_ROOT}`,
+execFileSync("git", ["add", DOCS_ROOT]);
+const changedDocs = execFileSync(
+  "git",
+  ["status", "--porcelain", "--", DOCS_ROOT],
   { encoding: "utf8" },
 )
   .split("\n")
@@ -260,4 +270,4 @@ await Promise.all(
   ),
 );
 
-execSync("git reset HEAD~1", { stdio: "inherit" });
+execFileSync("git", ["reset", "HEAD~1"], { stdio: "inherit" });

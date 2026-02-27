@@ -30,30 +30,31 @@ PromptShield provides the tooling to detect these threats at every stage of your
 
 ## 📦 Ecosystem
 
-| Package                                             | Status                                                                                                                | Description                                                                            |
-| :-------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| [**@promptshield/core**](./packages/core)           | [![npm](https://img.shields.io/npm/v/@promptshield/core)](https://www.npmjs.com/package/@promptshield/core)           | **The Engine.** Zero-dependency, high-performance threat detection logic.              |
-| [**@promptshield/cli**](./packages/cli)             | [![npm](https://img.shields.io/npm/v/@promptshield/cli)](https://www.npmjs.com/package/@promptshield/cli)             | **The Gatekeeper.** CI/CD tool to block malicious prompts from entering your codebase. |
-| [**@promptshield/vscode**](./packages/vscode)       | [![npm](https://img.shields.io/npm/v/@promptshield/vscode)](https://www.npmjs.com/package/@promptshield/vscode)       | **The Lens.** VS Code extension for real-time threat visualization (X-Ray Mode).       |
-| [**@promptshield/lsp**](./packages/lsp)             | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp)             | **The Brain.** Language Server Protocol implementation for universal editor support.   |
-| [**@promptshield/sanitizer**](./packages/sanitizer) | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer) | **The Cure.** Deterministic logic to strip invisible threats safely.                   |
-| [**@promptshield/ignore**](./packages/ignore)       | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore)       | **The Filter.** Standardized syntax for suppressing false positives.                   |
-| [**@promptshield/workspace**](./packages/workspace) | [![npm](https://img.shields.io/npm/v/@promptshield/workspace)](https://www.npmjs.com/package/@promptshield/workspace) | **The Orchestrator.** High-performance filesystem and caching engine.                  |
+| Package                                                                                   | Status                                                                                                                                   | Description                                                                            |
+| :---------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| [**@promptshield/core**](./packages/core)                                                 | [![npm](https://img.shields.io/npm/v/@promptshield/core)](https://www.npmjs.com/package/@promptshield/core)                              | **The Engine.** Zero-dependency, high-performance threat detection logic.              |
+| [**@promptshield/cli**](./packages/cli)                                                   | [![npm](https://img.shields.io/npm/v/@promptshield/cli)](https://www.npmjs.com/package/@promptshield/cli)                                | **The Gatekeeper.** CI/CD tool to block malicious prompts from entering your codebase. |
+| [**mayank1513.promptshield**](./packages/vscode)                                          | [![Open VSX Version](https://img.shields.io/open-vsx/v/mayank1513/promptshield)](https://open-vsx.org/extension/mayank1513/promptshield) |
+| **The Lens.** VS Code/Open VSX extension for real-time threat visualization (X-Ray Mode). |
+| [**@promptshield/lsp**](./packages/lsp)                                                   | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp)                                | **The Brain.** Language Server Protocol implementation for universal editor support.   |
+| [**@promptshield/sanitizer**](./packages/sanitizer)                                       | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer)                    | **The Cure.** Deterministic logic to strip invisible threats safely.                   |
+| [**@promptshield/ignore**](./packages/ignore)                                             | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore)                          | **The Filter.** Standardized syntax for suppressing false positives.                   |
+| [**@promptshield/workspace**](./packages/workspace)                                       | [![npm](https://img.shields.io/npm/v/@promptshield/workspace)](https://www.npmjs.com/package/@promptshield/workspace)                    | **The Orchestrator.** High-performance filesystem and caching engine.                  |
 
 ---
 
 ## ⚡ Quick Start
 
-### For Developers (VS Code)
+### For Developers (VS Code / Open VSX)
 
-1.  Install the **[PromptShield Extension](https://marketplace.visualstudio.com/items?itemName=mayank1513.promptshield)**.
+1.  Install the **[PromptShield VSCode Extension](https://marketplace.visualstudio.com/items?itemName=mayank1513.promptshield)** / **[PromptShield Open VSX Extension](https://open-vsx.org/extension/mayank1513/promptshield)**.
 2.  Open any file. Invisible characters and threats are instantly highlighted.
 
 ### For CI/CD (CLI)
 
 ```bash
 # Scan your prompts directory and fail if threats are found
-npx promptshield scan "prompts/**/*.txt" --check
+pnpx @promptshield/cli scan "prompts/**/*.txt" --check
 ```
 
 ### For Node.js Apps

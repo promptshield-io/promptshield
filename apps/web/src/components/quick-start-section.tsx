@@ -16,7 +16,7 @@ const tabs: Tab[] = [
     label: "For CI/CD (CLI)",
     description:
       "Run PromptShield in your pipeline to block PRs containing adversarial inputs.",
-    code: "npx @promptshield/cli scan . --fail-on-threat",
+    code: "pnpx @promptshield/cli scan . --fail-on-threat",
   },
   {
     id: "node",

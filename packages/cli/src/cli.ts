@@ -272,12 +272,9 @@ export const main = async (
 
 /**
  * Ensures execution only when invoked directly via Node.
- * Prevents accidental execution when imported as a module.
+ * Only ESM supported.
  */
-const isCLI =
-  typeof require !== "undefined"
-    ? require.main === module
-    : fileURLToPath(import.meta.url) === process.argv[1];
+const isCLI = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isCLI) {
   main().catch(console.error);

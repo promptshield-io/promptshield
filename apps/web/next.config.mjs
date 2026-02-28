@@ -15,7 +15,7 @@ const config = {
     unoptimized: true,
   },
   ...(isGitHubActions && {
-    basePath: "/promptshield",
+    // basePath: "/promptshield", // we are publishing to https://promptshield.js.org/ -- so remove basePath
     output: "export",
   }),
 };

@@ -95,8 +95,6 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   );
 }
 
-export const dynamicParams = true;
-
 export async function generateStaticParams() {
   return [
     ...source.generateParams(),

@@ -31,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile && pnpm i -g @vscode/vsce ovsx
-          pnpm next telemetry disable
           pnpm turbo telemetry disable
+          pnpm cd apps/web && next telemetry disable && cd ../..
 
       - name: Create Release PR or Publish
         id: changesets

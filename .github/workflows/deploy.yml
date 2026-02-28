@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Web App
         run: |
-          pnpm next telemetry disable
+          pnpm cd apps/web && next telemetry disable && cd ../..
           pnpm turbo telemetry disable
           pnpm build --filter @app/web
         env:

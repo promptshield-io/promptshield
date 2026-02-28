@@ -47,7 +47,8 @@
     "aliases": [
       "@ghostbuster/core"
     ],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "High-performance threat detector"
   },
   "funding": [
     {

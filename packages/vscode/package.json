@@ -175,7 +175,8 @@
   },
   "forge": {
     "aliases": [],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "Real-time editor threat visualization"
   },
   "funding": [
     {

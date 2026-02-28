@@ -128,19 +128,29 @@ for (const [pkgDir, docsDir] of PKG_DOC_DIRS) {
   }
 
   const rootMetaFilePath = path.join(DOCS_ROOT, docsDir, "meta.json");
+  const description = pkgJson.forge?.description || pkgJson.description;
+  const icon = pkgJson.forge?.icon || (pkgJson.bin ? "Terminal" : "FileCode");
   try {
-    await fs.access(rootMetaFilePath);
+    const meta = JSON.parse(await fs.readFile(rootMetaFilePath, "utf8"));
+    if (
+      meta.version !== pkgJson.version ||
+      meta.description !== description ||
+      meta.icon !== icon ||
+      meta.title !== pkgJson.name
+    ) {
+      throw new Error("Meta file is outdated");
+    }
   } catch {
     await fs.writeFile(
       rootMetaFilePath,
       JSON.stringify(
         {
           title: pkgJson.name,
-          description: pkgJson.description,
+          description,
           lastModified: new Date().toISOString(),
           version: pkgJson.version,
           root: true,
-          icon: pkgJson.forge?.icon || (pkgJson.bin ? "Terminal" : "FileCode"),
+          icon,
         },
         null,
         2,

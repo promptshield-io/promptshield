@@ -51,7 +51,8 @@
     "aliases": [
       "@ghostbuster/cli"
     ],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "CI/CD tool for prompt security"
   },
   "funding": [
     {

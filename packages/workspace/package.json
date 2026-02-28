@@ -47,7 +47,8 @@
     "aliases": [
       "@ghostbuster/workspace"
     ],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "Workspace scan/fix orchestrator"
   },
   "funding": [
     {

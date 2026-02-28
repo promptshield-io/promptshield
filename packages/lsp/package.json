@@ -55,7 +55,8 @@
     "aliases": [
       "@ghostbuster/lsp"
     ],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "Language Server Protocol implementation"
   },
   "funding": [
     {

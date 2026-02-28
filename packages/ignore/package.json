@@ -47,7 +47,8 @@
     "aliases": [
       "@ghostbuster/ignore"
     ],
-    "icon": "Shield"
+    "icon": "Shield",
+    "description": "Hierarchical ignore rules engine"
   },
   "funding": [
     {

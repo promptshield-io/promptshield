@@ -33,13 +33,10 @@ jobs:
           cd apps/web && pnpm next telemetry disable && cd ../..
           pnpm turbo telemetry disable
           pnpm build --filter @app/web
-        env:
-          GITHUB_ACTIONS: "true"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Assuming Next.js 'out' directory is inside apps/web
           path: ./apps/web/out
 
   deploy:

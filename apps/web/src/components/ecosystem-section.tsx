@@ -10,11 +10,12 @@ import {
 
 const packages = [
   {
-    name: "@promptshield/core",
-    role: "The Engine",
-    description: "Zero-dependency, high-performance threat detection logic.",
-    icon: <Blocks className="w-6 h-6 text-blue-500" />,
-    link: "https://www.npmjs.com/package/@promptshield/core",
+    name: "mayank1513.promptshield",
+    role: "The Lens",
+    description:
+      "VS Code extension for real-time threat visualization (X-Ray Mode).",
+    icon: <Eye className="w-6 h-6 text-purple-500" />,
+    link: "https://open-vsx.org/extension/mayank1513/promptshield",
   },
   {
     name: "@promptshield/cli",
@@ -24,19 +25,18 @@ const packages = [
     link: "https://www.npmjs.com/package/@promptshield/cli",
   },
   {
-    name: "mayank1513.promptshield",
-    role: "The Lens",
-    description:
-      "VS Code extension for real-time threat visualization (X-Ray Mode).",
-    icon: <Eye className="w-6 h-6 text-purple-500" />,
-    link: "https://open-vsx.org/extension/mayank1513/promptshield",
-  },
-  {
     name: "@promptshield/lsp",
     role: "The Brain",
     description: "Language Server Protocol implementation.",
     icon: <Brain className="w-6 h-6 text-pink-500" />,
     link: "https://www.npmjs.com/package/@promptshield/lsp",
+  },
+  {
+    name: "@promptshield/core",
+    role: "The Engine",
+    description: "Zero-dependency, high-performance threat detection logic.",
+    icon: <Blocks className="w-6 h-6 text-blue-500" />,
+    link: "https://www.npmjs.com/package/@promptshield/core",
   },
   {
     name: "@promptshield/sanitizer",

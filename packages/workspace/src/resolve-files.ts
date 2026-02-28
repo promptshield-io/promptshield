@@ -99,19 +99,27 @@ const loadIgnore = async (root: string): Promise<Ignore> => {
  * hierarchical ignore rules.
  *
  * Behavior:
- * - Uses `fast-glob` for discovery.
+ * - Normalizes CLI-style inputs (`.`, `./dir`) into recursive glob patterns.
+ * - Uses `fast-glob` for file discovery.
  * - Applies ignore matcher after resolution.
  * - Returns absolute file paths.
  *
- * @param patterns - Glob patterns relative to workspace root.
- * @param root - Absolute workspace root.
+ * @param patterns - Glob patterns or directory inputs relative to provided root.
+ * @param root - Absolute workspace root or directory to scan.
  * @returns Absolute file paths eligible for scanning.
  */
 export const resolveFiles = async (
   patterns: string[],
   root: string,
 ): Promise<string[]> => {
-  const globs = patterns.length > 0 ? patterns : ["**/*"];
+  const globs =
+    patterns.length > 0
+      ? patterns.map((p) => {
+          if (p === "." || p === "./") return "**/*";
+          const clean = p.replace(/\\/g, "/").replace(/^\.\//, "");
+          return clean.endsWith("/") ? `${clean}**/*` : clean;
+        })
+      : ["**/*"];
 
   const ig = await loadIgnore(root);
 

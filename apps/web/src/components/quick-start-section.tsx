@@ -1,96 +1,118 @@
 "use client";
 
 import { Check, Copy } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
-interface Tab {
-  id: string;
-  label: string;
-  code: string;
-  description: string;
-}
-
-const tabs: Tab[] = [
-  {
-    id: "ci",
-    label: "For CI/CD (CLI)",
-    description:
-      "Run PromptShield in your pipeline to block PRs containing adversarial inputs.",
-    code: "pnpx @promptshield/cli scan . --check",
-  },
-  {
-    id: "node",
-    label: "For Node.js Apps",
-    description:
-      "Integrate the core engine directly into your prompt handling logic.",
-    code: "npm install @promptshield/core\n\nimport { scan } from '@promptshield/core';\nconst report = scan(userInput);",
-  },
-];
-
 export function QuickStartSection() {
-  const [activeTab, setActiveTab] = useState(tabs[0].id);
-  const [copied, setCopied] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const activeContent = tabs.find((t) => t.id === activeTab) || tabs[0];
+  const snippets = [
+    {
+      title: "Core Installation",
+      code: "npm install @promptshield/core",
+      language: "bash",
+    },
+    {
+      title: "Minimal Validation",
+      code: "import { scan } from '@promptshield/core';\n\nconst result = scan(userInput);\nif (!result.isClean) {\n  throw new Error('Blocked adversarial prompt');\n}",
+      language: "typescript",
+    },
+    {
+      title: "CLI Scan Example",
+      code: "npx @promptshield/cli scan . --check",
+      language: "bash",
+    },
+  ];
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(activeContent.code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = (code: string, index: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   return (
-    <section className="py-24 bg-[var(--color-ps-secondary)] relative overflow-hidden">
+    <section className="py-24 bg-[var(--color-ps-bg)] relative overflow-hidden">
       <div className="mx-auto max-w-4xl px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Quick Start</h2>
           <p className="text-[var(--color-ps-muted-fg)]">
-            Integrate PromptShield anywhere prompts are handled.
+            Deploy defensive validation in seconds.
           </p>
         </div>
 
-        <div className="bg-[var(--color-ps-card)] rounded-2xl border border-[var(--color-ps-border)] overflow-hidden shadow-xl">
-          <div className="flex overflow-x-auto border-b border-[var(--color-ps-border)] bg-[var(--color-ps-bg)]">
-            {tabs.map((tab) => (
-              <button
-                type="button"
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "text-[var(--color-ps-accent)] border-b-2 border-[var(--color-ps-accent)] bg-[var(--color-ps-card)]"
-                    : "text-[var(--color-ps-muted-fg)] hover:text-[var(--color-ps-fg)] hover:bg-[var(--color-ps-muted)]"
-                }`}
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div className="bg-[var(--color-ps-card)] rounded-2xl border border-[var(--color-ps-border)] shadow-xl overflow-hidden">
+            {snippets.map((snippet, index) => (
+              <div
+                key={snippet.title}
+                className={`${index > 0 ? "border-t border-[var(--color-ps-border)]" : ""}`}
               >
-                {tab.label}
-              </button>
+                <div className="bg-[#161B22] border-b border-gray-800 px-4 py-2 flex justify-between items-center text-xs font-medium text-gray-400">
+                  {snippet.title}
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(snippet.code, index)}
+                    className="p-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                    {copiedIndex === index ? (
+                      <Check className="w-3.5 h-3.5 text-green-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </div>
+                <pre className="p-4 text-sm font-mono text-gray-300 bg-[#0D1117] overflow-x-auto whitespace-pre-wrap">
+                  <code>{snippet.code}</code>
+                </pre>
+              </div>
             ))}
           </div>
 
-          <div className="p-6">
-            <p className="text-[var(--color-ps-fg)] mb-6 text-sm">
-              {activeContent.description}
-            </p>
-
-            <div className="relative group rounded-xl overflow-hidden bg-black/90 dark:bg-black/40 border border-[var(--color-ps-border)]">
-              <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors backdrop-blur-sm"
-                  aria-label="Copy code"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              <pre className="p-6 text-sm text-gray-300 overflow-x-auto font-mono leading-relaxed">
-                <code>{activeContent.code}</code>
-              </pre>
+          <div className="flex flex-col gap-6 pt-2">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[var(--color-ps-accent)]/20 text-[var(--color-ps-accent)] flex items-center justify-center text-xs">
+                  1
+                </span>
+                Add the Library
+              </h3>
+              <p className="text-[var(--color-ps-muted-fg)] text-sm">
+                Install the core package into your Node.js or TypeScript
+                application. It has zero dependencies.
+              </p>
             </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[var(--color-ps-accent)]/20 text-[var(--color-ps-accent)] flex items-center justify-center text-xs">
+                  2
+                </span>
+                Scan the Context
+              </h3>
+              <p className="text-[var(--color-ps-muted-fg)] text-sm">
+                Pass any user-provided string or templated block into{" "}
+                <code>scan</code> before touching the LLM.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[var(--color-ps-accent)]/20 text-[var(--color-ps-accent)] flex items-center justify-center text-xs">
+                  3
+                </span>
+                Enforce in CI
+              </h3>
+              <p className="text-[var(--color-ps-muted-fg)] text-sm">
+                Use the CLI to automatically reject repository PRs containing
+                embedded malicious prompts.
+              </p>
+            </div>
+
+            <Link
+              href="/docs"
+              className="mt-4 text-[var(--color-ps-accent)] hover:text-blue-400 font-medium hover:underline text-sm"
+            >
+              Read advanced usage strategies in our Docs →
+            </Link>
           </div>
         </div>
       </div>

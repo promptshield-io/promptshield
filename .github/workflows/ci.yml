@@ -43,7 +43,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build & Test
-        run: pnpm build && pnpm test && node --experimental-strip-types ./tooling/scripts/split-lcov.ts
+        run: |
+          pnpm next telemetry disable
+          pnpm turbo telemetry disable
+          pnpm build && pnpm test && node --experimental-strip-types ./tooling/scripts/split-lcov.ts
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -56,7 +59,6 @@ jobs:
           files: coverage/packages/${{ matrix.pkg }}.lcov
           flags: ${{ matrix.pkg }}
           fail_ci_if_error: false
-
 
   check-changeset:
     # Strictly for PRs to main. Quick pushes to main (hotfixes/meta) bypass this.

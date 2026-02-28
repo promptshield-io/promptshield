@@ -29,7 +29,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Web App
-        run: pnpm build --filter @app/web
+        run: |
+          pnpm next telemetry disable
+          pnpm turbo telemetry disable
+          pnpm build --filter @app/web
+        env:
+          GITHUB_ACTIONS: "true"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

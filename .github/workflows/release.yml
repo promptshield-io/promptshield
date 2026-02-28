@@ -29,7 +29,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile && pnpm i -g @vscode/vsce ovsx
+        run: |
+          pnpm install --frozen-lockfile && pnpm i -g @vscode/vsce ovsx
+          pnpm next telemetry disable
+          pnpm turbo telemetry disable
 
       - name: Create Release PR or Publish
         id: changesets
@@ -58,10 +61,10 @@ jobs:
           LOCAL_VERSION=$(node -p "require('./package.json').version")
           # Fetch remote version from VS Code Marketplace
           REMOTE_VERSION=$(vsce show mayank1513.promptshield --json | jq -r 'if .versions then .versions[0].version else "none" end' 2>/dev/null || echo "none")
-          
+
           echo "Local VSCode Extension Version: $LOCAL_VERSION"
           echo "Marketplace VSCode Extension Version: $REMOTE_VERSION"
-          
+
           if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
             echo "Publishing new extension version to VS Code Marketplace..."
             vsce publish --no-dependencies
@@ -98,4 +101,3 @@ jobs:
         run: pnpm tsx tooling/scripts/publish-aliases.ts --published-packages '${{ steps.changesets.outputs.publishedPackages }}'
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-

@@ -1,5 +1,16 @@
 # @promptshield/workspace
 
+## 1.0.1
+
+### Patch Changes
+
+- [`a8fcfc7`](https://github.com/promptshield-io/promptshield/commit/a8fcfc73e15990e6d5c0e1c98469d12700670891) Thanks [@mayank1513](https://github.com/mayank1513)! - normalize CLI-style path inputs in resolveFiles
+
+  - Convert "." and "./" to "\*_/_"
+  - Expand directory inputs to recursive glob patterns
+  - Preserve ignore filtering behavior
+  - Update resolveFiles doc comment
+
 ## 1.0.0
 
 ### Major Changes

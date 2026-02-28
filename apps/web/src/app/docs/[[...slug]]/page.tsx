@@ -98,7 +98,13 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return [...source.generateParams(), { slug: [] }];
+  return [
+    ...source.generateParams(),
+    { slug: [] },
+    ...["cli", "workspace", "ignore", "sanitizer", "lsp"].map((pkg) => ({
+      slug: [pkg],
+    })),
+  ];
 }
 
 export async function generateMetadata(

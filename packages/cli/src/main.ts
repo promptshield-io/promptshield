@@ -64,12 +64,7 @@ import {
   sanitizeWorkspace,
   type WorkspaceScanConfig,
 } from "@promptshield/workspace";
-import {
-  createLogger,
-  deepMerge,
-  findProjectRoot,
-  type LogLevel,
-} from "@turbo-forge/cli-kit";
+import { createLogger, deepMerge, type LogLevel } from "@turbo-forge/cli-kit";
 
 /**
  * CLI options for the PromptShield command-line interface.
@@ -312,13 +307,12 @@ export const runPromptShield = async (
 
   const logger = createLogger({ level: config.logLevel });
   const root = process.cwd();
-  const workspaceRoot = findProjectRoot(root);
 
   if (config.check) {
     const files = await resolveFiles(config.patterns, root);
     for (const file of files) {
       if (await isBinary(file)) {
-        logger.debug(`Skipping binary file: ${relative(workspaceRoot, file)}`);
+        logger.debug(`Skipping binary file: ${relative(root, file)}`);
         continue;
       }
       const content = await readFile(file, "utf-8");
@@ -337,7 +331,7 @@ export const runPromptShield = async (
       );
 
       if (filteredResult.threats.length > 0) {
-        logger.error(`Threat detected in ${relative(workspaceRoot, file)}`);
+        logger.error(`Threat detected in ${relative(root, file)}`);
         process.exitCode = 1;
         return;
       }
@@ -432,7 +426,7 @@ export const runPromptShield = async (
       uri,
       threats: result.threats,
     }));
-    await generateWorkspaceReport(workspaceRoot, reportData, totalThreatsCount);
+    await generateWorkspaceReport(root, reportData, totalThreatsCount);
     logger.info(
       `Generated detailed workspace report in ${PROMPTSHIELD_ARTIFACTS_DIR}/${PROMPTSHIELD_REPORT_FILE}`,
     );

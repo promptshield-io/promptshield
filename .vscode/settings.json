@@ -8,7 +8,7 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSaveMode": "file",
   "mayank1513.trello-kanban.Workspace.filePath": ".tkb",
-  "cSpell.words": ["noscss", "promptshield"],
+  "cSpell.words": ["commitlintrc", "noscss", "promptshield"],
   "conventionalCommits.scopes": [
     "root",
     "tooling",

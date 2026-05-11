@@ -61,6 +61,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/packages/${{ matrix.pkg }}.lcov
           flags: ${{ matrix.pkg }}
+          disable_search: true
           fail_ci_if_error: false
 
   check-changeset:

@@ -15,6 +15,7 @@
     "@tool/tsconfig": "0.0.0"
   },
   "changesets": [
-    "fancy-ravens-obey"
+    "fancy-ravens-obey",
+    "ready-horses-lay"
   ]
 }

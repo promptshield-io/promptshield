@@ -294,6 +294,7 @@ export class CacheManager {
             JSON.stringify({ version: CACHE_SCHEMA_VERSION, entries: {} }),
             "utf-8",
           );
+          this.loadPromise = null;
         }
       }
     } catch {
@@ -356,10 +357,7 @@ export class CacheManager {
         if (parsed.version === CACHE_SCHEMA_VERSION) this.cache = parsed;
       })
       .catch(() => {
-        this.cache = {
-          version: CACHE_SCHEMA_VERSION,
-          entries: {},
-        };
+        this.loadPromise = null;
       });
 
     return this.loadPromise;
@@ -459,6 +457,10 @@ export class CacheManager {
             : this.requestedMode,
       }),
     );
+    this.cache = {
+      version: CACHE_SCHEMA_VERSION,
+      entries: {},
+    };
   };
 
   /* ------------------------------------------------------------------------ */

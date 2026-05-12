@@ -45,7 +45,7 @@
 
 import { readFile } from "node:fs/promises";
 import os from "node:os";
-import { relative } from "node:path";
+import { join, relative } from "node:path";
 import { type ScanOptions, type Severity, scan } from "@promptshield/core";
 import {
   createIgnoreChecker,
@@ -53,6 +53,7 @@ import {
   filterThreats,
 } from "@promptshield/ignore";
 import {
+  atomicWrite,
   type CacheMode,
   type FileScanResult,
   generateWorkspaceReport,
@@ -220,7 +221,9 @@ export interface PromptshieldCliOptions {
   forceFullScan?: boolean;
 
   /**
-   * Generate a detailed Markdown workspace report describing found threats.
+   * Generate a workspace report describing found threats.
+   *
+   * Writes a Markdown report. When combined with `--json`, also writes a JSON report.
    *
    * @default false
    */
@@ -421,15 +424,28 @@ export const runPromptShield = async (
 
   console.log("\n");
 
-  if (config.report && totalThreatsCount > 0) {
+  if (config.report) {
     const reportData = Object.entries(allThreats).map(([uri, result]) => ({
       uri,
       threats: result.threats,
     }));
     await generateWorkspaceReport(root, reportData, totalThreatsCount);
     logger.info(
-      `Generated detailed workspace report in ${PROMPTSHIELD_ARTIFACTS_DIR}/${PROMPTSHIELD_REPORT_FILE}`,
+      `Generated Markdown report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${PROMPTSHIELD_REPORT_FILE}`,
     );
+
+    if (config.json) {
+      const jsonReportFile = PROMPTSHIELD_REPORT_FILE.replace(/\.md$/, ".json");
+      const jsonReportPath = join(
+        root,
+        PROMPTSHIELD_ARTIFACTS_DIR,
+        jsonReportFile,
+      );
+      await atomicWrite(jsonReportPath, JSON.stringify(allThreats, null, 2));
+      logger.info(
+        `Generated JSON report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${jsonReportFile}`,
+      );
+    }
   }
 
   if (config.json) {

@@ -11,7 +11,7 @@ import { applyAllFixesToEditor, applyFixToEditor } from "./fixes";
 vi.mock("@promptshield/sanitizer", () => ({
   applyFixes: vi.fn((text, threats) => {
     if (threats.length === 0) return { text };
-    return { text: text + " fixed" }; // Dummy change to trigger the logic
+    return { text: `${text} fixed` }; // Dummy change to trigger the logic
   }),
 }));
 

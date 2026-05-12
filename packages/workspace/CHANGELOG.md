@@ -1,5 +1,13 @@
 # @promptshield/workspace
 
+## 1.0.5
+
+### Patch Changes
+
+- [`91158ae`](https://github.com/promptshield-io/promptshield/commit/91158aec05ff8e6464fda90b86f54b32c73f1f37) Thanks [@mayank1513](https://github.com/mayank1513)! - fix: `atomicWrite` now calls `ensureDir` on the target directory before
+  writing the temp file, preventing ENOENT errors when the directory does
+  not yet exist.
+
 ## 1.0.4
 
 ### Patch Changes

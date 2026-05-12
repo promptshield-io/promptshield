@@ -172,7 +172,9 @@ export const atomicWrite = async (
   path: string,
   data: string,
 ): Promise<void> => {
-  const tmp = join(dirname(path), `${randomUUID()}.tmp`);
+  const dir = dirname(path);
+  ensureDir(dir);
+  const tmp = join(dir, `${randomUUID()}.tmp`);
 
   await writeFile(tmp, data, "utf-8");
   await safeRename(tmp, path);

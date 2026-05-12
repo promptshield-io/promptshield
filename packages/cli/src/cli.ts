@@ -30,6 +30,7 @@
  * This file intentionally contains zero detection logic.
  */
 
+import { realpathSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -274,7 +275,7 @@ export const main = async (
  * Ensures execution only when invoked directly via Node.
  * Only ESM supported.
  */
-const isCLI = process.argv[1] === fileURLToPath(import.meta.url);
+const isCLI = realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isCLI) {
   main().catch(console.error);

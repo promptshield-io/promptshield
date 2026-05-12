@@ -1,5 +1,12 @@
 # @promptshield/lsp
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`2c3d7ad`](https://github.com/promptshield-io/promptshield/commit/2c3d7ad48678c7f00360e33ab4b7873fcb309ca2)]:
+  - @promptshield/workspace@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes

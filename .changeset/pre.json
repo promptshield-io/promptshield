@@ -14,5 +14,7 @@
     "@tool/scripts": "0.0.0",
     "@tool/tsconfig": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "fancy-ravens-obey"
+  ]
 }

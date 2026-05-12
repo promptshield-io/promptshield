@@ -1,5 +1,13 @@
 # @promptshield/workspace
 
+## 1.0.6
+
+### Patch Changes
+
+- [`fe3c96f`](https://github.com/promptshield-io/promptshield/commit/fe3c96f76e27aac6e3235563c835daecfdb8a147) Thanks [@mayank1513](https://github.com/mayank1513)! - **`@promptshield/cli`**: `--report --json` now writes a JSON report file (`.promptshield/workspace-report.json`) in addition to the Markdown report. The `--report` flag no longer requires threats to be present — a clean-scan report is always generated.
+
+  **`@promptshield/workspace`**: `generateWorkspaceReport` no longer early-returns when no threats are found. A report with a "✅ No threats detected." message is written instead.
+
 ## 1.0.5
 
 ### Patch Changes

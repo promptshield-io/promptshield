@@ -599,14 +599,18 @@ export const generateWorkspaceReport = async (
   threatsFound: number,
   reportFileName = PROMPTSHIELD_REPORT_FILE,
 ): Promise<void> => {
-  if (allThreats.length === 0) return;
-
   const reportPath = join(rootPath, PROMPTSHIELD_ARTIFACTS_DIR, reportFileName);
 
   let md = `# 🛡️ PromptShield Workspace Report\n\n`;
   md += `**Date:** ${new Date().toLocaleString()}\n`;
   md += `**Total Threats:** ${threatsFound}\n`;
   md += `**Files Affected:** ${allThreats.length}\n\n---\n\n`;
+
+  if (allThreats.length === 0) {
+    md += `✅ No threats detected.\n`;
+    await atomicWrite(reportPath, md);
+    return;
+  }
 
   for (const ft of allThreats) {
     const fileUri = pathToFileURL(join(rootPath, ft.uri)).toString();

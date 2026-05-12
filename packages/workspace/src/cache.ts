@@ -275,17 +275,29 @@ export class CacheManager {
     this.requestedMode = mode;
     this.fileCount = fileCount;
 
-    if (resolvedMode !== workspaceMode) {
-      try {
-        mkdirSync(this.rootDir, { recursive: true });
+    try {
+      mkdirSync(this.rootDir, { recursive: true });
+
+      if (resolvedMode !== workspaceMode) {
         writeFileSync(
           statePath,
           JSON.stringify({ mode: resolvedMode }, null, 2),
           "utf-8",
         );
-      } catch {
-        // Non-fatal: cache still functions without state persistence
       }
+
+      if (resolvedMode === "single") {
+        const cachePath = join(this.rootDir, CACHE_FILE);
+        if (!existsSync(cachePath)) {
+          writeFileSync(
+            cachePath,
+            JSON.stringify({ version: CACHE_SCHEMA_VERSION, entries: {} }),
+            "utf-8",
+          );
+        }
+      }
+    } catch {
+      // Non-fatal: cache still functions without state persistence
     }
   }
 

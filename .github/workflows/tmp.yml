@@ -13,7 +13,7 @@ jobs:
         # and see the raw CLI behavior on the runner.
         run: |
           echo "Environment: $(pwd)"
-          npx --yes @promptshield/cli@1.0.3-alpha.0 scan README-copy.md \
+          npx --yes --verbose @promptshield/cli@1.0.3-alpha.0 scan README-copy.md \
             --min-severity=LOW \
             --cache-mode=single \
             --report

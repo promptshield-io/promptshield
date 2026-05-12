@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: mkdir .promptshield
       - name: Run PromptShield
         uses: promptshield-io/action@v1
+
+      - run: ls -la
+          cd .promptshield && ls -la

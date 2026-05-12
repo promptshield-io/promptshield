@@ -13,8 +13,7 @@ jobs:
         # and see the raw CLI behavior on the runner.
         run: |
           echo "Environment: $(pwd)"
-          # Using @latest ensures we aren't hitting a runner cache
-          npx --yes @promptshield/cli@latest scan README-copy.md \
+          npx --yes @promptshield/cli@1.0.3-alpha.0 scan README-copy.md \
             --min-severity=LOW \
             --cache-mode=single \
             --report

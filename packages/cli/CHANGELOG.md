@@ -1,5 +1,32 @@
 # @promptshield/cli
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`2c3d7ad`](https://github.com/promptshield-io/promptshield/commit/2c3d7ad48678c7f00360e33ab4b7873fcb309ca2)]:
+  - @promptshield/workspace@1.0.4
+
+## 1.0.3
+
+### Patch Changes
+
+- [`3b2230b`](https://github.com/promptshield-io/promptshield/commit/3b2230b9fd3c20617b7b81db49e1b877876c9cc7) Thanks [@mayank1513](https://github.com/mayank1513)! - fix(cli): use `realpathSync` for ESM entry point detection
+
+  `process.argv[1]` may be a symlink (e.g. when installed globally via
+  `pnpm` or `npm`), causing the `isCLI` check to fail and the CLI to
+  silently do nothing when invoked directly.
+
+  Replaced the strict equality check with `realpathSync(process.argv[1])`
+  to resolve symlinks before comparing against `fileURLToPath(import.meta.url)`.
+
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`a9d483a`](https://github.com/promptshield-io/promptshield/commit/a9d483a4ab2d65da4fde08b66befbddd5647b7c8)]:
+  - @promptshield/workspace@1.0.3
+
 ## 1.0.1
 
 ### Patch Changes

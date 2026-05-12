@@ -92,6 +92,15 @@ export const PROMPTSHIELD_REPORT_FILE = "workspace-report.md";
  */
 export const CACHE_SPLIT_THRESHOLD = 1500;
 
+/** Filename for the single-mode cache artifact. */
+export const CACHE_FILE = "cache.json";
+
+/** Filename for the persisted workspace mode state. */
+export const STATE_FILE = "state.json";
+
+/** Filename for the single-mode write lock. */
+export const LOCK_FILE = "cache.lock";
+
 /**
  * Hysteresis ratio applied when recommending cache strategy changes.
  *

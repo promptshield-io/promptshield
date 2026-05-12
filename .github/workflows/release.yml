@@ -84,6 +84,15 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
+      - name: Trigger Action Repo Sync
+        # Only trigger if Changesets successfully published @promptshield/cli
+        if: steps.changesets.outputs.published == 'true' && contains(steps.changesets.outputs.publishedPackages, '"name":"@promptshield/cli"')
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_FOR_DISPATCH }}
+          repository: promptshield-io/action
+          event-type: cli-updated
+
       - name: Generate API docs
         if: steps.changesets.outputs.published == 'true'
         run: |

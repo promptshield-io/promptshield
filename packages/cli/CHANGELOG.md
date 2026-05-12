@@ -1,5 +1,12 @@
 # @promptshield/cli
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`91158ae`](https://github.com/promptshield-io/promptshield/commit/91158aec05ff8e6464fda90b86f54b32c73f1f37)]:
+  - @promptshield/workspace@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes

@@ -1,0 +1,33 @@
+name: PromptShield Deep Debug
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  debug-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Force Latest CLI Scan
+        # We run it directly here to bypass the Action's TS logic
+        # and see the raw CLI behavior on the runner.
+        run: |
+          echo "Environment: $(pwd)"
+          # Using @latest ensures we aren't hitting a runner cache
+          npx --yes @promptshield/cli@latest scan README-copy.md \
+            --min-severity=LOW \
+            --cache-mode=single \
+            --report
+
+      - name: Inspect Filesystem
+        if: always()
+        run: |
+          echo "--- Root Directory ---"
+          ls -la
+
+          echo "--- Hidden Folders ---"
+          find . -name ".promptshield" -type d
+
+          echo "--- CLI Logs (if any) ---"
+          # Check if the CLI wrote to a different hidden location
+          ls -R .promptshield || echo "STILL MISSING: .promptshield"

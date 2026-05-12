@@ -308,6 +308,10 @@ export const runPromptShield = async (
   const logger = createLogger({ level: config.logLevel });
   const root = process.cwd();
 
+  console.log(`\n\n🚀 Running PromptShield (${config.command} in ${root})\n\n`);
+  logger.warn(`PromptShield (${config.command} in ${root})\n\n`);
+  console.log("GITHUB_WORKSPACE", process.env["GITHUB_WORKSPACE"]);
+
   if (config.check) {
     const files = await resolveFiles(config.patterns, root);
     for (const file of files) {

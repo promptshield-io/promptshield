@@ -1,0 +1,18 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@app/web": "0.0.0",
+    "@promptshield/cli": "1.0.2",
+    "@promptshield/core": "1.0.0",
+    "@promptshield/ignore": "2.0.0",
+    "@promptshield/lsp": "1.0.3",
+    "@promptshield/sanitizer": "1.0.0",
+    "@promptshield/tiptap": "0.0.2",
+    "promptshield": "1.0.0",
+    "@promptshield/workspace": "1.0.3",
+    "@tool/scripts": "0.0.0",
+    "@tool/tsconfig": "0.0.0"
+  },
+  "changesets": []
+}

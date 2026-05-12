@@ -1,5 +1,11 @@
 # @promptshield/cli
 
+## 1.0.3-alpha.0
+
+### Patch Changes
+
+- [`4746bb5`](https://github.com/promptshield-io/promptshield/commit/4746bb59ab8f4f1eb83674a0ca48e1a4a608fc47) Thanks [@mayank1513](https://github.com/mayank1513)! - Add debug log
+
 ## 1.0.2
 
 ### Patch Changes

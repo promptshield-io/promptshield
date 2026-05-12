@@ -9,7 +9,13 @@ import { open, readdir, readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { FilteredThreatsResult } from "@promptshield/ignore";
 import fg from "fast-glob";
-import { ACCEPTABLE_DEVIATION, CACHE_SPLIT_THRESHOLD } from "./constants";
+import {
+  ACCEPTABLE_DEVIATION,
+  CACHE_FILE,
+  CACHE_SPLIT_THRESHOLD,
+  LOCK_FILE,
+  STATE_FILE,
+} from "./constants";
 import { atomicWrite, createLimiter, ensureDir, sha256 } from "./utils";
 
 /**
@@ -241,10 +247,10 @@ export class CacheManager {
     this.workspaceRoot = workspaceRoot;
     this.rootDir = join(workspaceRoot, artifactsDir);
     this.cacheDir = join(this.rootDir, "cache");
-    this.lockPath = join(this.rootDir, "cache.lock");
+    this.lockPath = join(this.rootDir, LOCK_FILE);
     this.debug = debug ?? undefined;
 
-    const statePath = join(this.rootDir, "state.json");
+    const statePath = join(this.rootDir, STATE_FILE);
 
     let workspaceMode: Exclude<CacheMode, "auto"> | null = null;
 
@@ -330,7 +336,7 @@ export class CacheManager {
   private loadSingle = async (): Promise<void> => {
     if (this.loadPromise) return this.loadPromise;
 
-    const filePath = join(this.rootDir, "cache.json");
+    const filePath = join(this.rootDir, CACHE_FILE);
 
     this.loadPromise = readFile(filePath, "utf-8")
       .then((raw) => {
@@ -397,7 +403,7 @@ export class CacheManager {
           this.cache.entries[relPath] = entry;
           await ensureDir(this.rootDir);
           await atomicWrite(
-            join(this.rootDir, "cache.json"),
+            join(this.rootDir, CACHE_FILE),
             JSON.stringify(this.cache),
           );
         } finally {
@@ -418,8 +424,8 @@ export class CacheManager {
 
   clear = async (): Promise<void> => {
     await rm(this.cacheDir, { recursive: true, force: true });
-    await rm(join(this.rootDir, "cache.json"), { force: true });
-    await rm(join(this.rootDir, "state.json"), { force: true });
+    await rm(join(this.rootDir, CACHE_FILE), { force: true });
+    await rm(join(this.rootDir, STATE_FILE), { force: true });
     // Clean up tmp files
     fg(["**/*.tmp"], {
       cwd: this.rootDir,
@@ -433,7 +439,7 @@ export class CacheManager {
     });
     // Recreate state.json
     await atomicWrite(
-      join(this.rootDir, "state.json"),
+      join(this.rootDir, STATE_FILE),
       JSON.stringify({
         mode:
           this.requestedMode === "auto"
@@ -548,10 +554,10 @@ export class CacheManager {
       ),
     );
 
-    await atomicWrite(join(this.rootDir, "cache.json"), JSON.stringify(merged));
+    await atomicWrite(join(this.rootDir, CACHE_FILE), JSON.stringify(merged));
     this.mode = "single";
     await atomicWrite(
-      join(this.rootDir, "state.json"),
+      join(this.rootDir, STATE_FILE),
       JSON.stringify({ mode: this.mode }),
     );
   };
@@ -609,7 +615,7 @@ export class CacheManager {
 
     this.mode = "split";
     await atomicWrite(
-      join(this.rootDir, "state.json"),
+      join(this.rootDir, STATE_FILE),
       JSON.stringify({ mode: this.mode }),
     );
   };

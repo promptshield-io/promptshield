@@ -327,7 +327,7 @@ importers:
         specifier: latest
         version: 25.7.0
       '@types/vscode':
-        specifier: ^1.118.0
+        specifier: ^1.96.0
         version: 1.118.0
       '@vscode/test-electron':
         specifier: ^2.5.2

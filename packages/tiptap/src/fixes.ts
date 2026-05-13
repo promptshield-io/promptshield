@@ -77,8 +77,7 @@ export const applyAllFixesToEditor = (editor: Editor) => {
 
   // 1. Get current threats from storage
   const storage = editor.storage.promptshield;
-  if (!storage || !storage.threats || storage.threats.length === 0)
-    return false;
+  if (!storage?.threats || storage.threats.length === 0) return false;
 
   const threats = storage.threats as ThreatReport[];
 

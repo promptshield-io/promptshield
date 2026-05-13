@@ -1,14 +1,14 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Use of any is ok for test files */
 
 import { readFile, writeFile } from "node:fs/promises";
-import { findProjectRoot, resolveConfig } from "@turbo-forge/cli-kit";
+import { findProjectRoot, resolveConfig } from "@turboforge/cli-kit";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { main, parseArgs, showHelp } from "./cli";
 import { DEFAULT_CONFIG, runPromptShield } from "./main";
 
 // Mocks
 vi.mock("node:fs/promises");
-vi.mock("@turbo-forge/cli-kit");
+vi.mock("@turboforge/cli-kit");
 vi.mock("@promptshield/workspace");
 vi.mock("./main");
 
@@ -54,6 +54,52 @@ describe("cli.ts", () => {
       expect(parseArgs(["--json"])).toEqual({ json: true });
       expect(parseArgs(["--strict"])).toEqual({ strict: true });
       expect(parseArgs(["--check"])).toEqual({ check: true });
+      expect(parseArgs(["--no-inline-ignore"])).toEqual({
+        noInlineIgnore: true,
+      });
+      expect(parseArgs(["-f"])).toEqual({ forceFullScan: true });
+      expect(parseArgs(["--force-full-scan"])).toEqual({ forceFullScan: true });
+      expect(parseArgs(["-r"])).toEqual({ report: true });
+      expect(parseArgs(["--report"])).toEqual({ report: true });
+    });
+
+    it("should parse --cache-mode with valid values", () => {
+      expect(parseArgs(["--cache-mode", "none"])).toEqual({
+        cacheMode: "none",
+      });
+      expect(parseArgs(["-m", "single"])).toEqual({ cacheMode: "single" });
+      expect(parseArgs(["--cache-mode", "split"])).toEqual({
+        cacheMode: "split",
+      });
+      expect(parseArgs(["--cache-mode", "auto"])).toEqual({
+        cacheMode: "auto",
+      });
+    });
+
+    it("should ignore --cache-mode with invalid value", () => {
+      expect(parseArgs(["--cache-mode", "invalid"])).toEqual({
+        patterns: ["invalid"],
+      });
+      expect(parseArgs(["-m", "bad"])).toEqual({ patterns: ["bad"] });
+    });
+
+    it("should parse --base-url", () => {
+      expect(
+        parseArgs(["--base-url", "https://github.com/owner/repo/blob/abc"]),
+      ).toEqual({ baseUrl: "https://github.com/owner/repo/blob/abc" });
+    });
+
+    it("should parse --report-file-name", () => {
+      expect(parseArgs(["--report-file-name", "my-report"])).toEqual({
+        reportFileName: "my-report",
+      });
+    });
+
+    it("should not consume next arg as config when --init is followed by a flag", () => {
+      expect(parseArgs(["--init", "--json"])).toEqual({
+        init: true,
+        json: true,
+      });
     });
 
     it("should parse commands", () => {
@@ -144,6 +190,13 @@ describe("cli.ts", () => {
         expect.objectContaining({
           patterns: ["src"],
         }),
+      );
+    });
+
+    it("should pass configFile to resolveConfig when --config is provided", async () => {
+      await main(["--config", "custom.json"]);
+      expect(mockResolveConfig).toHaveBeenCalledWith(
+        expect.objectContaining({ configFile: "custom.json" }),
       );
     });
 

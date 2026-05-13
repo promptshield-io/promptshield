@@ -27,10 +27,11 @@ vi.mock("@promptshield/workspace", () => ({
   sanitizeWorkspace: vi.fn(),
   runWorkspaceScan: vi.fn(),
   generateWorkspaceReport: vi.fn(),
+  atomicWrite: vi.fn().mockResolvedValue(undefined),
   PROMPTSHIELD_ARTIFACTS_DIR: ".promptshield",
   PROMPTSHIELD_REPORT_FILE: "workspace-report.md",
 }));
-vi.mock("@turbo-forge/cli-kit", () => ({
+vi.mock("@turboforge/cli-kit", () => ({
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     warn: vi.fn(),
@@ -113,6 +114,14 @@ describe("runPromptShield", () => {
     it("should not exit with code 1 if check mode finds no threats", async () => {
       mockScan.mockReturnValue({ threats: [] });
       await runPromptShield({ ...OPTIONS, check: true });
+      expect(process.exitCode).toBe(0);
+    });
+
+    it("should skip binary files in check mode", async () => {
+      mockIsBinary.mockResolvedValue(true);
+      mockScan.mockReturnValue({ threats: [] });
+      await runPromptShield({ ...OPTIONS, check: true });
+      expect(mockReadFile).not.toHaveBeenCalled();
       expect(process.exitCode).toBe(0);
     });
   });
@@ -240,7 +249,78 @@ describe("runPromptShield", () => {
         expect.any(String),
         expect.arrayContaining([expect.objectContaining({ uri: "test.ts" })]),
         1,
+        expect.any(String),
+        undefined,
       );
+    });
+
+    it("should generate report with baseUrl when provided", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [
+              {
+                severity: "HIGH",
+                ruleId: "PSI001",
+                message: "Threat",
+                range: {
+                  start: { line: 1, column: 1, index: 0 },
+                  end: { line: 1, column: 1, index: 0 },
+                },
+              },
+            ],
+            unusedIgnores: [],
+            fixed: [],
+            ignoredBySeverity: {},
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      mockGenerateWorkspaceReport.mockResolvedValue();
+
+      await runPromptShield({
+        ...OPTIONS,
+        report: true,
+        baseUrl: "https://github.com/owner/repo/blob/abc",
+      });
+
+      expect(mockGenerateWorkspaceReport).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Array),
+        1,
+        expect.any(String),
+        "https://github.com/owner/repo/blob/abc",
+      );
+    });
+
+    it("should log ignored threats by severity", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [
+              {
+                severity: "HIGH",
+                ruleId: "PSI001",
+                message: "Threat",
+                range: {
+                  start: { line: 1, column: 1, index: 0 },
+                  end: { line: 1, column: 1, index: 0 },
+                },
+              },
+            ],
+            unusedIgnores: [],
+            fixed: [],
+            ignoredBySeverity: { CRITICAL: 0, HIGH: 2, MEDIUM: 1, LOW: 0 },
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      await runPromptShield(OPTIONS);
+      expect(mockRunWorkspaceScan).toHaveBeenCalled();
     });
   });
 
@@ -263,6 +343,34 @@ describe("runPromptShield", () => {
         expect.any(String),
         expect.objectContaining({ strict: false, write: false }),
       );
+    });
+
+    it("should log unchanged file in dry-run sanitize", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          changed: false,
+          sanitized: "same content",
+          progress: 100,
+        };
+      }
+      mockSanitizeWorkspace.mockImplementation(gen);
+      await runPromptShield({ ...OPTIONS, command: "sanitize" });
+      expect(mockSanitizeWorkspace).toHaveBeenCalled();
+    });
+
+    it("should log progress when write is true and file unchanged", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          changed: false,
+          sanitized: "same content",
+          progress: 100,
+        };
+      }
+      mockSanitizeWorkspace.mockImplementation(gen);
+      await runPromptShield({ ...OPTIONS, command: "sanitize", write: true });
+      expect(mockSanitizeWorkspace).toHaveBeenCalled();
     });
 
     it("should use strict sanitization if requested", async () => {
@@ -323,6 +431,103 @@ describe("runPromptShield", () => {
       await runPromptShield({ ...OPTIONS, command: "fix" });
 
       expect(mockRunWorkspaceScan).toHaveBeenCalled();
+    });
+
+    it("should show dry-run fix preview when write is false and fixes exist", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [],
+            unusedIgnores: [],
+            fixed: [
+              {
+                ruleId: "PSI001",
+                range: {
+                  start: { line: 1, column: 1, index: 0 },
+                  end: { line: 1, column: 1, index: 0 },
+                },
+              },
+            ],
+            text: "fixed content",
+            skipped: [],
+            ignoredBySeverity: {},
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      await runPromptShield({ ...OPTIONS, command: "fix", write: false });
+      expect(mockRunWorkspaceScan).toHaveBeenCalled();
+    });
+
+    it("should show dry-run no-changes message when write is false and no fixes", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [],
+            unusedIgnores: [],
+            fixed: [],
+            skipped: [],
+            ignoredBySeverity: {},
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      await runPromptShield({ ...OPTIONS, command: "fix", write: false });
+      expect(mockRunWorkspaceScan).toHaveBeenCalled();
+    });
+
+    it("should warn about skipped threats in dry-run fix", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [],
+            unusedIgnores: [],
+            fixed: [],
+            skipped: [
+              {
+                ruleId: "PSI001",
+                range: {
+                  start: { line: 1, column: 1, index: 0 },
+                  end: { line: 1, column: 1, index: 0 },
+                },
+              },
+            ],
+            ignoredBySeverity: {},
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      await runPromptShield({ ...OPTIONS, command: "fix", write: false });
+      expect(mockRunWorkspaceScan).toHaveBeenCalled();
+    });
+
+    it("should write JSON report when report and json are both enabled", async () => {
+      async function* gen() {
+        yield {
+          path: "test.ts",
+          result: {
+            threats: [{ severity: "HIGH" }],
+            unusedIgnores: [],
+            fixed: [],
+            ignoredBySeverity: {},
+          },
+          progress: 100,
+        };
+      }
+      mockRunWorkspaceScan.mockImplementation(gen);
+      mockGenerateWorkspaceReport.mockResolvedValue();
+
+      const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+      await runPromptShield({ ...OPTIONS, report: true, json: true });
+      spy.mockRestore();
+
+      expect(mockGenerateWorkspaceReport).toHaveBeenCalled();
     });
   });
 });

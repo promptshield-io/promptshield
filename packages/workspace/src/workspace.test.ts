@@ -569,9 +569,12 @@ describe("workspace", () => {
   });
 
   describe("generateWorkspaceReport", () => {
-    it("should silently return if no threats", async () => {
+    it("should write report even if no threats", async () => {
       await generateWorkspaceReport("/test/workspace", [], 0);
-      expect(utils.atomicWrite).not.toHaveBeenCalled();
+      expect(utils.atomicWrite).toHaveBeenCalledWith(
+        expect.stringContaining("workspace-report.md"),
+        expect.stringContaining("No threats detected"),
+      );
     });
 
     it("should format md report for threats with readable labels and various severities", async () => {

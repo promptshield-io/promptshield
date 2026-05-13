@@ -1,5 +1,14 @@
 # @promptshield/cli
 
+## 1.1.1
+
+### Patch Changes
+
+- [`103829f`](https://github.com/promptshield-io/promptshield/commit/103829f85a8290e12c77ea9d556755f1db468c58) Thanks [@mayank1513](https://github.com/mayank1513)! - **`@promptshield/cli`**: Migrated dependency from `@turbo-forge/cli-kit` (dev) to `@turboforge/cli-kit` (runtime `^1.0.0`) and updated all imports accordingly. `findProjectRoot` is now awaited as it returns a `Promise`.
+
+- Updated dependencies [[`888d2dc`](https://github.com/promptshield-io/promptshield/commit/888d2dc2078f627f884db958131b6596497a4a9a)]:
+  - @promptshield/workspace@1.0.7
+
 ## 1.1.0
 
 ### Minor Changes

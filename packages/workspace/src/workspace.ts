@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { basename, join, relative } from "node:path";
-import { pathToFileURL } from "node:url";
 import {
   SEVERITY_MAP,
   type Severity,
@@ -607,6 +606,7 @@ export const generateWorkspaceReport = async (
   allThreats: { uri: string; threats: ThreatReport[] }[],
   threatsFound: number,
   reportFileName = PROMPTSHIELD_REPORT_FILE,
+  baseUrl?: string,
 ): Promise<void> => {
   const reportPath = join(rootPath, PROMPTSHIELD_ARTIFACTS_DIR, reportFileName);
 
@@ -622,8 +622,6 @@ export const generateWorkspaceReport = async (
   }
 
   for (const ft of allThreats) {
-    const fileUri = pathToFileURL(join(rootPath, ft.uri)).toString();
-
     const bySeverity = new Map<Severity, ThreatReport[]>();
     for (const s of SEVERITY_ORDER) bySeverity.set(s, []);
     for (const t of ft.threats) bySeverity.get(t.severity)?.push(t);
@@ -634,7 +632,8 @@ export const generateWorkspaceReport = async (
       (s) => `${bySeverity.get(s)?.length} ${s[0]}${s.slice(1).toLowerCase()}`,
     );
 
-    md += `<details>\n<summary><b>📄 [${ft.uri}](${fileUri}) — ${summaryParts.join(", ")}</b></summary>\n\n`;
+    const fileUrl = baseUrl ? `${baseUrl}/${ft.uri}` : ft.uri;
+    md += `<details>\n<summary><b>📄 ${ft.uri} <a href="${fileUrl}" target="_blank" rel="noopener noreferrer">↗</a> — ${summaryParts.join(", ")}</b></summary>\n\n`;
 
     for (const severity of SEVERITY_ORDER) {
       const group = bySeverity.get(severity);
@@ -642,7 +641,7 @@ export const generateWorkspaceReport = async (
 
       const icon = SEVERITY_ICON[severity];
 
-      md += `<details style="padding-left:1rem">\n<summary>${icon} <strong>${severity}</strong> — ${group.length} threat${group.length > 1 ? "s" : ""}</summary>\n\n`;
+      md += `> <details>\n> <summary>${icon} <strong>${severity}</strong> — ${group.length} threat${group.length > 1 ? "s" : ""}</summary>\n>\n`;
 
       const byLine = new Map<number, ThreatReport[]>();
       for (const t of group) {
@@ -653,22 +652,22 @@ export const generateWorkspaceReport = async (
       for (const [line, threats] of [...byLine.entries()].sort(
         ([a], [b]) => a - b,
       )) {
-        md += `<details style="padding-left:1rem">\n<summary>Line ${line} — ${threats.length} threat${threats.length > 1 ? "s" : ""}</summary>\n\n`;
+        md += `> > <details>\n> > <summary>Line ${line} — ${threats.length} threat${threats.length > 1 ? "s" : ""}</summary>\n> >\n`;
 
         for (const threat of threats) {
-          md += `- **${threat.category}** \`${threat.ruleId}\`: ${threat.message}`;
+          md += `> > - **${threat.category}** \`${threat.ruleId}\`: ${threat.message}`;
           if (threat.readableLabel)
             md += ` (Hidden: \`${threat.readableLabel}\`)`;
           md += "\n";
         }
 
-        md += `\n</details>\n\n`;
+        md += `> >\n> > </details>\n> >\n`;
       }
 
-      md += `</details>\n\n`;
+      md += `>\n> </details>\n>\n`;
     }
 
-    md += `</details>\n\n`;
+    md += `\n</details>\n\n`;
   }
 
   await atomicWrite(reportPath, md);

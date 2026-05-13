@@ -124,6 +124,14 @@ export const parseArgs = (args: string[]): Partial<CliOptions> => {
         options.report = true;
         break;
 
+      case "--base-url":
+        options.baseUrl = args[++i];
+        break;
+
+      case "--report-file-name":
+        options.reportFileName = args[++i];
+        break;
+
       case "--write":
         options.write = true;
         break;
@@ -198,6 +206,9 @@ OPTIONS
 
   -f, --force-full-scan      Ignore cache and rescan everything
   -r, --report               Generate Markdown report
+      --report-file-name <name>  Report filename without extension (default: workspace-report)
+      --base-url <url>       Base URL for file links in report
+                               e.g. https://github.com/owner/repo/blob/<sha>
       --json                 JSON output (scan only)
       --write                Persist fixes to disk
       --strict               Strict sanitization rules

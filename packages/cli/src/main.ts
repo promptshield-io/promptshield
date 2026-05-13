@@ -228,6 +228,24 @@ export interface PromptshieldCliOptions {
    * @default false
    */
   report?: boolean;
+
+  /**
+   * Base URL for absolute file links in the generated report.
+   *
+   * When set, relative file paths in the report are prefixed with this URL.
+   * Intended for CI/PR comment contexts where relative paths are not resolvable.
+   *
+   * @example `https://github.com/owner/repo/blob/abc1234`
+   */
+  baseUrl?: string;
+
+  /**
+   * Custom report filename (without extension).
+   *
+   * Applies to both the Markdown and JSON report files.
+   * Defaults to the workspace package default when omitted.
+   */
+  reportFileName?: string;
 }
 
 /**
@@ -247,6 +265,8 @@ export const DEFAULT_CONFIG: Required<PromptshieldCliOptions> = {
     process.env["CI"] === "true" || process.env["CI"] === "1" ? "none" : "auto",
   forceFullScan: false,
   report: false,
+  baseUrl: "",
+  reportFileName: PROMPTSHIELD_REPORT_FILE.replace(/\.md$/, ""),
 };
 
 /**
@@ -429,21 +449,28 @@ export const runPromptShield = async (
       uri,
       threats: result.threats,
     }));
-    await generateWorkspaceReport(root, reportData, totalThreatsCount);
+
+    config.reportFileName = config.reportFileName.replace(/\.md$/, "");
+    const mdFile = `${config.reportFileName}.md`;
+    const jsonFile = `${config.reportFileName}.json`;
+    await generateWorkspaceReport(
+      root,
+      reportData,
+      totalThreatsCount,
+      mdFile,
+      config.baseUrl || undefined,
+    );
     logger.info(
-      `Generated Markdown report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${PROMPTSHIELD_REPORT_FILE}`,
+      `Generated Markdown report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${mdFile}`,
     );
 
     if (config.json) {
-      const jsonReportFile = PROMPTSHIELD_REPORT_FILE.replace(/\.md$/, ".json");
-      const jsonReportPath = join(
-        root,
-        PROMPTSHIELD_ARTIFACTS_DIR,
-        jsonReportFile,
+      await atomicWrite(
+        join(root, PROMPTSHIELD_ARTIFACTS_DIR, jsonFile),
+        JSON.stringify(allThreats, null, 2),
       );
-      await atomicWrite(jsonReportPath, JSON.stringify(allThreats, null, 2));
       logger.info(
-        `Generated JSON report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${jsonReportFile}`,
+        `Generated JSON report: ${PROMPTSHIELD_ARTIFACTS_DIR}/${jsonFile}`,
       );
     }
   }

@@ -1,5 +1,19 @@
 # @promptshield/cli
 
+## 1.2.0
+
+### Minor Changes
+
+- [`ab5cded`](https://github.com/promptshield-io/promptshield/commit/ab5cdeda7a8c8e6f96cda25115466b4cce5f33dc) Thanks [@mayank1513](https://github.com/mayank1513)! - Added `--base-url <url>` and `--report-file-name <name>` flags to the `scan` and `fix` commands.
+
+  - `--base-url` prefixes relative file links in the generated report with an absolute URL (e.g. for GitHub PR comments).
+  - `--report-file-name` sets a custom stem for both the `.md` and `.json` report files. Defaults to `workspace-report`.
+
+### Patch Changes
+
+- Updated dependencies [[`ab5cded`](https://github.com/promptshield-io/promptshield/commit/ab5cdeda7a8c8e6f96cda25115466b4cce5f33dc)]:
+  - @promptshield/workspace@1.1.0
+
 ## 1.1.1
 
 ### Patch Changes

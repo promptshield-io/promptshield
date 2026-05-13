@@ -1,5 +1,11 @@
 # @promptshield/workspace
 
+## 1.1.0
+
+### Minor Changes
+
+- [`ab5cded`](https://github.com/promptshield-io/promptshield/commit/ab5cdeda7a8c8e6f96cda25115466b4cce5f33dc) Thanks [@mayank1513](https://github.com/mayank1513)! - `generateWorkspaceReport` accepts an optional `baseUrl` parameter to prefix relative file hrefs with an absolute URL. Intended for CI/PR comment contexts where relative paths are not resolvable.
+
 ## 1.0.7
 
 ### Patch Changes

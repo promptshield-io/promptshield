@@ -1,5 +1,6 @@
-import { ArrowRight, Download, Github } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import Link from "next/link";
+import { SiGithub } from "react-icons/si";
 import { highlight } from "sugar-high";
 
 const codeSample = `import { scanWorkspace } from "@promptshield/workspace";
@@ -65,7 +66,7 @@ export function HeroSection() {
               rel="noreferrer"
               className="flex items-center gap-2 bg-[var(--color-ps-secondary)] hover:bg-[var(--color-ps-muted)] text-[var(--color-ps-fg)] px-8 py-3 rounded-xl font-semibold transition-colors border border-[var(--color-ps-border)]"
             >
-              <Github className="w-5 h-5" />
+              <SiGithub className="w-5 h-5" />
             </a>
           </div>
           <p className="text-sm font-medium text-[var(--color-ps-muted-fg)] animate-[var(--animate-fade-in-up)] [animation-delay:500ms] opacity-0">

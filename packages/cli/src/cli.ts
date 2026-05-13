@@ -35,7 +35,7 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CacheMode } from "@promptshield/workspace";
-import { findProjectRoot, resolveConfig } from "@turbo-forge/cli-kit";
+import { findProjectRoot, resolveConfig } from "@turboforge/cli-kit";
 import {
   DEFAULT_CONFIG,
   type PromptshieldCliOptions,
@@ -239,7 +239,7 @@ More: https://github.com/promptshield
 export const main = async (
   args: string[] = process.argv.slice(2),
 ): Promise<void> => {
-  const root = findProjectRoot();
+  const root = await findProjectRoot();
   const { help, init, config: configFile, ...cliArgs } = parseArgs(args);
 
   if (help) {

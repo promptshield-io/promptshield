@@ -593,6 +593,15 @@ export async function* sanitizeWorkspace(
  *
  * Existing reports are overwritten.
  */
+const SEVERITY_ORDER: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+
+const SEVERITY_ICON: Record<Severity, string> = {
+  CRITICAL: "🚨",
+  HIGH: "🔥",
+  MEDIUM: "⚠️",
+  LOW: "💡",
+};
+
 export const generateWorkspaceReport = async (
   rootPath: string,
   allThreats: { uri: string; threats: ThreatReport[] }[],
@@ -602,8 +611,8 @@ export const generateWorkspaceReport = async (
   const reportPath = join(rootPath, PROMPTSHIELD_ARTIFACTS_DIR, reportFileName);
 
   let md = `# 🛡️ PromptShield Workspace Report\n\n`;
-  md += `**Date:** ${new Date().toLocaleString()}\n`;
-  md += `**Total Threats:** ${threatsFound}\n`;
+  md += `**Date:** ${new Date().toLocaleString()}  \n`;
+  md += `**Total Threats:** ${threatsFound}  \n`;
   md += `**Files Affected:** ${allThreats.length}\n\n---\n\n`;
 
   if (allThreats.length === 0) {
@@ -615,58 +624,51 @@ export const generateWorkspaceReport = async (
   for (const ft of allThreats) {
     const fileUri = pathToFileURL(join(rootPath, ft.uri)).toString();
 
-    let critCount = 0;
-    let highCount = 0;
-    let medCount = 0;
-    let lowCount = 0;
+    const bySeverity = new Map<Severity, ThreatReport[]>();
+    for (const s of SEVERITY_ORDER) bySeverity.set(s, []);
+    for (const t of ft.threats) bySeverity.get(t.severity)?.push(t);
 
-    for (const t of ft.threats) {
-      if (t.severity === "CRITICAL") critCount++;
-      else if (t.severity === "HIGH") highCount++;
-      else if (t.severity === "MEDIUM") medCount++;
-      else lowCount++;
-    }
+    const summaryParts = SEVERITY_ORDER.filter(
+      (s) => (bySeverity.get(s)?.length ?? 0) > 0,
+    ).map(
+      (s) => `${bySeverity.get(s)?.length} ${s[0]}${s.slice(1).toLowerCase()}`,
+    );
 
-    const summaryParts: string[] = [];
-    if (critCount > 0) summaryParts.push(`${critCount} Critical`);
-    if (highCount > 0) summaryParts.push(`${highCount} High`);
-    if (medCount > 0) summaryParts.push(`${medCount} Medium`);
-    if (lowCount > 0) summaryParts.push(`${lowCount} Low`);
+    md += `<details>\n<summary><b>📄 [${ft.uri}](${fileUri}) — ${summaryParts.join(", ")}</b></summary>\n\n`;
 
-    md += `## 📄 [${ft.uri}](${fileUri})\n\n`;
-    md += `> ${summaryParts.join(", ")} severity threats.\n\n`;
+    for (const severity of SEVERITY_ORDER) {
+      const group = bySeverity.get(severity);
+      if (!group?.length) continue;
 
-    const threatsByLine = new Map<number, ThreatReport[]>();
+      const icon = SEVERITY_ICON[severity];
 
-    for (const threat of ft.threats) {
-      if (!threatsByLine.has(threat.range.start.line)) {
-        threatsByLine.set(threat.range.start.line, []);
+      md += `<details style="padding-left:1rem">\n<summary>${icon} <strong>${severity}</strong> — ${group.length} threat${group.length > 1 ? "s" : ""}</summary>\n\n`;
+
+      const byLine = new Map<number, ThreatReport[]>();
+      for (const t of group) {
+        if (!byLine.has(t.range.start.line)) byLine.set(t.range.start.line, []);
+        byLine.get(t.range.start.line)?.push(t);
       }
-      threatsByLine.get(threat.range.start.line)?.push(threat);
-    }
 
-    for (const [line, threats] of threatsByLine) {
-      md += `- **Line ${line}:**\n`;
+      for (const [line, threats] of [...byLine.entries()].sort(
+        ([a], [b]) => a - b,
+      )) {
+        md += `<details style="padding-left:1rem">\n<summary>Line ${line} — ${threats.length} threat${threats.length > 1 ? "s" : ""}</summary>\n\n`;
 
-      for (const threat of threats) {
-        const icon =
-          threat.severity === "CRITICAL"
-            ? "🔴"
-            : threat.severity === "HIGH"
-              ? "🟠"
-              : "🟡";
-
-        md += `  - ${icon} **${threat.category}** (${threat.severity}): ${threat.message}`;
-
-        if (threat.readableLabel) {
-          md += ` (Hidden: \`${threat.readableLabel}\`)`;
+        for (const threat of threats) {
+          md += `- **${threat.category}** \`${threat.ruleId}\`: ${threat.message}`;
+          if (threat.readableLabel)
+            md += ` (Hidden: \`${threat.readableLabel}\`)`;
+          md += "\n";
         }
 
-        md += "\n";
+        md += `\n</details>\n\n`;
       }
+
+      md += `</details>\n\n`;
     }
 
-    md += "\n";
+    md += `</details>\n\n`;
   }
 
   await atomicWrite(reportPath, md);

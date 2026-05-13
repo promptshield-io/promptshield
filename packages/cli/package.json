@@ -42,7 +42,6 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@turbo-forge/cli-kit": "latest",
     "@types/node": "latest",
     "tsup": "latest",
     "typescript": "latest"
@@ -81,6 +80,7 @@
     "@promptshield/core": "workspace:*",
     "@promptshield/ignore": "workspace:*",
     "@promptshield/sanitizer": "workspace:*",
-    "@promptshield/workspace": "workspace:*"
+    "@promptshield/workspace": "workspace:*",
+    "@turboforge/cli-kit": "^1.0.0"
   }
 }

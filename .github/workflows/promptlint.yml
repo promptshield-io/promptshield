@@ -15,7 +15,3 @@ jobs:
 
       - name: Run PromptShield
         uses: promptshield-io/action@v1
-
-      - run: |
-          ls -la
-          cd .promptshield && ls -la

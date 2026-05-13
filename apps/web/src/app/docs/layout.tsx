@@ -42,7 +42,7 @@ const cleanUpSourceTree = (node: Folder) => {
 };
 
 const sourceTree = source.getPageTree();
-cleanUpSourceTree(sourceTree as Folder);
+cleanUpSourceTree(sourceTree as unknown as Folder);
 
 const Layout = ({ children }: { children: ReactNode }) => (
   <RootProvider search={{ options: { type: "static" } }}>

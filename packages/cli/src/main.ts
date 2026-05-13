@@ -65,7 +65,7 @@ import {
   sanitizeWorkspace,
   type WorkspaceScanConfig,
 } from "@promptshield/workspace";
-import { createLogger, deepMerge, type LogLevel } from "@turbo-forge/cli-kit";
+import { createLogger, deepMerge, type LogLevel } from "@turboforge/cli-kit";
 
 /**
  * CLI options for the PromptShield command-line interface.

@@ -240,10 +240,13 @@ export interface PromptshieldCliOptions {
   baseUrl?: string;
 
   /**
-   * Custom report filename (without extension).
+   * Custom report filename stem (without extension).
    *
    * Applies to both the Markdown and JSON report files.
-   * Defaults to the workspace package default when omitted.
+   * The file is always written inside `PROMPTSHIELD_ARTIFACTS_DIR` to
+   * prevent the report itself from being scanned as a threat source.
+   *
+   * @default "workspace-report"
    */
   reportFileName?: string;
 }

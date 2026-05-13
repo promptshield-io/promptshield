@@ -206,7 +206,7 @@ OPTIONS
 
   -f, --force-full-scan      Ignore cache and rescan everything
   -r, --report               Generate Markdown report
-      --report-file-name <name>  Report filename without extension (default: workspace-report)
+      --report-file-name <name>  Report filename without extension, written to .promptshield/ (default: workspace-report)
       --base-url <url>       Base URL for file links in report
                                e.g. https://github.com/owner/repo/blob/<sha>
       --json                 JSON output (scan only)

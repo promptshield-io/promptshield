@@ -4,5 +4,9 @@
   "lastModified": "2026-03-09T14:54:55.071Z",
   "version": "1.0.0",
   "root": true,
-  "icon": "Shield"
+  "icon": "Shield",
+  "pages": [
+    "v1",
+    "v0"
+  ]
 }

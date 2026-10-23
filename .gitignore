@@ -20,3 +20,9 @@ tsup.config.bundled*
 
 # promptshield artifacts
 .promptshield
+
+# Turboforge artifacts
+.turboforge
+
+# Agent memory and scratchpad
+.brain

@@ -5,11 +5,7 @@
       2,
       "always",
       [
-        "root",
-        "tooling",
-        "docs",
-        "deps",
-        "changeset",
+        "@app/web",
         "@promptshield/cli",
         "@promptshield/core",
         "@promptshield/ignore",
@@ -17,8 +13,9 @@
         "@promptshield/sanitizer",
         "@promptshield/tiptap",
         "@promptshield/workspace",
-        "promptshield",
-        "@app/web"
+        "@tool/scripts",
+        "@tool/tsconfig",
+        "promptshield"
       ]
     ]
   }

@@ -15,32 +15,15 @@ permissions:
   pull-requests: write
 
 jobs:
-  discover-packages:
+  build-test:
     runs-on: ubuntu-latest
-    outputs:
-      packages: ${{ steps.discover.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Discover packages
-        id: discover
-        run: echo "matrix=$(ls -d packages/* | xargs -n1 basename | jq -Rc '[inputs]')" >> "$GITHUB_OUTPUT"
-
-  build-test-and-upload:
-    needs: discover-packages
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        pkg: ${{ fromJSON(needs.discover-packages.outputs.packages) }}
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -49,31 +32,32 @@ jobs:
       - name: Build & Test
         run: |
           pnpm turbo telemetry disable
-          pnpm build --filter=!@app/web && pnpm test && node --experimental-strip-types ./tooling/scripts/split-lcov.ts
+          pnpm build
+          pnpm test
+          node --experimental-strip-types ./tooling/scripts/split-lcov.ts
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-      - name: Upload coverage (${{ matrix.pkg }})
-        continue-on-error: true
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/packages/${{ matrix.pkg }}.lcov
-          flags: ${{ matrix.pkg }}
-          disable_search: true
-          fail_ci_if_error: false
+      - name: Upload Coverage to Codecov
+        if: env.CODECOV_TOKEN != ''
+        run: node --experimental-strip-types ./tooling/scripts/upload-coverage.ts
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   check-changeset:
-    # Strictly for PRs to main. Quick pushes to main (hotfixes/meta) bypass this.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Check for Changeset
         run: pnpm exec changeset status --since=origin/${{ github.base_ref }}

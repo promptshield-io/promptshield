@@ -3,6 +3,6 @@ contact_links:
   - name: 💬 Community Discussions
     url: https://github.com/promptshield-io/promptshield/discussions
     about: Ask questions and share ideas with the community.
-  # - name: 📖 Documentation
-  #   url: https://turbo-forge...
-  #   about: Read the official documentation.
+  - name: 📖 Documentation
+    url: https://promptshield.js.org/docs
+    about: Read the official documentation.

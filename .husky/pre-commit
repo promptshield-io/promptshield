@@ -13,7 +13,7 @@ FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|mts|tsx
 if git diff --cached -S '"version":' -- "**/package.json" \
   | grep '^+.*"version":' \
   | grep -vq '"version": *"0\.0\.0"'; then
-  echo "❌ Error: Manual version bumps are forbidden in Turbo-Forge."
+  echo "❌ Error: Manual version bumps are forbidden in Turboforge."
   echo "Allowed exception: \"version\": \"0.0.0\" only."
   echo "Please use 'pnpm changeset' to document your changes."
   echo "The CI/CD pipeline will handle versioning automatically."

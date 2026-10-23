@@ -26,14 +26,26 @@
 
     /* Path Mapping */
     "paths": {
-      "@promptshield/cli": ["./packages/cli/src"],
-      "@promptshield/core": ["./packages/core/src"],
-      "@promptshield/ignore": ["./packages/ignore/src"],
-      "@promptshield/lsp": ["./packages/lsp/src"],
-      "@promptshield/sanitizer": ["./packages/sanitizer/src"],
-      "@promptshield/tiptap": ["./packages/tiptap/src"],
-      "@promptshield/workspace": ["./packages/workspace/src"],
-      "promptshield": ["./packages/vscode/src"]
+      "@promptshield/cli": ["./packages/cli/src", "./packages/cli/dist"],
+      "@promptshield/core": ["./packages/core/src", "./packages/core/dist"],
+      "@promptshield/ignore": [
+        "./packages/ignore/src",
+        "./packages/ignore/dist"
+      ],
+      "@promptshield/lsp": ["./packages/lsp/src", "./packages/lsp/dist"],
+      "@promptshield/sanitizer": [
+        "./packages/sanitizer/src",
+        "./packages/sanitizer/dist"
+      ],
+      "@promptshield/tiptap": [
+        "./packages/tiptap/src",
+        "./packages/tiptap/dist"
+      ],
+      "@promptshield/workspace": [
+        "./packages/workspace/src",
+        "./packages/workspace/dist"
+      ],
+      "promptshield": ["./packages/vscode/src", "./packages/vscode/dist"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "vitest.config.ts"],
@@ -43,6 +55,8 @@
     "**/build",
     "**/.next",
     "**/.turbo",
+    "apps",
+    "examples",
     "coverage"
   ]
 }

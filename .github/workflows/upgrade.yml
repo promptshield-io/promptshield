@@ -1,0 +1,44 @@
+name: Update dependencies
+
+on:
+  schedule:
+    - cron: "0 */8 * * *"
+  workflow_dispatch:
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v6
+      
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: "pnpm"
+      - name: Setup Git
+        run: |
+          git config --global user.name "mayank1513"
+          git config --global user.email "turboforge@mayankchaudhari.com"
+          git fetch
+          git checkout main
+          git pull
+      - run: git stash --include-untracked
+        name: clean up working directory
+      - run: pnpm deps:update
+        name: Update dependencies
+      - run: pnpm build
+        name: Build all apps and packages to make sure it is not broken due to dependency upgrades
+      - name: Run unit tests
+        run: pnpm test
+      - name: Save upgraded packages back to repo
+        continue-on-error: true
+        run: |
+          git add .
+          git commit -m "upgrade deps && docs [skip ci]"
+          git push origin main

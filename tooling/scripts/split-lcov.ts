@@ -1,19 +1,28 @@
 import fs from "node:fs";
 import path from "node:path";
+import { CACHE_DIR } from "./forge.const.ts";
+import { readJson } from "./utils.ts";
+
+type Pkg = {
+  name: string;
+  dir: string;
+};
 
 const ROOT = process.cwd();
 const INPUT = path.join(ROOT, "coverage/lcov.info");
-const OUT_DIR = path.join(ROOT, "coverage/packages");
-const PACKAGE_PREFIX = "packages/";
+const OUT_DIR = path.join(ROOT, "coverage");
+const PKG_CONFIG = path.join(ROOT, `${CACHE_DIR}/packages.json`);
+
+const normalize = (p: string) => p.replaceAll("\\", "/");
 
 if (!fs.existsSync(INPUT)) {
-  console.error(`LCOV file not found: ${INPUT}`);
-  process.exit(1);
+  throw new Error(`LCOV file not found: ${INPUT}`);
 }
-
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
-const content = fs.readFileSync(INPUT, "utf8").replaceAll("\\", "/");
+const packages = await readJson<Pkg[]>(PKG_CONFIG);
+
+const content = normalize(fs.readFileSync(INPUT, "utf8"));
 
 const records = content
   .split("end_of_record")
@@ -28,27 +37,31 @@ for (let record of records) {
   const sfIndex = lines.findIndex((l) => l.startsWith("SF:"));
   if (sfIndex === -1) continue;
 
-  const filePath = lines[sfIndex].slice(3); // remove SF:
-  const idx = filePath.indexOf(PACKAGE_PREFIX);
+  const filePath = lines[sfIndex].slice(3);
+
+  // Find matching package by prefix
+  const pkg = packages?.find((p) => filePath.includes(`${p.dir}/`));
+  if (!pkg) continue;
+
+  const idx = filePath.indexOf(pkg.dir);
   if (idx === -1) continue;
+  const repoRelative = filePath.slice(idx);
 
-  const rest = filePath.slice(idx + PACKAGE_PREFIX.length);
-  const [pkg, ...relativeParts] = rest.split("/");
-  if (!pkg || relativeParts.length === 0) continue;
-
-  // Rewrite SF to be package-local (as if cwd = packages/<pkg>)
-  lines[sfIndex] = `SF:${relativeParts.join("/")}`;
+  // Preserve repo-relative path (e.g. packages/list/src/index.ts) with forward slashes so Codecov matches git tree
+  lines[sfIndex] = `SF:${repoRelative}`;
 
   record = `${lines.join("\n")}\n`;
 
-  if (!byPackage.has(pkg)) byPackage.set(pkg, []);
-  byPackage.get(pkg)?.push(record);
+  if (!byPackage.has(pkg.dir)) byPackage.set(pkg.dir, []);
+  byPackage.get(pkg.dir)?.push(record);
 }
 
-for (const [pkg, recs] of byPackage.entries()) {
-  const out = path.join(OUT_DIR, `${pkg}.lcov`);
+for (const [pkgDir, recs] of byPackage.entries()) {
+  const pkgBasename = path.basename(pkgDir);
+  const out = path.join(OUT_DIR, `${pkgBasename}.lcov`);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, recs.join(""), "utf8");
-  console.log(`✓ ${pkg}: ${recs.length} records`);
+  console.log(`[coverage] ${pkgBasename}: ${recs.length} records -> ${out}`);
 }
 
 if (byPackage.size === 0) {

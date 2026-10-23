@@ -9,12 +9,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
-import { getPageImage, source } from "@/lib/source";
+import {
+  DEFAULT_PKG_DIR,
+  getPageImage,
+  PKG_MAX_VERSION,
+  source,
+} from "@/lib/source";
+import { formatLastUpdated } from "@/lib/utils";
 import { getMDXComponents } from "@/mdx-components";
 
 const GIT_CONFIG = {
-  user: "react18-tools",
-  repo: "turbo-forge",
+  user: "promptshield-io",
+  repo: "promptshield",
   branch: "main",
 };
 
@@ -22,16 +28,16 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) {
-    if (!params.slug?.length) {
+    if (!params.slug?.length || params.slug[0] === DEFAULT_PKG_DIR) {
       redirect(`/docs/overview`);
-    } else if (params.slug?.length === 1) {
+    } else if (params.slug?.length === 1 && params.slug[0] !== "overview") {
       redirect(`/docs/${params.slug[0]}/overview`);
     } else {
       notFound();
     }
   }
 
-  const lastSegment = params.slug?.pop() ?? "";
+  const _lastSegment = params.slug?.pop() ?? "";
 
   const MDX = page.data.body;
 
@@ -39,6 +45,11 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
+      {page.data.lastModified && (
+        <p className="text-sm text-muted-foreground -mt-4 mb-2">
+          Updated {formatLastUpdated(page.data.lastModified)}
+        </p>
+      )}
       <DocsDescription className="mb-0">
         {page.data.description}
       </DocsDescription>
@@ -46,7 +57,6 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         <LLMCopyButton {...{ markdownUrl }} />
         <ViewOptions
           {...{ markdownUrl }}
-          // update it to match your repo
           githubUrl={
             page.data.editURL ||
             `https://github.com/${GIT_CONFIG.user}/${GIT_CONFIG.repo}/blob/${GIT_CONFIG.branch}/docs/content/docs/${page.path}`
@@ -72,26 +82,12 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
                 );
               }
               const cleanedHref =
-                href?.replace(/index\.mdx?/, "").replace(/\.mdx?$/, "") ?? "";
-              return (
-                <Link
-                  {...props}
-                  href={
-                    /^(\/|\.)/.test(cleanedHref) ||
-                    cleanedHref.startsWith(lastSegment)
-                      ? cleanedHref
-                      : `${lastSegment}/${cleanedHref}`
-                  }
-                />
-              );
+                href?.replace(/index\.mdx?/, "")?.replace(/\.mdx?$/, "") ?? "";
+              return <Link {...props} href={cleanedHref} />;
             },
-            blockquote: (props) => (
-              <Callout
-                {...(props as React.ComponentProps<"div">)}
-                // biome-ignore lint/complexity/noUselessFragments: Required to suppress default icon
-                icon={<></>}
-              />
-            ),
+            // @ts-expect-error -- ok
+            // biome-ignore lint/complexity/noUselessFragments: Required to suppress default icon
+            blockquote: (props) => <Callout {...props} icon={<></>} />,
           })}
         />
       </DocsBody>
@@ -103,8 +99,8 @@ export async function generateStaticParams() {
   return [
     ...source.generateParams(),
     { slug: [] },
-    ...["cli", "workspace", "ignore", "sanitizer", "lsp"].map((pkg) => ({
-      slug: [pkg],
+    ...PKG_MAX_VERSION.map((pkg) => ({
+      slug: [pkg.dir],
     })),
   ];
 }

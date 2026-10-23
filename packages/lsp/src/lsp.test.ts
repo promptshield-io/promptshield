@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: test file */
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import * as validation from "./validation";
 import * as workspaceScanning from "./workspace-scanning";
@@ -95,8 +95,11 @@ import { scan } from "@promptshield/core";
 import { startLspServer } from "./lsp";
 
 describe("LSP Server", () => {
-  it("should initialize connection and documents", () => {
+  beforeEach(() => {
     startLspServer();
+  });
+
+  it("should initialize connection and documents", () => {
     expect(mocks.mockdocuments.listen).toHaveBeenCalledWith(
       mocks.mockConnection,
     );
@@ -121,6 +124,14 @@ describe("LSP Server", () => {
 
   it("should register onInitialized handler", () => {
     expect(mocks.mockConnection.onInitialized).toHaveBeenCalled();
+
+    // Initialize first so hasConfigurationCapability is true
+    const initHandler = mocks.mockConnection.onInitialize.mock.calls[0][0];
+    initHandler({
+      capabilities: {
+        workspace: { configuration: true, workspaceFolders: true },
+      },
+    });
 
     // Test handler
     const handler = mocks.mockConnection.onInitialized.mock.calls[0][0];

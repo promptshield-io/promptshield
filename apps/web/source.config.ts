@@ -1,12 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { sep } from "node:path";
+import { remarkTypedocMdx } from "@turboforge/remark-typedoc-mdx";
+import { metaSchema } from "fumadocs-core/source/schema";
 import {
   defineConfig,
   defineDocs,
   frontmatterSchema,
-  metaSchema,
 } from "fumadocs-mdx/config";
-import { remarkTypedocMdx } from "remark-typedoc-mdx";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 import { z } from "zod";
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
@@ -59,6 +61,10 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [[remarkTypedocMdx, { normalizeSignatures: false }]],
+    remarkPlugins: [
+      remarkMath,
+      [remarkTypedocMdx, { normalizeSignatures: false }],
+    ],
+    rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });

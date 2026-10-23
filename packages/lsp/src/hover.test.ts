@@ -55,7 +55,7 @@ describe("LSP Hover", () => {
 
     const hover = getHover(document, { line: 0, character: 1 });
     expect(hover).not.toBeNull();
-    const value = (hover?.contents as any).value;
+    const value = (hover?.contents as any)?.value;
     expect(value).toContain("![HIGH](data:image/svg+xml;base64,");
     expect(value).toContain("HIGH");
   });
@@ -84,7 +84,7 @@ describe("LSP Hover", () => {
 
     const hover = getHover(document, { line: 0, character: 1 });
     expect(hover).not.toBeNull();
-    const value = (hover?.contents as any).value;
+    const value = (hover?.contents as any)?.value;
     expect(value).toContain("![LOW](data:image/svg+xml;base64,");
     expect(value).toContain("LOW");
   });
@@ -147,7 +147,7 @@ describe("LSP Hover", () => {
     } as any);
 
     const hover = getHover(document, { line: 0, character: 1 });
-    const value = (hover?.contents as any).value;
+    const value = (hover?.contents as any)?.value;
     expect(value).toContain("**Suggestion:** Remove this.");
   });
 });

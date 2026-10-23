@@ -1,23 +1,26 @@
 import { Heart } from "lucide-react";
+import { author, name, year } from "@/meta.json";
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="border-t border-[var(--color-ps-border)] bg-[var(--color-ps-bg)] py-12">
       <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-[var(--color-ps-muted-fg)]">
         <div className="flex flex-col items-center md:items-start gap-2">
-          <p className="font-semibold text-[var(--color-ps-fg)]">
-            PromptShield
+          <p className="font-semibold text-[var(--color-ps-fg)]">{name}</p>
+          <p>
+            MIT License &copy;{" "}
+            {currentYear > year ? `${year}-${currentYear}` : currentYear}
           </p>
-          <p>MIT License &copy; {new Date().getFullYear()}</p>
           <p>
             Built with{" "}
             <a
-              href="https://github.com/react18-tools/turbo-forge/"
+              href="https://github.com/turboforge-dev/turboforge/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-fd-foreground"
             >
-              TurboForge
+              Turboforge
             </a>
             .
           </p>
@@ -34,7 +37,7 @@ export function Footer() {
               rel="noreferrer"
               className="font-medium text-[var(--color-ps-fg)] hover:text-[var(--color-ps-accent)] transition-colors"
             >
-              Mayank Kumar Chaudhari
+              {author}
             </a>
           </span>
         </div>

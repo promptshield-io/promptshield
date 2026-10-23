@@ -34,7 +34,6 @@
 ## Recommended Repository Settings
 
 Go to [repository settings] and configure the following:
-
 - [ ] Enable Discussions
 - [ ] Enable `Always suggest updating pull request branches`
 - [ ] Enable `Automatically delete head branches`

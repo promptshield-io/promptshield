@@ -5,7 +5,6 @@
 ### Minor Changes
 
 - [`ab5cded`](https://github.com/promptshield-io/promptshield/commit/ab5cdeda7a8c8e6f96cda25115466b4cce5f33dc) Thanks [@mayank1513](https://github.com/mayank1513)! - Added `--base-url <url>` and `--report-file-name <name>` flags to the `scan` and `fix` commands.
-
   - `--base-url` prefixes relative file links in the generated report with an absolute URL (e.g. for GitHub PR comments).
   - `--report-file-name` sets a custom stem for both the `.md` and `.json` report files. Defaults to `workspace-report`.
 
@@ -83,7 +82,6 @@
   from.
 
   **What changed:**
-
   - Removed `findProjectRoot` from `runPromptShield`; all path operations
     now use `process.cwd()` consistently
   - `--check` mode log messages now show paths relative to cwd
@@ -140,7 +138,6 @@
   feat(vscode): expose Scan Workspace and Fix Workspace commands
 
   ## CLI
-
   - Added `--report` flag to generate a detailed Markdown report.
   - Report includes:
     - Per-file threat listings
@@ -154,12 +151,10 @@
   ## LSP
 
   Added new workspace commands:
-
   - `promptshield.scanWorkspace`
   - `promptshield.fixWorkspace`
 
   These commands:
-
   - Trigger full workspace scan via `runWorkspaceScan`
   - Respect config (minSeverity, cacheMode, noInlineIgnore, etc.)
   - Stream results back to client
@@ -167,7 +162,6 @@
   - Support fix preview and write modes
 
   Designed for:
-
   - IDE-level security auditing
   - Large repository support
   - Consistent behavior with CLI
@@ -175,12 +169,10 @@
   ## VSCode Extension
 
   Added command palette entries:
-
   - **PromptShield: Scan Workspace**
   - **PromptShield: Fix Workspace**
 
   Behavior:
-
   - Delegates to LSP commands
   - Shows progress notifications
   - Updates Problems panel
@@ -188,14 +180,12 @@
   - Supports cache strategy
 
   ## Impact
-
   - Enables enterprise-scale workspace auditing
   - Improves CI + IDE parity
   - Adds human-readable security reporting
   - Strengthens multi-surface integration (CLI + LSP + VSCode)
 
   ## Notes
-
   - No breaking changes
   - No config schema changes
   - Fully backward compatible
@@ -206,7 +196,6 @@
   not just the repository root.
 
   ### What changed
-
   - Recursively discovers supported ignore files:
     - `.gitignore`
     - `.promptshieldignore`

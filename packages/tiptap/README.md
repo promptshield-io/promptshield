@@ -93,7 +93,6 @@ const editor = new Editor({
 ```
 
 When a suspicious sequence is detected:
-
 - The text is visually highlighted in the editor
 - Hovering reveals the detected threat and explanation
 - Developers can programmatically sanitize the content if needed
@@ -119,7 +118,6 @@ Unexpected or unsafe model output
 `@promptshield/tiptap` detects and highlights these threats **before the user submits the content**, allowing them to review or sanitize it locally.
 
 `@promptshield/tiptap` is incredibly suited for robust User-to-LLM interfaces. If you are building a chat interface or a co-pilot editor using TipTap:
-
 1. **Prevent Attack Propagation:** If an end-user maliciously pastes hidden ZWSP sequences or homoglyphs targeting the AI model.
 2. **Warn the User:** The immediate visual threat highlights enable the user to automatically rewrite or remove the hidden logic _before_ clicking submit.
 3. **Seamlessly Fix:** Quick fix actions natively remove invisible characters or normalize strings locally.

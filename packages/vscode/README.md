@@ -46,7 +46,6 @@ or via Open VSX Registry:
 ### Overview of Commands and Actions
 
 The extension registers several commands accessible via the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
-
 - **`PromptShield: Scan Workspace`**
   - Triggers a highly concurrent, streaming scan of your entire project directory, respecting `.gitignore` and `.promptshieldignore`.
   - Automatically generates a detailed `workspace-report.md` in your `.promptshield` directory containing `file://` links to all discovered threats.
@@ -58,7 +57,6 @@ The extension registers several commands accessible via the Command Palette (`Cm
 #### Code Actions & Quick Fixes
 
 When your cursor is over a highlighted threat, you can use the Quick Fix menu (`Cmd+.` / `Ctrl+.`) to access context-aware actions:
-
 1. **Fix this issue / Fix all issues**: Immediately and deterministically removes the dangerous characters from the document without breaking surrounding text block shapes.
 2. **Fix with AI (Copilot Integrated)**: For semantic threats (like encoded payloads or complex regex injections), this action bridges directly to GitHub Copilot (or your active Language Model) to intelligently rewrite the malicious prompt segment while preserving the original intent.
 3. **Ignore this line**: Automatically injects a language-appropriate comment (e.g. `// promptshield-ignore next`) to suppress the warning.

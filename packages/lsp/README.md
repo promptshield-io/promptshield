@@ -52,7 +52,6 @@ $ pnpm add @promptshield/lsp
 <summary>View internal architecture and integration details</summary>
 
 The server is built on `vscode-languageserver` and orchestrates:
-
 1.  **Document Lifecycle**: Tracks open files and changes via `TextDocuments`.
 2.  **Validation Loop**:
     - Debounces input (default 300ms).

@@ -9,6 +9,7 @@ All AI coding assistants and contributors must align with the conventions outlin
 - **DRY Refactoring Skill**: [`.agents/skills/dry-refactoring/SKILL.md`](./.agents/skills/dry-refactoring/SKILL.md)
 
 ### Agent Working Memory & Context
+
 - **`context.md`**: Maintain a `context.md` (or `.agents/context.md`) for project-specific domain rules, package interactions, and architectural notes.
 - **`.brain/`**: Use the `.brain/` directory to store session task lists, intermediate research logs, scratch scripts, and temporary working assets without polluting production source files.
 

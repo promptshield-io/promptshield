@@ -29,7 +29,6 @@
 ## ✨ What This Package Does
 
 `@promptshield/workspace` is responsible for:
-
 - Workspace file resolution
 - Binary detection
 - Concurrent file scanning
@@ -73,7 +72,7 @@ const patterns = ["**/*.ts", "**/*.js"];
 
 for await (const { path, result, progress } of scanWorkspace(patterns, root)) {
   console.log(
-    `[${progress}%] ${path} → ${result.threats.length} active threats`
+    `[${progress}%] ${path} → ${result.threats.length} active threats`,
   );
 }
 ```
@@ -117,7 +116,6 @@ scanWorkspace(patterns, root, {
 Minimum severity to report.
 
 When caching is enabled:
-
 - Baseline scan always runs with `"LOW"`
 - Severity filtering is applied _after_ cache retrieval
 
@@ -130,7 +128,6 @@ Default: `"LOW"`
 Disables `promptshield-ignore` inline directives.
 
 Does NOT affect:
-
 - `.gitignore`
 - `.promptshieldignore`
 - `.psignore`
@@ -169,9 +166,7 @@ Default: `false`
 ## 💾 Cache Semantics (Important)
 
 When caching is enabled:
-
 - Baseline scan always uses:
-
   - `minSeverity: "LOW"`
   - Inline ignore enabled
 
@@ -203,7 +198,6 @@ Generates:
 ```
 
 Report includes:
-
 - Timestamp
 - Total threat count
 - Affected files
@@ -217,12 +211,10 @@ Report is generated only if threats exist.
 ## 🔍 Binary File Handling
 
 Binary files are automatically skipped using:
-
 - NULL-byte detection
 - Suspicious byte ratio heuristic
 
 Prevents false positives in:
-
 - Images
 - PDFs
 - Archives
@@ -233,7 +225,6 @@ Prevents false positives in:
 ## 🏗 Architecture Role
 
 Used by:
-
 - `@promptshield/cli`
 - `@promptshield/lsp`
 

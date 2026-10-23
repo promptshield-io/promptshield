@@ -5,7 +5,6 @@
 ### Included Utilities
 
 This template is equipped with pre-configured tools to streamline your development process:
-
 - Monorepo setup powered by TurboRepo
   - TurboRepo is renowned for its efficient builds and caching mechanisms, minimizing unnecessary builds.
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
@@ -19,7 +18,6 @@ This template is equipped with pre-configured tools to streamline your developme
 ### Apps and Packages
 
 This TurboRepo comprises the following packages/examples, all written in [TypeScript](https://www.typescriptlang.org/):
-
 - `@example/nextjs`: a [Next.js](https://nextjs.org/) app
 - `@example/vite`: a [Vite.js](https://vitest.dev) app
 - `@tool/tsconfig`: `tsconfig.json`s used throughout the monorepo
@@ -72,7 +70,6 @@ pnpm lint:fix
 ## Useful Resources
 
 Explore more about TurboRepo and Next.js through the following links:
-
 - [React and Next.js with TypeScript](https://www.udemy.com/course/react-and-next-js-with-typescript/?referralCode=7202184A1E57C3DCA8B2) - an interactive Next.js course.
 - [The Game of Chess with Next.js, React, and TypeScript](https://www.udemy.com/course/game-of-chess-with-nextjs-react-and-typescrypt/?referralCode=851A28F10B254A8523FE)
 - [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)

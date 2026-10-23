@@ -96,12 +96,10 @@
   directory instead of being written to the repository root.
 
   ### Changes
-
   - `.promptshield-cache.json` → `.promptshield/cache.json` (or split cache files)
   - `promptshield-report.md` → `.promptshield/reports/`
 
   ### Why
-
   - Avoids polluting repository root
   - Improves artifact isolation
   - Simplifies ignore configuration
@@ -121,7 +119,6 @@
   feat(vscode): expose Scan Workspace and Fix Workspace commands
 
   ## CLI
-
   - Added `--report` flag to generate a detailed Markdown report.
   - Report includes:
     - Per-file threat listings
@@ -135,12 +132,10 @@
   ## LSP
 
   Added new workspace commands:
-
   - `promptshield.scanWorkspace`
   - `promptshield.fixWorkspace`
 
   These commands:
-
   - Trigger full workspace scan via `runWorkspaceScan`
   - Respect config (minSeverity, cacheMode, noInlineIgnore, etc.)
   - Stream results back to client
@@ -148,7 +143,6 @@
   - Support fix preview and write modes
 
   Designed for:
-
   - IDE-level security auditing
   - Large repository support
   - Consistent behavior with CLI
@@ -156,12 +150,10 @@
   ## VSCode Extension
 
   Added command palette entries:
-
   - **PromptShield: Scan Workspace**
   - **PromptShield: Fix Workspace**
 
   Behavior:
-
   - Delegates to LSP commands
   - Shows progress notifications
   - Updates Problems panel
@@ -169,14 +161,12 @@
   - Supports cache strategy
 
   ## Impact
-
   - Enables enterprise-scale workspace auditing
   - Improves CI + IDE parity
   - Adds human-readable security reporting
   - Strengthens multi-surface integration (CLI + LSP + VSCode)
 
   ## Notes
-
   - No breaking changes
   - No config schema changes
   - Fully backward compatible
@@ -186,21 +176,18 @@
   Introduces two new configuration options:
 
   ### `promptshield.minSeverity`
-
   - Type: `"string"`
   - Default: `"LOW"`
   - Enum: `"CRITICAL" | "HIGH" | "MEDIUM" | "LOW"`
   - Description: Minimum severity level to report.
 
   ### `promptshield.cacheMode`
-
   - Type: `"string"`
   - Default: `"auto"`
   - Enum: `"single" | "split" | "auto" | "none"`
   - Description: Controls how workspace scan results are cached.
 
   This enables:
-
   - Severity-based filtering across CLI, LSP, and workspace scans.
   - Flexible caching strategies for small and large workspaces.
 
@@ -210,7 +197,6 @@
   not just the repository root.
 
   ### What changed
-
   - Recursively discovers supported ignore files:
     - `.gitignore`
     - `.promptshieldignore`
@@ -232,7 +218,6 @@
   This improves correctness for large monorepos and multi-package workspaces.
 
 - [#1](https://github.com/promptshield-io/promptshield/pull/1) [`811fad0`](https://github.com/promptshield-io/promptshield/commit/811fad055be08b2bf845aa3daff18fdb90677333) Thanks [@mayank1513](https://github.com/mayank1513)! - Refactor workspace scanning and add unused ignore highlighting.
-
   - Removed workspace scanning logic from LSP. Scanning is now delegated to `@promptshield/workspace`, using a generator-based architecture for better separation of concerns and reuse.
   - Added diagnostics for unused `promptshield-ignore` directives, enabling precise editor highlighting and improved security hygiene.
 

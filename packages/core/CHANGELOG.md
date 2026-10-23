@@ -45,11 +45,11 @@
   Consumers should measure performance externally if needed.
 
 - [#5](https://github.com/promptshield-io/promptshield/pull/5) [`4c3ddc7`](https://github.com/promptshield-io/promptshield/commit/4c3ddc7a2f3e2a5c0d085ee8f34463bbbeaa7056) Thanks [@mayank1513](https://github.com/mayank1513)! - Refactored the core scanning engine to use offset-based detection and centralized location resolution.
-
   - Detectors now operate on absolute character offsets instead of line/column coordinates.
   - Introduced `enrichWithLocation` utility for post-processing character offsets into human-readable locations.
   - Simplified `scan` entry point by removing manual line-splitting logic.
   - Updated `ThreatReport` to use a `range` object.
+
     ```ts
     range: {
       start: {
@@ -64,10 +64,8 @@
 - [#5](https://github.com/promptshield-io/promptshield/pull/5) [`aac8870`](https://github.com/promptshield-io/promptshield/commit/aac8870183a5b118348e2b0e4bc9323bf86ecb32) Thanks [@mayank1513](https://github.com/mayank1513)! - Enhance detection coverage and introduce multi-line threat spans.
 
   ## Security
-
   - Added **hex-encoded payload detection (PSS006)** to detect hidden instructions encoded in hexadecimal.
   - Improved **Base64 payload detection (PSS002)** with support for:
-
     - whitespace-broken Base64
     - character-spaced Base64 obfuscation.
 
@@ -75,22 +73,18 @@
   - Improved **Trojan Source detection** with support for nested BIDI contexts.
 
   ## Breaking
-
   - Threat ranges may now span **multiple lines**.
   - Consumers must not assume threats occur on a single line.
   - UI layers should project multi-line threats into per-line diagnostics when needed.
 
   ## Added
-
   - **PSS005** — Hidden HTML container detection.
   - **PSS006** — Hex-encoded payload detection.
   - Support for **chunked / spaced Base64 evasion techniques**.
 
   ## Improved
-
   - Trojan Source detector now correctly handles **nested BIDI override contexts**.
   - Added coverage for additional directionality marks:
-
     - LRM (`U+200E`)
     - RLM (`U+200F`)
     - ALM (`U+061C`)
@@ -99,7 +93,6 @@
   - Correct handling of **CRLF and mixed line endings**.
 
   ## Docs
-
   - Updated smuggling detector documentation.
   - Added real-world Trojan Source examples from the original research paper.
   - Improved explanations for multi-line threat handling.

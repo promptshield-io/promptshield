@@ -1,4 +1,5 @@
 ---
+
 name: dry-refactoring
 description: Guided workflow to eliminate copy-paste duplication detected by jscpd. Refactor clones using extract function, module, constant, or base class strategies.
 ---
@@ -83,7 +84,7 @@ Always ensure:
 - A clone between test files may indicate a missing test helper
 - Clones across unrelated modules may signal a missing shared utility
 - A cross-format clone (same logic in a `.js` and a `.ts` file, found with `--cross-formats`) often means code was ported without deleting the original — consolidate into one implementation (usually the TypeScript one) and update imports, rather than extracting a third shared copy
-- Many `(renamed)` clones in one file usually mean one abstraction is missing, not many: look for the shared shape before extracting pair by pair. Many `(renamed)` clones across *test* files usually mean nothing: test cases are supposed to look alike
+- Many `(renamed)` clones in one file usually mean one abstraction is missing, not many: look for the shared shape before extracting pair by pair. Many `(renamed)` clones across _test_ files usually mean nothing: test cases are supposed to look alike
 - Do not gate CI (`--threshold`, `--fail-on-new-clones`) on the Type-2/Type-3 passes until the team has reviewed what they report on this codebase; gate on the exact run
 - `--similarity` covers JavaScript, TypeScript, Python, Java, Kotlin, Scala, C#, Go, Rust, C, C++, PHP, Ruby, Swift and Clojure, also inside Markdown code blocks and Vue, Svelte and Astro scripts; for other languages rely on the exact and `--max-gap-lines` passes
 - Use `--min-lines 10` to filter noise and focus on meaningful duplications

@@ -11,7 +11,6 @@ We are committed to fostering an environment that respects and promotes the dign
 While acknowledging differences in social norms, we all strive to meet our community's expectations for positive behavior. We also understand that our words and actions may be interpreted differently than we intend based on culture, background, or native language.
 
 With these considerations in mind, we agree to behave mindfully toward each other and act in ways that center our shared values, including:
-
 1. Respecting the **purpose of our community**, our activities, and our ways of gathering.
 2. Engaging **kindly and honestly** with others.
 3. Respecting **different viewpoints** and experiences.
@@ -23,7 +22,6 @@ With these considerations in mind, we agree to behave mindfully toward each othe
 ## Restricted Behaviors
 
 We agree to restrict the following behaviors in our community. Instances, threats, and promotion of these behaviors are violations of this Code of Conduct.
-
 1. **Harassment.** Violating explicitly expressed boundaries or engaging in unnecessary personal attention after any clear request to stop.
 2. **Character attacks.** Making insulting, demeaning, or pejorative comments directed at a community member or group of people.
 3. **Stereotyping or discrimination.** Characterizing anyone’s personality or behavior on the basis of immutable identities or traits.
@@ -53,7 +51,6 @@ Community Moderators take reports of violations seriously and will make every ef
 ---
 
 If an investigation by the Community Moderators finds that this Code of Conduct has been violated, the following enforcement ladder may be used to determine how best to repair harm, based on the incident's impact on the individuals involved and the community as a whole. Depending on the severity of a violation, lower rungs on the ladder may be skipped.
-
 1. Warning
    1. Event: A violation involving a single incident or series of incidents.
    2. Consequence: A private, written warning from the Community Moderators.

@@ -33,7 +33,6 @@
 <summary>Why PromptShield?</summary>
 
 LLM inputs can be manipulated using techniques invisible to humans but meaningful to machines:
-
 - Zero-width characters
 - Trojan Source (BIDI control attacks)
 - Homoglyph spoofing
@@ -157,7 +156,7 @@ const result: ScanResult = scan(
     disableNormalization: false, // Detect NFKC anomalies
     disableInjectionPatterns: false, // Detect common injection patterns
   },
-  context
+  context,
 );
 ```
 
@@ -188,7 +187,6 @@ interface ScanContext {
 ## 🗺️ Ecosystem Roadmap
 
 `@promptshield/core` is the foundation. The broader ecosystem is being built to provide plug-and-play security at every layer of your stack:
-
 - [ ] `@promptshield/sanitizer` - Safe, explicit string mutation.
 - [ ] `@promptshield/cli` - CI/CD pipeline auditing for your codebase.
 - [ ] `@promptshield/vscode` & `lsp` - Real-time developer feedback.
@@ -198,7 +196,6 @@ interface ScanContext {
 ## 🤝 Contributing
 
 We welcome security researchers and OSS contributors! We are actively looking for PRs involving:
-
 - New Prompt Injection attack vectors and test cases.
 - Unicode edge-case refinements.
 - Performance benchmarks against multi-megabyte text buffers.

@@ -6,12 +6,12 @@ packages:
 
 overrides:
   typescript: ^6.0.3
-  '@types/vscode': ^1.96.0
-  tmp@<=0.2.3: '>=0.2.4'
-  lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
-  diff@>=6.0.0 <8.0.3: '>=8.0.3'
+  "@types/vscode": ^1.96.0
+  tmp@<=0.2.3: ">=0.2.4"
+  lodash@>=4.0.0 <=4.17.22: ">=4.17.23"
+  diff@>=6.0.0 <8.0.3: ">=8.0.3"
 
 allowBuilds:
-  '@parcel/watcher': true
+  "@parcel/watcher": true
   esbuild: true
   sharp: true

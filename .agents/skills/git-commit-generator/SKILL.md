@@ -1,19 +1,23 @@
 ---
+
 name: git-commit-generator
 description: Logic for generating conventional commits or batching multi-scope changes.
 ---
 
 # Goal
+
 Generate a high-fidelity Conventional Commit message for staged changes. If the changes are too large or span multiple scopes, orchestrate a batching workflow.
 
 # Workflow
 
 ## 1. Plan
+
 - Trigger: "commit my changes", "generate a message", "check my work".
 - Run `bash ./.agent/skills/git-commit-generator/scripts/collect-git-context.sh > .turboforge/git-context.txt`.
 - Analyze `.turboforge/git-context.txt` and related files as needed.
 
 ## 2. Validate (The "Fork in the Road")
+
 Analyze the `METADATA` from the script:
 - **Condition A (Complexity)**: `FILE_COUNT > 12` OR `LOC_INSERTIONS > 500`.
 - **Condition B (Scope Divergence)**: `DETECTED_SCOPES` count > 1.
@@ -29,10 +33,10 @@ Analyze the `METADATA` from the script:
      > (1) Write one global message  
      > (2) Split into separate commits per scope (recommended)  
      > (3) Focus on one specific scope"
-
 ## 3. Execute
 
 ### Case: Single/Global Commit
+
 - Determine type using rules below.
 - Determine scope:
   - If exactly one scope → use it
@@ -40,6 +44,7 @@ Analyze the `METADATA` from the script:
   - If none → omit
 
 - Format:
+
   ```
   <type>(<scope>): <description>
   ```
@@ -52,9 +57,11 @@ Analyze the `METADATA` from the script:
 - Omit scope for generic root `chore`
 
 ### Case: Batching
+
 - For each group in `SCOPE_GROUPS`:
 - Generate a message specific to those files
 - Provide commands:
+
   ```bash
   git reset HEAD
   git add [FILES]
@@ -62,6 +69,7 @@ Analyze the `METADATA` from the script:
   ```
 
 ## Type Selection Rules
+
 - feat → new capability
 - fix → bug fix
 - refactor → internal change (no behavior change)
@@ -73,6 +81,7 @@ Analyze the `METADATA` from the script:
 - style → formatting only
 
 ## Output Quality Gate
+
 Before returning:
 - Does it explain what changed (not just files)?
 - Will it make sense in git log later?
@@ -82,10 +91,12 @@ Before returning:
 If not → refine.
 
 # Examples
+
 - `feat(ui): add primary button variant`
 - `fix(web): resolve hydration error on home page`
 - `chore(tooling): update turbo pipeline for ci`
 
 # Constraints
+
 - Strictly use Conventional Commit types: `feat`, `fix`, `chore`, `refactor`, `style`, `test`, `docs`, `build`, `ci`.
 - Never include `*-lock.json` or `node_modules` in analysis.

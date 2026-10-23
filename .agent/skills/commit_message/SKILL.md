@@ -1,6 +1,6 @@
 ---
-description: Generate a conventional commit message based on staged changes.
----
+
+## description: Generate a conventional commit message based on staged changes.
 
 # Commit Message Generation Skill
 
@@ -20,7 +20,7 @@ This skill allows you to generate a conventional commit message for the currentl
 
 3.  **Select Commit Type**
     - Determine the type of change based on the diff:
-        - `feat`: A new feature
+      - `feat`: A new feature
         - `fix`: A bug fix
         - `docs`: Documentation only changes
         - `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc)
@@ -34,25 +34,25 @@ This skill allows you to generate a conventional commit message for the currentl
 
 4.  **Draft Commit Message**
     - **Structure**:
-        ```
-        <type>(<scope>): <title>
 
-        [optional body]
+      ```
+      <type>(<scope>): <title>
 
-        [optional footer]
-        ```
+      [optional body]
+
+      [optional footer]
+      ```
     - **Title**:
-        - Format: `<type>(<scope>): <title>`
+      - Format: `<type>(<scope>): <title>`
         - Example: `feat(auth): add login via google`
         - Keep under 72 characters. More description can go in body
         - Use imperative mood (e.g., "add" not "added").
-    - **Body** (Optional):
-        - Include if the change needs explanation (what and why).
-        - Wrap at 72 characters.
-        - Should be separated from header and footer by at least 1 empty line, i.e., 2 new lines.
-    - **Footer** (Optional):
-        - Use for breaking changes (start with `BREAKING CHANGE:`) or closing issues (e.g., `Closes #123`).
+        - **Body** (Optional):
+          - Include if the change needs explanation (what and why).
+            - Wrap at 72 characters.
+            - Should be separated from header and footer by at least 1 empty line, i.e., 2 new lines.
+            - **Footer** (Optional):
+              - Use for breaking changes (start with `BREAKING CHANGE:`) or closing issues (e.g., `Closes #123`).
 
 5.  **Output**
     - Present the generated commit message in a text code block to the user for review.
-

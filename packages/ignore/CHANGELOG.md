@@ -14,13 +14,11 @@
   As a result, this version of `@promptshield/ignore` **is not compatible with older versions of `@promptshield/core`.**
 
   ### Changes
-
   - Updated ignore filtering logic to support **multi-line threats**.
   - A threat is now suppressed **only when its entire span falls inside an ignore range**.
   - Prevents partial suppression where only the first line of a multi-line threat is ignored.
 
   ### Technical details
-
   - Threat location data is read from `range.start` / `range.end`.
   - Suppression checks both `range.start.line` and `range.end.line`.
   - Threat sorting now uses `range.start.index`.

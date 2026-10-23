@@ -19,7 +19,6 @@
 ## 🛑 The Problem
 
 LLM inputs are code. If you can't see the text, you can't trust the execution. Attackers use:
-
 - **Invisible Characters**: Zero-width spaces (`\u200B`) to smuggle instructions past keyword filters.
 - **Trojan Source**: BIDI overrides to make code look like it does one thing while doing another.
 - **Homoglyphs**: Cyrillic `а` looking like Latin `a` to spoof trusted domains or commands.
@@ -30,16 +29,16 @@ PromptShield provides the tooling to detect these threats at every stage of your
 
 ## 📦 Ecosystem
 
-| Package                                                                                   | Status                                                                                                                                   | Description                                                                            |
-| :---------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| [**@promptshield/core**](./packages/core)                                                 | [![npm](https://img.shields.io/npm/v/@promptshield/core)](https://www.npmjs.com/package/@promptshield/core)                              | **The Engine.** Zero-dependency, high-performance threat detection logic.              |
-| [**@promptshield/cli**](./packages/cli)                                                   | [![npm](https://img.shields.io/npm/v/@promptshield/cli)](https://www.npmjs.com/package/@promptshield/cli)                                | **The Gatekeeper.** CI/CD tool to block malicious prompts from entering your codebase. |
-| [**mayank1513.promptshield**](./packages/vscode)                                          | [![Open VSX Version](https://img.shields.io/open-vsx/v/mayank1513/promptshield)](https://open-vsx.org/extension/mayank1513/promptshield) | **The Lens.** VS Code/Open VSX extension for real-time threat visualization (X-Ray Mode). |
-| [**@promptshield/lsp**](./packages/lsp)                                                   | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp)                                | **The Brain.** Language Server Protocol implementation for universal editor support.   |
-| [**@promptshield/sanitizer**](./packages/sanitizer)                                       | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer)                    | **The Cure.** Deterministic logic to strip invisible threats safely.                   |
-| [**@promptshield/ignore**](./packages/ignore)                                             | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore)                          | **The Filter.** Standardized syntax for suppressing false positives.                   |
-| [**@promptshield/workspace**](./packages/workspace)                                       | [![npm](https://img.shields.io/npm/v/@promptshield/workspace)](https://www.npmjs.com/package/@promptshield/workspace)                    | **The Orchestrator.** High-performance filesystem and caching engine.                  |
-| [**@promptshield/tiptap**](./packages/tiptap)                                             | [![npm](https://img.shields.io/npm/v/@promptshield/tiptap)](https://www.npmjs.com/package/@promptshield/tiptap)                          | **The Shield.** Real-time Tiptap editor protection.                                    |
+| Package                                             | Status                                                                                                                                   | Description                                                                               |
+| :-------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| [**@promptshield/core**](./packages/core)           | [![npm](https://img.shields.io/npm/v/@promptshield/core)](https://www.npmjs.com/package/@promptshield/core)                              | **The Engine.** Zero-dependency, high-performance threat detection logic.                 |
+| [**@promptshield/cli**](./packages/cli)             | [![npm](https://img.shields.io/npm/v/@promptshield/cli)](https://www.npmjs.com/package/@promptshield/cli)                                | **The Gatekeeper.** CI/CD tool to block malicious prompts from entering your codebase.    |
+| [**mayank1513.promptshield**](./packages/vscode)    | [![Open VSX Version](https://img.shields.io/open-vsx/v/mayank1513/promptshield)](https://open-vsx.org/extension/mayank1513/promptshield) | **The Lens.** VS Code/Open VSX extension for real-time threat visualization (X-Ray Mode). |
+| [**@promptshield/lsp**](./packages/lsp)             | [![npm](https://img.shields.io/npm/v/@promptshield/lsp)](https://www.npmjs.com/package/@promptshield/lsp)                                | **The Brain.** Language Server Protocol implementation for universal editor support.      |
+| [**@promptshield/sanitizer**](./packages/sanitizer) | [![npm](https://img.shields.io/npm/v/@promptshield/sanitizer)](https://www.npmjs.com/package/@promptshield/sanitizer)                    | **The Cure.** Deterministic logic to strip invisible threats safely.                      |
+| [**@promptshield/ignore**](./packages/ignore)       | [![npm](https://img.shields.io/npm/v/@promptshield/ignore)](https://www.npmjs.com/package/@promptshield/ignore)                          | **The Filter.** Standardized syntax for suppressing false positives.                      |
+| [**@promptshield/workspace**](./packages/workspace) | [![npm](https://img.shields.io/npm/v/@promptshield/workspace)](https://www.npmjs.com/package/@promptshield/workspace)                    | **The Orchestrator.** High-performance filesystem and caching engine.                     |
+| [**@promptshield/tiptap**](./packages/tiptap)       | [![npm](https://img.shields.io/npm/v/@promptshield/tiptap)](https://www.npmjs.com/package/@promptshield/tiptap)                          | **The Shield.** Real-time Tiptap editor protection.                                       |
 
 ---
 
@@ -73,7 +72,6 @@ if (!result.isClean) {
 ## 🤝 Contributing
 
 We welcome security researchers and engineers! This monorepo is managed with [Turbo](https://turbo.build/) and [PNPM](https://pnpm.io/).
-
 1.  Clone the repo
 2.  `pnpm install`
 3.  `pnpm build`

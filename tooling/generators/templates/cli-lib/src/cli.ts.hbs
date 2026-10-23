@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { findProjectRoot, resolveConfig } from "@turbo-forge/cli-kit";
+import { findProjectRoot, resolveConfig, isCLI } from "@turboforge/cli-kit";
 import { 
   {{camelCase fileName}}, 
   DEFAULT_CONFIG, 
@@ -47,7 +47,9 @@ export const parseArgs = (args: string[]): Partial<CliOptions> => {
 
 export const showHelp = () => {
   console.log(`
-Usage: {{kebabCase fileName}} [options]
+Usage: cli [options]{{#if scope}}
+       {{kebabCase scope}} [options]{{/if}}{{#if hasCustomFileName}}
+       {{kebabCase fileName}} [options]{{/if}}
 
 Options:
   -h, --help              Show this help message
@@ -66,17 +68,17 @@ export const main = async (args: string[] = process.argv.slice(2)) => {
 
   if (init) {
     await writeFile(
-      resolve(findProjectRoot(), configFile || "{{kebabCase fileName}}.config.json"),
+      resolve(await findProjectRoot(), configFile || "{{kebabCase configName}}.config.json"),
       JSON.stringify(DEFAULT_CONFIG, null, 2),
     );
     console.log(
-      `Created default config file at ${configFile || "{{kebabCase fileName}}.config.json"}`,
+      `Created default config file at ${configFile || "{{kebabCase configName}}.config.json"}`,
     );
     return;
   }
 
   const config = await resolveConfig<CliOptions>({
-    name: "{{kebabCase fileName}}",
+    name: "{{kebabCase configName}}",
     defaults: DEFAULT_CONFIG,
     cliArgs,
     configFile,
@@ -85,11 +87,6 @@ export const main = async (args: string[] = process.argv.slice(2)) => {
   await {{camelCase fileName}}(config);
 };
 
-const isCLI =
-  typeof require !== "undefined"
-    ? require.main === module
-    : fileURLToPath(import.meta.url) === process.argv[1];
-
-if (isCLI) {
+if (isCLI()) {
   main().catch(console.error);
 }

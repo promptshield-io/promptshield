@@ -1,7 +1,11 @@
 {
   "name": "{{scopedKebab name}}",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -14,12 +18,16 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "dev": "tsup --watch"
   },
   "devDependencies": {
     "@tool/tsconfig": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "catalog:"
+  },
+  "forge": {
+    "aliases": [],
+    "icon": "Component",
+    "description": ""
   }
 }

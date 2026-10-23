@@ -10,11 +10,7 @@
   "mayank1513.trello-kanban.Workspace.filePath": ".tkb",
   "cSpell.words": ["commitlintrc", "noscss", "promptshield"],
   "conventionalCommits.scopes": [
-    "root",
-    "tooling",
-    "docs",
-    "deps",
-    "changeset",
+    "@app/web",
     "@promptshield/cli",
     "@promptshield/core",
     "@promptshield/ignore",
@@ -22,8 +18,9 @@
     "@promptshield/sanitizer",
     "@promptshield/tiptap",
     "@promptshield/workspace",
-    "promptshield",
-    "@app/web"
+    "@tool/scripts",
+    "@tool/tsconfig",
+    "promptshield"
   ],
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
@@ -35,6 +32,9 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   }
 }

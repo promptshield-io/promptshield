@@ -69,6 +69,6 @@
     "@promptshield/ignore": "workspace:*",
     "@promptshield/sanitizer": "workspace:*",
     "fast-glob": "^3.3.3",
-    "ignore": "^7.0.5"
+    "ignore": "^7.0.13"
   }
 }

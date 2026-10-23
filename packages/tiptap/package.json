@@ -40,11 +40,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@tiptap/core": "^3.23.2",
-    "@tiptap/extension-document": "^3.23.2",
-    "@tiptap/extension-paragraph": "^3.23.2",
-    "@tiptap/extension-text": "^3.23.2",
-    "@tiptap/pm": "^3.23.2",
+    "@tiptap/core": "^3.32.0",
+    "@tiptap/extension-document": "^3.32.0",
+    "@tiptap/extension-paragraph": "^3.32.0",
+    "@tiptap/extension-text": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
     "@types/node": "latest",
     "tsup": "latest",
     "typescript": "latest"

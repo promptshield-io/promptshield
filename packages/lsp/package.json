@@ -43,8 +43,8 @@
     "@promptshield/ignore": "workspace:*",
     "@promptshield/sanitizer": "workspace:*",
     "@promptshield/workspace": "workspace:*",
-    "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15"
   },
   "devDependencies": {
     "@types/node": "latest",

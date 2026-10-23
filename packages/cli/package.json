@@ -81,6 +81,6 @@
     "@promptshield/ignore": "workspace:*",
     "@promptshield/sanitizer": "workspace:*",
     "@promptshield/workspace": "workspace:*",
-    "@turboforge/cli-kit": "^1.0.0"
+    "@turboforge/cli-kit": "^1.0.2"
   }
 }

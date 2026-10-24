@@ -25,7 +25,9 @@
     "fumadocs-mdx": "15.4.9",
     "fumadocs-ui": "16.17.7",
     "katex": "^0.19.0",
+    "lowlight": "^3.3.0",
     "lucide-react": "^1.61.0",
+    "mermaid": "^12.2.0",
     "next": "16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -33,7 +35,8 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "sugar-high": "^2.6.2",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "tiptap-extension-mermaid": "^0.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -43,7 +46,7 @@
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
+    "typescript": "6.0.3",
     "zod": "^4.6.7"
   }
 }

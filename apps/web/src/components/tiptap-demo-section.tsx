@@ -3,14 +3,17 @@
 import { PromptShield } from "@promptshield/tiptap";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { createLowlight } from "lowlight";
+import mermaid from "mermaid";
+import { CodeBlockLowlightMermaid } from "tiptap-extension-mermaid";
 import "@promptshield/tiptap/style.css";
 import type { ThreatReport } from "@promptshield/core";
 import { ArrowRight, ShieldAlert, ShieldCheck, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const INITIAL_CONTENT = `
 <h2>Interactive AI Demo Editor</h2>
-<p>This editor is protected by <strong>@promptshield/tiptap</strong>.</p>
+<p>This editor is protected by <strong>@promptshield/tiptap</strong> with live <strong>Mermaid diagrams</strong> enabled.</p>
 <p>Try hovering over these hidden threats below to see X-Ray detection in action:</p>
 <ul>
   <li><strong>Invisible Characters:</strong> An invisible ZWSP is hiding inside this w​ord.</li>
@@ -20,15 +23,39 @@ const INITIAL_CONTENT = `
   <li><strong>Normalization:</strong> The word <code>Hℌello</code> uses a special character for 'H'.</li>
 </ul>
 <p>Click the <strong>Quick Fix</strong> button in the tooltip to sanitize it locally before submission. You can also use <strong>Fix All</strong> if multiple threats are found.</p>
+
+<p>Live Mermaid diagram rendering in real time:</p>
+<pre><code class="language-mermaid">graph LR
+  User[User Prompt] --> Scanner[PromptShield Guard]
+  Scanner --> Valid{Valid?}
+  Valid -- Yes --> LLM[LLM API]
+  Valid -- No --> Sanitize[Sanitized Output]
+</code></pre>
 `;
 
 export function TiptapDemoSection() {
   const [threatCount, setThreatCount] = useState(0);
   const [threats, setThreats] = useState<ThreatReport[]>([]);
 
+  const lowlight = useMemo(() => createLowlight(), []);
+
+  useEffect(() => {
+    mermaid.initialize({ startOnLoad: false, theme: "dark" });
+  }, []);
+
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      CodeBlockLowlightMermaid.configure({
+        lowlight,
+        classList: "mermaid-container",
+        debounce: 300,
+        mermaidConfig: {
+          theme: "dark",
+        },
+      }),
       PromptShield.configure({
         scanOnUpdate: true,
         scanOnPaste: true,

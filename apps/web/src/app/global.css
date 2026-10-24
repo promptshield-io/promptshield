@@ -221,4 +221,15 @@
       background-color 0.3s ease,
       color 0.3s ease;
   }
+
+  .mermaid-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-ps-border);
+  }
 }
